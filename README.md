@@ -1,6 +1,10 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+# Teler SDK for Node.js
+
+The official Node.js library for the Teler Voice API.
+
+
 
 ### What is this repository for? ###
 

@@ -1,0 +1,23 @@
+{
+  "devDependencies": {
+    "@types/node": "^25.0.8",
+    "@types/ws": "^8.18.1",
+    "@typescript-eslint/eslint-plugin": "^8.53.0",
+    "@typescript-eslint/parser": "^8.53.0",
+    "axios": "^1.13.3",
+    "dotenv": "^17.2.3",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "prettier": "^3.8.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "ws": "^8.19.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "npx ts-node src/example/basic-call.ts",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write \"src/**/*.ts\""
+  }
+}
