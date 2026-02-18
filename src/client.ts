@@ -10,8 +10,17 @@ export class TelerClient {
      * HTTP TelerClient for the Teler API.
      * 
      * Usage:
-        with TelerClient(api_key="...") as client:
-        ...
+        const client = new TelerClient(API_KEY);
+        const response = await client.calls.create(
+            {
+                'flow_url': `https://${SERVER_DOMAIN}/api/v1/calls/flow`,
+                'status_callback_url': `https://${SERVER_DOMAIN}/api/v1/webhooks/receiver`,
+                'from_number': "+918065193777",
+                'to_number': "+919954174459",
+                'record': true,
+            }
+        )
+    );
      */
 
     private apiKey: string;
@@ -47,6 +56,7 @@ export class TelerClient {
         try {
             const headers = {
                 'Content-Type': 'application/json',
+                "Accept": "application/json",
                 'x-api-key': `${this.apiKey}`,
             };
             const response = await this.httpClient.request({

@@ -1,5 +1,6 @@
 import { StreamOP, StreamHandler, StreamType, StreamHandlerResult } from "../types";
 import { NotImplementedException, BadParametersException, TelerException } from "../exceptions";
+import { logger } from "../logger";
 
 export class StreamConnector {
 
@@ -54,7 +55,7 @@ export class StreamConnector {
         const messageQueue: string[] = [];
         
         remoteWs.addEventListener('open', () => {
-            console.log(`[StreamConnector]: Connected to ${this.remoteUrl}.`);
+            logger.info({ component: 'StreamConnector', event: 'connected', remote_url: this.remoteUrl }, 'Connected to remote server');
             while (messageQueue.length > 0) {
                 const queuedMessage = messageQueue.shift();
                 if (queuedMessage) {
@@ -66,7 +67,7 @@ export class StreamConnector {
         callWs.addEventListener('message', async (event) => {
 
             /**
-             * Event 'message' triggered when this server receives message from Teler(callWs)
+             * Event 'message' triggered when it receives message from Teler(callWs)
              */
 
             try {
@@ -76,26 +77,25 @@ export class StreamConnector {
 
                 if(streamOp === StreamOP.RELAY) {
                     if (remoteWs.readyState === WebSocket.OPEN) {
-                        console.log("[StreamConnector]: Relaying audio to AI Agent.");
                         remoteWs.send(data);
                     } else {
-                        console.log("[StreamConnector]: Buffering message for Remote.");
+                        logger.info({ component: 'StreamConnector', remote_url: this.remoteUrl }, 'Buffering audio for Remote.');
                         messageQueue.push(data);
                     }
                 } else if(streamOp === StreamOP.STOP) {
-                    console.log("[StreamConnector]: Stream stopped by client.");
+                    logger.warn({ component: 'StreamConnector', event: 'stream_stopped' }, 'Stream stopped by client.');
                     remoteWs.close();
                     callWs.close();
                 }
             } catch(exception) {
-                throw new TelerException(`❌ Invalid response from call stream handler: ${exception}`);
+                throw new TelerException(`[StreamConnector]: Invalid response from call stream handler: ${exception}`);
             }
         });
         
         remoteWs.addEventListener('message', async (event) => {
 
             /**
-             * Event 'message' triggered when this server receives message from remoteWs(eg. AI agent)
+             * Event 'message' triggered when it receives message from remoteWs(eg. AI agent)
              */
 
             try{
@@ -104,35 +104,34 @@ export class StreamConnector {
                 const [data, streamOp] = response;
 
                 if(streamOp === StreamOP.RELAY) {
-                    console.log("[StreamConnector]: Relaying audio to Teler.");
                     callWs.send(data);
                 } else if(streamOp === StreamOP.STOP) {
-                    console.log("[StreamConnector]: Stream stopped by client.");
+                    logger.warn({ component: 'StreamConnector', event: 'stream_stopped' }, 'Stream stopped by client.');
                     callWs.close();
                     remoteWs.close();
                 }
             } catch(exception) {
-                throw new TelerException(`❌ Invalid response from remote stream handler: ${exception}`);
+                throw new TelerException(`[StreamConnector]: Invalid response from remote stream handler: ${exception}`);
             }
         });
 
         remoteWs.addEventListener('close', event => {
-            console.log('[StreamConnector]: Remote URL connection closed. ', event.code, event.reason);
+            logger.warn({ component: 'StreamConnector', event: 'call_disconnected', code: event.code, reason: event.reason }, 'Remote URL connection closed.');
             callWs.close();
         });
 
         callWs.addEventListener('close', event => {
-            console.log("[StreamConnector]: Call disconnected. ", event.code, event.reason);
+            logger.warn({ component: 'StreamConnector', event: 'call_disconnected', code: event.code, reason: event.reason }, 'Call disconnected.');
             remoteWs.close();
         })
 
         remoteWs.addEventListener('error', error => {
-            console.error('[StreamConnector]: ❌ WebSocket error: ', error);
+            logger.error({ component: 'StreamConnector', event: 'ws_error', reason: error }, 'WebSocket error');
             callWs.close();
         });
-
-        callWs.addEventListener('error', error => {
-            console.error('[StreamConnector]: ❌ WebSocket error: ', error);
+        
+        callWs.addEventListener('error', (error) => {
+            logger.error({ component: 'StreamConnector', event: 'ws_error', reason: error }, 'WebSocket error');
             remoteWs.close();
         });
 
