@@ -1,1 +1,1 @@
-export const TELER_BASE_URL: string = 'https://sandbox.frejun.ai/api/v1';
+export const TELER_BASE_URL: string = 'https://api.frejun.ai/api/v1';
