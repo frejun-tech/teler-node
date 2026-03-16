@@ -1,7 +1,7 @@
 import { StreamOP, StreamHandler, StreamType, StreamHandlerResult } from "../types";
 import { NotImplementedException, BadParametersException, TelerException } from "../exceptions";
 import { logger } from "../logger";
-import WebSocket from 'ws';
+import { WebSocket } from 'ws';
 
 export class StreamConnector {
 
