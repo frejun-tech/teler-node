@@ -1,61 +1,143 @@
-# README #
-
 # Teler Node SDK
 
-Official Node client for the FreJun Teler API. Provides typed abstractions for initiating calls, managing streams, and handling telephony events — with minimal setup and full TypeScript support.
+Official Node client for the FreJun Teler API. Provides typed abstractions for initiating calls, managing streams, and handling telephony events — with minimal setup.
 
+## Requirements
+- Node.js 14.x or later
+- npm or yarn
 
-### What is this repository for? ###
+## Features
+- **Initiate Calls**: Easily start outbound calls using the Teler REST API.
+- **Call Flows**: Control what happens on the call using flows like Streaming, Playing Audio, and Hanging up.
+- **Real-time Media Streaming**: Stream call audio via WebSockets for Conversational AI, transcription, and insights.
 
-* Quick summary: The official Node library for the Teler Voice API.
-* Version: 1.0.0
+## Installation
 
+Install the SDK using npm:
 
-## Basic Usage
+```bash
+npm install teler-sdk-node
+```
 
-The built-in client interfaces provide methods for creating and managing Teler's REST resources.
+Or using yarn:
 
-### Initiate Call
+```bash
+yarn add teler-sdk-node
+```
 
-Initiate call using Teler SDK, passing the required parameters.
+## Initiate call using Teler Client
 
-```bash 
-import { TelerClient} from "teler-sdk-node";
-import { flowUrl, statusCallbackUrl } from '../../utils/constants';
+The `TelerClient` is the main entry point to interact with the Teler API.
 
-const { fromNumber, toNumber, record } = req.body;
-const telerClient = new TelerClient(API_KEY);
+```typescript
+import { TelerClient } from "teler-sdk-node";
 
+// Initialize the client with your API key
+const telerClient = new TelerClient("YOUR_API_KEY");
+
+// Initiate a call
 const call = await telerClient.calls.create({
-    from_number: fromNumber,
-    to_number: toNumber,
-    flow_url: flowUrl,
-    status_callback_url: statusCallbackUrl,
-    record: record ?? true
+    from_number: "+918065xxxx",
+    to_number: "+919967xxxx",
+    flow_url: "https://your-domain.com/flow",
+    status_callback_url: "https://your-domain.com/receiver",
+    record: true
 });
 ```
 
-### Media Streaming
+## Call Flows
 
-The library provides a simple interface for integrating real-time call audio streams from Teler into your application, unlocking advanced capabilities such as Conversational AI, Real-time transcription, and Actionable insights.
+When a call connects, Teler will fetch instructions from your `flow_url`. You can control the call using different actions:
 
-#### StreamConnector
+### Stream
 
-This class lets you bridge the call audio stream to your desired websocket endpoint. It handles message relaying between the two streams via pluggable handlers, making it highly customizable. It also handles graceful shutdown of the media streams in case of any unexpected errors.
+Initiates bidirectional WebSocket streaming of the call's audio.
 
-It takes the following 4 parameters:
+```json
+{
+    "action": "stream",
+    "url": "wss://your-domain.com/stream"
+}
+```
+
+### Play
+
+Plays an audio file to the caller.
+
+```json
+{
+    "action": "play",
+    "url": "https://example.com/audio.mp3"
+}
+```
+
+### Hangup
+
+Ends the call immediately.
+
+```json
+{
+    "action": "hangup"
+}
+```
+
+## Media Streaming
+
+The library provides a powerful interface for integrating real-time call audio streams from Teler to your application via WebSockets.
+
+### StreamConnector
+
+The `StreamConnector` lets you bridge the Teler call audio stream to your desired remote websocket endpoint (e.g., an AI agent). It handles message relaying between the two streams via pluggable handlers, making it highly customizable. It also handles graceful shutdown of the media streams in case of any unexpected errors.
+
+It takes the following parameters:
 
 - `streamType` - Only `StreamType.BIDIRECTIONAL` is supported for now.
 - `remoteUrl` - The remote websocket URL where the call audio stream needs to be bridged.
-- `callStreamHandler` - An asynchronous `StreamHandler` function that handles the call audio stream.
-- `remoteStreamHandler` - An asynchronous `StreamHandler` function that handles the remote audio stream.
+- `callStreamHandler` - An asynchronous `StreamHandler` function that handles incoming messages from the Teler call audio stream.
+- `remoteStreamHandler` - An asynchronous `StreamHandler` function that handles incoming messages from the remote audio stream (e.g., your AI agent).
 
-#### StreamHandler
+### Stream Handlers
 
-A `StreamHandler` asynchronous function receives the incoming messages on the websocket, processes them, and returns a tuple (e.g., `[string, StreamOp]`) where `StreamOp` is an operation flag that decides the subsequent action the `StreamConnector` will take.
+A `StreamHandler` asynchronous function receives the incoming messages on a WebSocket, processes them, and returns a tuple (e.g., `[string, StreamOp]`) where `StreamOp` is an operation flag that decides the subsequent action the `StreamConnector` will take.
+
+- **`callStreamHandler`**: Receives audio data from the caller and forwards it to an AI model.
+- **`remoteStreamHandler`**: Receives audio data from the remote endpoint (e.g., AI agent's response) and sent back to the caller.
 
 `StreamOp` can be one of:
 
 - `StreamOp.RELAY` - Relays the message to the other stream. The message needs to be supplied as a string as the first item in the returned tuple.
 - `StreamOp.PASS` - Does not relay any message to the other stream. Any message in the returned tuple will be ignored.
 - `StreamOp.STOP` - Stops both streams, ends the call and exits gracefully. Any message in the returned tuple will be ignored.
+
+## Error Handling
+
+`teler-sdk-node` throws typed exceptions that extend the base `TelerException` class, allowing you to handle errors precisely.
+
+### Exception Hierarchy
+```
+TelerException (base)
+├── BadParametersException   (400)
+├── UnauthorizedException    (401)
+├── ForbiddenException       (403)
+└── NotImplementedException  (501)
+```
+
+### Exception Reference
+
+| Exception | Code | Description |
+|-----------|------|-------------|
+| `TelerException` | `500` | Base exception, all SDK errors extend this |
+| `BadParametersException` | `400` | One or more request parameters are invalid |
+| `UnauthorizedException` | `401` | Invalid or missing API key |
+| `ForbiddenException` | `403` | Authenticated but not allowed to perform action |
+| `NotImplementedException` | `501` | Feature not yet implemented |
+
+### Properties
+
+All exceptions expose:
+- `message` — human-readable error description
+- `code` — HTTP-style status code
+- `name` — exception class name (e.g. `"BadParametersException"`)
+
+`BadParametersException` additionally exposes:
+- `param` — the name of the invalid parameter
