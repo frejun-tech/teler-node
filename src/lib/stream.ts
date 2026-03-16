@@ -1,6 +1,7 @@
 import { StreamOP, StreamHandler, StreamType, StreamHandlerResult } from "../types";
 import { NotImplementedException, BadParametersException, TelerException } from "../exceptions";
 import { logger } from "../logger";
+import WebSocket from 'ws';
 
 export class StreamConnector {
 
@@ -71,7 +72,7 @@ export class StreamConnector {
              */
 
             try {
-                const payload = event.data;
+                const payload = typeof event.data === 'string' ? event.data : event.data.toString('utf-8');
                 const response: StreamHandlerResult = await this.callStreamHandler(payload);
                 const [data, streamOp] = response;
 
@@ -99,7 +100,7 @@ export class StreamConnector {
              */
 
             try{
-                const payload = event.data;
+                const payload = typeof event.data === 'string' ? event.data : event.data.toString('utf-8');
                 const response: StreamHandlerResult = await this.remoteStreamHandler(payload);
                 const [data, streamOp] = response;
 
