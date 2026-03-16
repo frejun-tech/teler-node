@@ -1,8 +1,14 @@
 {
   "name": "teler-sdk-node",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Teler Node SDK",
-  "keywords": ["teler", "voice-api", "node-sdk", "call", "stream"],
+  "keywords": [
+    "teler",
+    "voice-api",
+    "node-sdk",
+    "call",
+    "stream"
+  ],
   "homepage": "https://bitbucket.org/frejun_tech/teler-sdk-node#readme",
   "bugs": {
     "url": "https://bitbucket.org/frejun_tech/teler-sdk-node/issues"
@@ -15,8 +21,13 @@
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist", "!dist/tsconfig.tsbuildinfo"],
-  "engines": { "node": ">=18" },
+  "files": [
+    "dist",
+    "!dist/tsconfig.tsbuildinfo"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "npx ts-node src/example/basic-call.ts",
