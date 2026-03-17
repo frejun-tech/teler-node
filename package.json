@@ -9,13 +9,13 @@
     "call",
     "stream"
   ],
-  "homepage": "https://bitbucket.org/frejun_tech/teler-sdk-node#readme",
+  "homepage": "https://github.com/frejun-tech/teler-node#readme",
   "bugs": {
-    "url": "https://bitbucket.org/frejun_tech/teler-sdk-node/issues"
+    "url": "https://github.com/frejun-tech/teler-node/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://rupak5@bitbucket.org/frejun_tech/teler-sdk-node.git"
+    "url": "git+https://github.com/frejun-tech/teler-node.git"
   },
   "license": "ISC",
   "type": "commonjs",
