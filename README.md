@@ -25,7 +25,7 @@ Or using yarn:
 yarn add teler
 ```
 
-## Initiate call using Teler Client
+## Initiate call using Client
 
 The `Client` is the main entry point to interact with the Teler API.
 
