@@ -16,13 +16,13 @@ This Node library offers a lightweight and developer-friendly abstraction over t
 Install the SDK using npm:
 
 ```bash
-npm install teler
+npm install @frejun/teler
 ```
 
 Or using yarn:
 
 ```bash
-yarn add teler
+yarn add @frejun/teler
 ```
 
 ## Initiate call using Client
