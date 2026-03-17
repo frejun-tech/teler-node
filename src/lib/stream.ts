@@ -13,6 +13,7 @@ export class StreamConnector {
 
     private streamType: StreamType | StreamType.BIDIRECTIONAL;
     private remoteUrl: string | "";
+    private remoteHeaders: Record<string, string>;
     private callStreamHandler: StreamHandler;
     private remoteStreamHandler: StreamHandler;
 
@@ -25,11 +26,12 @@ export class StreamConnector {
         return [message, StreamOP.RELAY];
     }
 
-    constructor(remoteUrl: string, streamType: StreamType = StreamType.BIDIRECTIONAL, callStreamHandler: StreamHandler = StreamConnector.defaultStreamHandler, remoteStreamHandler: StreamHandler = StreamConnector.defaultStreamHandler) {  
+    constructor(remoteUrl: string, streamType: StreamType = StreamType.BIDIRECTIONAL, callStreamHandler: StreamHandler = StreamConnector.defaultStreamHandler, remoteStreamHandler: StreamHandler = StreamConnector.defaultStreamHandler, headers: Record<string, string> = {}) {  
         this.remoteUrl = remoteUrl;
         this.streamType = streamType;
         this.callStreamHandler = callStreamHandler;
         this.remoteStreamHandler = remoteStreamHandler;
+        this.remoteHeaders = headers;
 
         if (this.streamType === StreamType.UNIDIRECTIONAL) {
             throw new NotImplementedException("Unidirectional streams are not supported yet.");
@@ -41,7 +43,7 @@ export class StreamConnector {
         
     }
 
-    public async bridgeStream(callWs: WebSocket): Promise<void> {
+    public async bridgeStream(callWs: WebSocket): Promise<WebSocket> {
 
         /**
          * Bridges stream between callWs and remoteWs
@@ -51,9 +53,10 @@ export class StreamConnector {
          * 
          */
 
-        const remoteWs = new WebSocket(this.remoteUrl);
+        const remoteWs = new WebSocket(this.remoteUrl, { headers: this.remoteHeaders });
 
         const messageQueue: string[] = [];
+        const MAX_QUEUE_SIZE = 100;
         
         remoteWs.addEventListener('open', () => {
             logger.info({ component: 'StreamConnector', event: 'connected', remote_url: this.remoteUrl }, 'Connected to remote server');
@@ -79,9 +82,11 @@ export class StreamConnector {
                 if(streamOp === StreamOP.RELAY) {
                     if (remoteWs.readyState === WebSocket.OPEN) {
                         remoteWs.send(data);
-                    } else {
-                        logger.info({ component: 'StreamConnector', remote_url: this.remoteUrl }, 'Buffering audio for Remote.');
+                    } else if (messageQueue.length < MAX_QUEUE_SIZE) {
+                        logger.info({ component: 'StreamConnector' }, 'Buffering message for remote.');
                         messageQueue.push(data);
+                    } else {
+                        logger.warn({ component: 'StreamConnector' }, 'Message queue full, dropping message.');
                     }
                 } else if(streamOp === StreamOP.STOP) {
                     logger.warn({ component: 'StreamConnector', event: 'stream_stopped' }, 'Stream stopped by client.');
@@ -136,6 +141,7 @@ export class StreamConnector {
             remoteWs.close();
         });
 
+        return remoteWs;
     }
 
 }
