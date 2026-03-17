@@ -1,4 +1,4 @@
-export { TelerClient } from "./client";
+export { Client } from "./client";
 export * from "./types";
 export * from "./exceptions";
 export * from "./resources/calls";

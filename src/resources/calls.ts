@@ -1,10 +1,10 @@
-import { TelerClient } from "../client";
+import { Client } from "../client";
 import { CreateCallPayload, CallResource } from "../types";
 
 export class CallResourceManager {
-    private client: TelerClient;
+    private client: Client;
 
-    constructor(client: TelerClient) {
+    constructor(client: Client) {
         this.client = client;
     }
 

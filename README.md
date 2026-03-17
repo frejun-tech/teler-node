@@ -16,27 +16,27 @@ Official Node client for the FreJun Teler API. Provides typed abstractions for i
 Install the SDK using npm:
 
 ```bash
-npm install teler-sdk-node
+npm install teler
 ```
 
 Or using yarn:
 
 ```bash
-yarn add teler-sdk-node
+yarn add teler
 ```
 
 ## Initiate call using Teler Client
 
-The `TelerClient` is the main entry point to interact with the Teler API.
+The `Client` is the main entry point to interact with the Teler API.
 
 ```typescript
-import { TelerClient } from "teler-sdk-node";
+import { Client } from "teler";
 
 // Initialize the client with your API key
-const telerClient = new TelerClient("YOUR_API_KEY");
+const client = new Client("YOUR_API_KEY");
 
 // Initiate a call
-const call = await telerClient.calls.create({
+const call = await client.calls.create({
     from_number: "+918065xxxx",
     to_number: "+919967xxxx",
     flow_url: "https://your-domain.com/flow",
@@ -111,7 +111,7 @@ A `StreamHandler` asynchronous function receives the incoming messages on a WebS
 
 ## Error Handling
 
-`teler-sdk-node` throws typed exceptions that extend the base `TelerException` class, allowing you to handle errors precisely.
+`teler` throws typed exceptions that extend the base `TelerException` class, allowing you to handle errors precisely.
 
 ### Exception Hierarchy
 ```

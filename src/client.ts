@@ -4,13 +4,13 @@ import { CreateCallPayload } from "./types";
 import { TelerException, ForbiddenException, UnauthorizedException, BadParametersException } from "./exceptions";
 import { TELER_BASE_URL } from "./constants";
 
-export class TelerClient {
+export class Client {
 
     /**
-     * HTTP TelerClient for the Teler API.
+     * HTTP Client for the Teler API.
      * 
      * Usage:
-        const client = new TelerClient(API_KEY);
+        const client = new Client(API_KEY);
         const response = await client.calls.create(
             {
                 'flow_url': `https://${SERVER_DOMAIN}/api/v1/calls/flow`,
