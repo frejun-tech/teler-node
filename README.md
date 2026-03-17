@@ -30,7 +30,7 @@ yarn add @frejun/teler
 The `Client` is the main entry point to interact with the Teler API.
 
 ```typescript
-import { Client } from "teler";
+import { Client } from "@frejun/teler";
 
 // Initialize the client with your API key
 const client = new Client("YOUR_API_KEY");

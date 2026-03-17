@@ -4,6 +4,7 @@
   "description": "Teler Node SDK",
   "keywords": [
     "teler",
+    "@frejun/teler",
     "voice-api",
     "node-sdk",
     "call",
