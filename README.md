@@ -1,6 +1,6 @@
 # Teler Node SDK
 
-Official Node client for the FreJun Teler API. Provides typed abstractions for initiating calls, managing streams, and handling telephony events — with minimal setup.
+This Node library offers a lightweight and developer-friendly abstraction over the FreJun Teler API.
 
 ## Requirements
 - Node.js 14.x or later
