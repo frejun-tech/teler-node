@@ -11,22 +11,13 @@ export class StreamConnector {
      * Bridges the call stream to a remote websocket via pluggable handlers.
      */
 
-    private streamType: StreamType | StreamType.BIDIRECTIONAL;
-    private remoteUrl: string | "";
+    private streamType: StreamType;
+    private remoteUrl: string;
     private remoteHeaders: Record<string, string>;
     private callStreamHandler: StreamHandler;
     private remoteStreamHandler: StreamHandler;
 
-    static async defaultStreamHandler(message: string): Promise<StreamHandlerResult> {
-
-        /**
-         * Default Stream Handler
-         */
-
-        return [message, StreamOP.RELAY];
-    }
-
-    constructor(remoteUrl: string, streamType: StreamType = StreamType.BIDIRECTIONAL, callStreamHandler: StreamHandler = StreamConnector.defaultStreamHandler, remoteStreamHandler: StreamHandler = StreamConnector.defaultStreamHandler, headers: Record<string, string> = {}) {  
+    constructor(remoteUrl: string, streamType: StreamType = StreamType.BIDIRECTIONAL, callStreamHandler: StreamHandler, remoteStreamHandler: StreamHandler, headers: Record<string, string> = {}) {  
         this.remoteUrl = remoteUrl;
         this.streamType = streamType;
         this.callStreamHandler = callStreamHandler;
