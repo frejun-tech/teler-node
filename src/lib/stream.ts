@@ -1,4 +1,4 @@
-import { StreamOP, StreamHandler, StreamType, StreamHandlerResult } from "../types";
+import { StreamOP, StreamHandler, StreamType, StreamHandlerResult, StreamData } from "../types";
 import { NotImplementedException, BadParametersException, TelerException } from "../exceptions";
 import { logger } from "../logger";
 import { WebSocket } from 'ws';
@@ -75,7 +75,9 @@ export class StreamConnector {
                         remoteWs.send(data);
                     } else if (messageQueue.length < MAX_QUEUE_SIZE) {
                         logger.info({ component: 'StreamConnector' }, 'Buffering message for remote.');
-                        messageQueue.push(data);
+                        if(typeof data === "string") {
+                            messageQueue.push(data);
+                        }
                     } else {
                         logger.warn({ component: 'StreamConnector' }, 'Message queue full, dropping message.');
                     }
@@ -96,7 +98,7 @@ export class StreamConnector {
              */
 
             try{
-                const payload = typeof event.data === 'string' ? event.data : event.data.toString('utf-8');
+                const payload: StreamData = Array.isArray(event.data) ? Buffer.concat(event.data) : event.data;
                 const response: StreamHandlerResult = await this.remoteStreamHandler(payload);
                 const [data, streamOp] = response;
 
