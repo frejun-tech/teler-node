@@ -2,6 +2,10 @@
 
 This Node library offers a lightweight and developer-friendly abstraction over the FreJun Teler API.
 
+## What is Teler?
+
+Teler is a programmable voice API by FreJun. It handles carriers, phone numbers, and real-time audio streaming so you can connect AI models directly to phone calls. → [frejun.ai](https://frejun.ai)
+
 ## Requirements
 - Node.js 14.x or later
 - npm or yarn
