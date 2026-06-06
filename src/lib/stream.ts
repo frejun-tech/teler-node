@@ -1,7 +1,8 @@
-import { StreamOP, StreamHandler, StreamType, StreamHandlerResult, StreamData } from "../types";
+import { StreamOP, StreamHandler, StreamType, StreamHandlerResult, StreamData } from "../types/call";
 import { NotImplementedException, BadParametersException, TelerException } from "../exceptions";
 import { logger } from "../logger";
 import { WebSocket } from 'ws';
+
 
 export class StreamConnector {
 
@@ -28,10 +29,14 @@ export class StreamConnector {
             throw new NotImplementedException("Unidirectional streams are not supported yet.");
         }
         
-        if (!this.remoteUrl || !this.remoteUrl.trim() || !URL.canParse(this.remoteUrl)) {
+        if (!this.remoteUrl || !this.remoteUrl.trim()) {
             throw new BadParametersException("remoteUrl", "remoteUrl is a required parameter.");
         }
-        
+        try {
+            new URL(this.remoteUrl);
+        } catch {
+            throw new BadParametersException("remoteUrl", "remoteUrl must be a valid URL.");
+        }
     }
 
     public async bridgeStream(callWs: WebSocket): Promise<WebSocket> {
@@ -39,9 +44,8 @@ export class StreamConnector {
         /**
          * Bridges stream between callWs and remoteWs
          * 
-         * @param
-         * 1. callWs: Teler's websocket connection
-         * 
+         * @param {WebSocket} callWs - Teler's websocket connection
+         * @returns {Promise<WebSocket>} The remote WebSocket instance
          */
 
         const remoteWs = new WebSocket(this.remoteUrl, { headers: this.remoteHeaders });
@@ -87,7 +91,8 @@ export class StreamConnector {
                     callWs.close();
                 }
             } catch(exception) {
-                throw new TelerException(`[StreamConnector]: Invalid response from call stream handler: ${exception}`);
+                const errorMessage = exception instanceof Error ? exception.message : String(exception);
+                logger.error({ component: 'StreamConnector', event: 'call_stream_error' }, `[StreamConnector]: Invalid response from call stream handler: ${errorMessage}`);
             }
         });
         
@@ -110,7 +115,8 @@ export class StreamConnector {
                     remoteWs.close();
                 }
             } catch(exception) {
-                throw new TelerException(`[StreamConnector]: Invalid response from remote stream handler: ${exception}`);
+                const errorMessage = exception instanceof Error ? exception.message : String(exception);
+                logger.error({ component: 'StreamConnector', event: 'remote_stream_error' }, `[StreamConnector]: Invalid response from remote stream handler: ${errorMessage}`);
             }
         });
 

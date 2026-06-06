@@ -1,0 +1,75 @@
+import axios, { AxiosInstance } from "axios";
+import { TELER_BASE_URL } from "../constants";
+import { HttpMethod } from "../types/common";
+import { TelerException, BadParametersException, UnauthorizedException, ForbiddenException, UnprocessableRequestException, InternalServerErrorException, NotImplementedException, NotFoundException } from "../exceptions";
+
+export class HttpResourceManager {
+    private readonly httpClient: AxiosInstance;
+
+    constructor(apiKey: string) {
+        this.httpClient = axios.create({
+            baseURL: TELER_BASE_URL,
+            timeout: 10000,
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'x-api-key': apiKey,
+            }
+        });
+    }
+
+    public async get<T, P = unknown>(path: string, params?: P): Promise<T> {
+        return this.request<T>('GET', path, undefined, params);
+    }
+
+    public async post<T, P>(path: string, data?: P): Promise<T> {
+        return this.request<T, P>('POST', path, data);
+    }
+
+    public async patch<T, P>(path: string, data?: P): Promise<T> {
+        return this.request<T, P>('PATCH', path, data);
+    }
+
+    public async delete<T>(path: string): Promise<T> {
+        return this.request<T>('DELETE', path);
+    }
+
+    /**
+    * Initiates an HTTPS request to the FreJun Teler.
+    * 
+    * @param method - HTTP method to use (e.g., GET, POST).
+    * @param path - API endpoint path.
+    * @param data - The request payload body of type P.
+    * @param params - URL query parameters.
+    * @returns The response data of type T.
+    */
+
+    private async request<T, P = unknown>(method: HttpMethod, path: string, data?: P, params?: Record<string, any>): Promise<T> {
+        try {
+            const response = await this.httpClient.request<T>({ method, url: path, data, params });
+            return response.data;
+        } catch (err) {
+            if (axios.isAxiosError(err)) {
+                const status = err.response?.status;
+                const message = err.response?.data?.message || err.message;
+
+                switch (status) {
+                    case 400: throw new BadParametersException(message);
+                    case 401: throw new UnauthorizedException(message);
+                    case 403: throw new ForbiddenException(message);
+                    case 404: throw new NotFoundException(message);
+                    case 422: throw new UnprocessableRequestException(message);
+                    default:
+                        if (status === 501) {
+                            throw new NotImplementedException(message, status);
+                        }
+                        else if (status >= 500) {
+                            throw new InternalServerErrorException(message, status);
+                        }
+                        throw new TelerException(`API Error: ${message}`, status);
+                }
+            }
+            throw new TelerException("An unknown error occurred while calling the API.");
+        }
+    }
+}
