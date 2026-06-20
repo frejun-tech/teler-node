@@ -1,5 +1,5 @@
 export class CallFlow {
-    static stream(wsUrl: string, options: { sampleRate?: string, chunkSize?: number } = {}) {
+    static stream(wsUrl: string, options: { sampleRate?: string, chunkSize?: number, record?: boolean } = {}) {
         
         /**
          * Build and return stream action flow.
@@ -8,29 +8,31 @@ export class CallFlow {
          * @param {object} [options={}] - Options object
          * @param {string} [options.sampleRate="8k"] - Sample rate of Teler audio
          * @param {number} [options.chunkSize=400] - Chunk size of Teler audio
+         * @param {boolean} [options.record=true] - Record the call
          * @returns {object} JSON response containing the stream details
          */
 
         return {
             action: "stream",
             ws_url: wsUrl,
-            sample_rate: options.sampleRate || "8k",
-            chunk_size: options.chunkSize || 400
+            sample_rate: options.sampleRate ?? "8k",
+            chunk_size: options.chunkSize ?? 400,
+            record: options.record ??  true,
         };
     }
 
-    static play(fileUrl: string) {
+    static play(mediaUrl: string) {
 
         /**
          * Build and return play action flow
          * 
-         * @param {string} fileUrl - URL of the audio to be played.
+         * @param {string} mediaUrl - URL of the audio to be played.
          * @returns {object} JSON response containing the play details
          */
 
         return {
             action: "play",
-            file_url: fileUrl,
+            media_url: mediaUrl,
         };
     }
 
@@ -43,7 +45,7 @@ export class CallFlow {
          */
 
         return {
-            "action": "hangup",
+            action: "hangup",
         }
     }
 }

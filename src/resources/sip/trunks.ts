@@ -17,7 +17,7 @@ export class TrunkResourceManager {
     }
 
     /**
-     * Get a sip trunk.
+     * Fetch a sip trunk.
      * @param sipTrunkId - The sip trunk ID to fetch
      * @returns Details of the sip trunk.
      */
@@ -27,7 +27,7 @@ export class TrunkResourceManager {
     
     /**
      * List all sip trunks.
-     * @param params - Optional filters and pagination, which includes page, page_size, status and search.
+     * @param params - Optional filters and cursor, which includes search, status, limit, cursor_after and cursor_before.
      * @returns A list of sip trunks.
      */
     public async list(params?: ListTrunkFilters): Promise<SIPTrunkResponse[]> {

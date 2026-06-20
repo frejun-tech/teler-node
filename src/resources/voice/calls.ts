@@ -2,20 +2,17 @@ import type { CreateCallPayload, CallResource, CreateCallParams } from "../../ty
 import { HttpResourceManager } from "../http";
 
 
-//  TODO: Legacy initate call API
-
 export class CallResourceManager {
     private readonly basePath = '/voice/calls';
     constructor(private readonly http: HttpResourceManager) {}
 
     /**
-     * Creates payload of the request
+     * Initiate Call API
      * 
      * @param {CreateCallParams} params - The parameters to create a call
      * @returns {Promise<CallResource>} Response of the call
      */
     public async create(params: CreateCallParams): Promise<CallResource> {
-
         const data = {
             from_number: params.fromNumber,
             to_number: params.toNumber,

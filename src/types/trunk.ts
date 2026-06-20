@@ -30,7 +30,7 @@ export type InboundRoute = {
   sip_user?: string
 };
 
-
+// TODO: updates of the response
 export interface SIPTrunkBase {
   name: string,
   domain_name: string,

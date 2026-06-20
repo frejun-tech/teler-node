@@ -21,7 +21,7 @@ export class AppResourceManager {
 
     /**
      * List all voice apps.
-     * @param params - Optional filters and pagination, which includes limit, search, status, cursor_after and cursor_before.
+     * @param params - Optional filters and cursor, which includes search, status, limit, cursor_after and cursor_before.
      * @returns A list of voice apps.
      */
     public async list(params?: ListAppFilters): Promise<VoiceAppResponse[]> {
@@ -29,7 +29,7 @@ export class AppResourceManager {
     }
 
     /**
-     * Get a voice app.
+     * Fetch a voice app.
      * @param voiceAppId - The voice app ID to fetch.
      * @returns Details of the voice app.
      */
@@ -50,7 +50,7 @@ export class AppResourceManager {
     /**
      * Delete a voice app.
      * @param voiceAppId - voice app ID to delete.
-     * @returns A confirmation of the deletion.
+     * @returns success/ failure.
      */
     public async delete(voiceAppId: string): Promise<DefaultResponse> {
         return this.http.delete<DefaultResponse>(`${this.basePath}/${voiceAppId}`);
