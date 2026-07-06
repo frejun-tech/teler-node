@@ -2,7 +2,9 @@
  * Core Types
  */
 
+import { VoiceAppListResponse } from "./app";
 import { CursorFilters } from "./common";
+import { SIPTrunkListResponse } from "./trunk";
 
 export enum Status {
   ACTIVE = "active",
@@ -28,4 +30,22 @@ export interface VNListResponse {
   name: string;
   number: string;
   location: LocationResponse;
+  voice_app?: VoiceAppListResponse;
+  sip_trunk?: SIPTrunkListResponse;
+}
+
+export interface UpdateVNPayload {
+  name: string;
+}
+
+export interface AssignVNPayload {
+  vn_ids?: string[];
+  apply_to_all?: boolean;
+  voice_app_id?: string;
+  sip_trunk_id?: string;
+}
+
+export interface UnassignVNPayload {
+  vn_ids?: string[];
+  apply_to_all?: boolean;
 }

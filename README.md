@@ -40,11 +40,11 @@ import { Client } from "@frejun/teler";
 const client = new Client("YOUR_API_KEY");
 
 // Initiate a call
-const call = await client.calls.create({
-    from_number: "+918065xxxx",
-    to_number: "+919967xxxx",
-    flow_url: "https://your-domain.com/flow",
-    status_callback_url: "https://your-domain.com/receiver",
+const call = await client.voice.calls.create({
+    fromNumber: "+918065xxxx",
+    toNumber: "+919967xxxx",
+    flowUrl: "https://your-domain.com/flow",
+    statusCallbackUrl: "https://your-domain.com/receiver",
     record: true
 });
 ```
@@ -60,7 +60,10 @@ Initiates bidirectional WebSocket streaming of the call's audio.
 ```json
 {
     "action": "stream",
-    "url": "wss://your-domain.com/stream"
+    "ws_url": "wss://your-domain.com/stream",
+    "sample_rate": "8k",
+    "chunk_size": 400,
+    "record": true,
 }
 ```
 
@@ -71,7 +74,7 @@ Plays an audio file to the caller.
 ```json
 {
     "action": "play",
-    "url": "https://example.com/audio.mp3"
+    "media_url": "https://example.com/audio.mp3"
 }
 ```
 
@@ -106,6 +109,10 @@ A `StreamHandler` asynchronous function receives the incoming messages on a WebS
 
 - **`callStreamHandler`**: Receives audio data from the caller and forwards it to an AI model.
 - **`remoteStreamHandler`**: Receives audio data from the remote endpoint (e.g., AI agent's response) and sent back to the caller.
+
+`StreamData` can be:
+- string, Buffer, Uint8Array, ArrayBuffer, Blob
+
 
 `StreamOp` can be one of:
 

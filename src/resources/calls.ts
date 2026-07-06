@@ -2,7 +2,8 @@
 //  * @legacy call intiate API
 //  */
 import { Client } from "../client";
-import { CreateCallParams, CallResource } from "../types/call";
+import { CreateCallParams } from "../types/call";
+import type { CallResource } from "../types/call";
 
 export class CallResourceManager {
     private client: Client;

@@ -1,19 +1,34 @@
 import axios, { AxiosInstance } from "axios";
-import { TELER_BASE_URL } from "../constants";
-import { HttpMethod } from "../types/common";
+import type { HttpMethod } from "../types/common";
 import { TelerException, BadParametersException, UnauthorizedException, ForbiddenException, UnprocessableRequestException, InternalServerErrorException, NotImplementedException, NotFoundException } from "../exceptions";
 
 export class HttpResourceManager {
     private readonly httpClient: AxiosInstance;
 
-    constructor(apiKey: string) {
+    constructor(apiKey: string, baseURL: string) {
         this.httpClient = axios.create({
-            baseURL: TELER_BASE_URL,
+            baseURL: baseURL,
             timeout: 10000,
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'x-api-key': apiKey,
+            },
+            paramsSerializer: {
+                indexes: false,
+                serialize: (params) => {
+                    const searchParams = new URLSearchParams();
+                    Object.entries(params).forEach(([key, value]) => {
+                        if (Array.isArray(value)) {
+                            value
+                            .filter(v => v != null)
+                            .forEach(v => searchParams.append(key, v));
+                        } else if (value !== undefined) {
+                            searchParams.append(key, value);
+                        }
+                    });
+                    return searchParams.toString();
+                }
             }
         });
     }

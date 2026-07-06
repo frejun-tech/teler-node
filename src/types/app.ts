@@ -40,3 +40,8 @@ export interface ListAppFilters extends CursorFilters {
   search?: string;
   status?: Status[];
 }
+
+export interface VoiceAppListResponse {
+  id: string;
+  name: string;
+}

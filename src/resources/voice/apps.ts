@@ -4,7 +4,6 @@ import type { UpdateAppPayload } from "../../types/app";
 import type { DefaultResponse } from "../../types/common";
 import { HttpResourceManager } from "../http";
 
-// TODO: restrict dev from using AppResourceManager
 
 export class AppResourceManager {
     private readonly basePath = '/voice/apps';

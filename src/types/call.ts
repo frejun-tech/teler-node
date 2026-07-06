@@ -10,12 +10,19 @@ export type CreateCallParams = {
   record?: boolean;
 };
 
-// need to check
+
+export interface CallDetails {
+  id: string;
+  from_number: string;
+  to_number: string;
+  status_callback_url: string;
+  record: boolean;
+}
+
+
 export type CallResource = {
-  id: string | null;
-  from_number: string | null;
-  to_number: string | null;
-  status_callback_url: string | null;
+  message: string;
+  data: CallDetails,
 };
 
 export type CreateCallPayload = {

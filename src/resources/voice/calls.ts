@@ -1,7 +1,6 @@
 import type { CreateCallPayload, CallResource, CreateCallParams } from "../../types/call";
 import { HttpResourceManager } from "../http";
 
-
 export class CallResourceManager {
     private readonly basePath = '/voice/calls';
     constructor(private readonly http: HttpResourceManager) {}

@@ -1,5 +1,6 @@
-import { StreamOP, StreamHandler, StreamType, StreamHandlerResult, StreamData } from "../types/call";
-import { NotImplementedException, BadParametersException, TelerException } from "../exceptions";
+import { StreamOP, StreamType } from "../types/call";
+import type { StreamHandler, StreamHandlerResult, StreamData } from "../types/call";
+import { NotImplementedException, BadParametersException } from "../exceptions";
 import { logger } from "../logger";
 import { WebSocket } from 'ws';
 
@@ -50,7 +51,7 @@ export class StreamConnector {
 
         const remoteWs = new WebSocket(this.remoteUrl, { headers: this.remoteHeaders });
 
-        const messageQueue: string[] = [];
+        const messageQueue: StreamData[] = [];
         const MAX_QUEUE_SIZE = 100;
         
         remoteWs.addEventListener('open', () => {
