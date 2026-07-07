@@ -1,6 +1,5 @@
 import { ListVNFilters, VNListResponse } from "../../types/core";
-import { CreateAppPayload, VoiceAppResponse, ListAppFilters } from "../../types/app";
-import type { UpdateAppPayload } from "../../types/app";
+import { CreateAppPayload, VoiceAppResponse, ListAppFilters, UpdateAppPayload } from "../../types/app";
 import type { DefaultResponse } from "../../types/common";
 import { HttpResourceManager } from "../http";
 

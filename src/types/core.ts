@@ -1,10 +1,11 @@
+import { VoiceAppListResponse } from "./app";
+import { CursorFilters, CursorResponse } from "./common";
+import { SIPTrunkListResponse } from "./trunk";
+
 /**
  * Core Types
  */
 
-import { VoiceAppListResponse } from "./app";
-import { CursorFilters } from "./common";
-import { SIPTrunkListResponse } from "./trunk";
 
 export enum Status {
   ACTIVE = "active",
@@ -24,7 +25,7 @@ export interface ListVNFilters extends CursorFilters {
   location?: string[];
 }
 
-export interface VNListResponse {
+export interface VNListResponse extends CursorResponse {
   id: string;
   account_id: string;
   name: string;

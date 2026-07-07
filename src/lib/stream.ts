@@ -5,13 +5,12 @@ import { logger } from "../logger";
 import { WebSocket } from 'ws';
 
 
+/**
+ * Media Stream Connector Interface.
+ * 
+ * Bridges the call stream to a remote websocket via pluggable handlers.
+ */
 export class StreamConnector {
-
-    /**
-     * Media Stream Connector Interface.
-     * 
-     * Bridges the call stream to a remote websocket via pluggable handlers.
-     */
 
     private streamType: StreamType;
     private remoteUrl: string;
@@ -40,14 +39,13 @@ export class StreamConnector {
         }
     }
 
+    /**
+     * Bridges stream between callWs and remoteWs
+     * 
+     * @param {WebSocket} callWs - Teler's websocket connection
+     * @returns {Promise<WebSocket>} The remote WebSocket instance
+     */
     public async bridgeStream(callWs: WebSocket): Promise<WebSocket> {
-
-        /**
-         * Bridges stream between callWs and remoteWs
-         * 
-         * @param {WebSocket} callWs - Teler's websocket connection
-         * @returns {Promise<WebSocket>} The remote WebSocket instance
-         */
 
         const remoteWs = new WebSocket(this.remoteUrl, { headers: this.remoteHeaders });
 
@@ -64,12 +62,11 @@ export class StreamConnector {
             }
         });
 
+
+        /**
+         * Event 'message' triggered when it receives message from Teler(callWs)
+         */
         callWs.addEventListener('message', async (event) => {
-
-            /**
-             * Event 'message' triggered when it receives message from Teler(callWs)
-             */
-
             try {
                 const payload = typeof event.data === 'string' ? event.data : event.data.toString('utf-8');
                 const response: StreamHandlerResult = await this.callStreamHandler(payload);
@@ -97,12 +94,10 @@ export class StreamConnector {
             }
         });
         
+        /**
+         * Event 'message' triggered when it receives message from remoteWs(eg. AI agent)
+         */
         remoteWs.addEventListener('message', async (event) => {
-
-            /**
-             * Event 'message' triggered when it receives message from remoteWs(eg. AI agent)
-             */
-
             try{
                 const payload: StreamData = Array.isArray(event.data) ? Buffer.concat(event.data) : event.data;
                 const response: StreamHandlerResult = await this.remoteStreamHandler(payload);

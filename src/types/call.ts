@@ -8,10 +8,10 @@ export type CreateCallParams = {
   flowUrl: string;
   statusCallbackUrl: string;
   record?: boolean;
-};
+}
 
 
-export interface CallDetails {
+export type CallDetails = {
   id: string;
   from_number: string;
   to_number: string;
@@ -23,7 +23,7 @@ export interface CallDetails {
 export type CallResource = {
   message: string;
   data: CallDetails,
-};
+}
 
 export type CreateCallPayload = {
   from_number: string;
@@ -31,7 +31,7 @@ export type CreateCallPayload = {
   flow_url: string;
   status_callback_url: string;
   record?: boolean;
-};
+}
 
 /**
  * Stream Types
@@ -40,13 +40,13 @@ export type CreateCallPayload = {
 export enum StreamType {
   UNIDIRECTIONAL = 0,
   BIDIRECTIONAL  = 1
-};
+}
 
 export enum StreamOP {
   RELAY = 0,
   PASS = 1,
   STOP = 2,
-};
+}
 
 export type StreamData = string | Buffer | Uint8Array | ArrayBuffer | Blob;
 

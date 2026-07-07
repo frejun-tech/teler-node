@@ -17,7 +17,7 @@ export interface CreateAppPayload extends VoiceAppBase {
   secret_id?: string | null;
 }
 
-export type UpdateAppPayload = {
+export interface UpdateAppPayload {
   name?: string;
   status?: Status;
   flow_url?: string;
