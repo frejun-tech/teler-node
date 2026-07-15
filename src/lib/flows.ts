@@ -18,19 +18,19 @@ export class CallFlow {
         return {
             action: "stream",
             ws_url: wsUrl,
-            sample_rate: options.sampleRate || "8k",
-            chunk_size: options.chunkSize || 400,
-            record: options.record || true,
+            sample_rate: options.sampleRate ?? "8k",
+            chunk_size: options.chunkSize ?? 400,
+            record: options.record ?? true,
         };
     }
 
-    static play(fileUrl: string) {
+    static play(mediaUrl: string) {
 
         /**
          * Build and return play action flow
          * 
          * @param:
-         * 1. fileUrl: URL of the audio to be played.
+         * 1. mediaUrl: URL of the audio to be played.
          * 
          * @returns
          * 1. JSON response contains the play details
@@ -39,7 +39,7 @@ export class CallFlow {
 
         return {
             action: "play",
-            file_url: fileUrl,
+            media_url: mediaUrl,
         };
     }
 

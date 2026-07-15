@@ -27,7 +27,7 @@ export class CallResourceManager {
             record: params?.record ?? true
         };
 
-        const response = await this.client.request<CallResource>('POST', '/calls/initiate', data);
+        const response = await this.client.request<CallResource>('POST', '/voice/calls/initiate', data);
         return response;
     }
 }
