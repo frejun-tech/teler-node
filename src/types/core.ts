@@ -1,6 +1,6 @@
 import { VoiceAppListResponse } from "./app";
 import { CursorFilters, CursorResponse } from "./common";
-import { SIPTrunkListResponse } from "./trunk";
+import { SipTrunkListResponse } from "./trunk";
 
 /**
  * Core Types
@@ -20,19 +20,23 @@ type LocationResponse = {
   country_name?: string | null;
 }
 
-export interface ListVNFilters extends CursorFilters {
+export interface VNFilters extends CursorFilters {
   search?: string;
   location?: string[];
 }
 
-export interface VNListResponse extends CursorResponse {
+export interface VNDetails {
   id: string;
   account_id: string;
   name: string;
   number: string;
   location: LocationResponse;
   voice_app?: VoiceAppListResponse;
-  sip_trunk?: SIPTrunkListResponse;
+  sip_trunk?: SipTrunkListResponse;
+}
+
+export interface VNResponse extends CursorResponse {
+  data: VNDetails[];
 }
 
 export interface UpdateVNPayload {
@@ -49,4 +53,9 @@ export interface AssignVNPayload {
 export interface UnassignVNPayload {
   vn_ids?: string[];
   apply_to_all?: boolean;
+}
+
+export interface RecordingParams {
+  recording_id: string;
+  expires_in?: number;
 }

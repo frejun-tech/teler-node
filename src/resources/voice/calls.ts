@@ -12,7 +12,7 @@ export class CallResourceManager {
      * @returns {Promise<CallResource>} Response of the call
      */
     public async create(params: CreateCallParams): Promise<CallResource> {
-        const data = {
+        const data: CreateCallPayload = {
             from_number: params.fromNumber,
             to_number: params.toNumber,
             flow_url: params.flowUrl,

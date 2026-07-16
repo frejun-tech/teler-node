@@ -10,6 +10,8 @@ export type DefaultResponse = {
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
+export type WebhookApiVersion = "2026-06-01" | "2025-08-01";
+
 export interface CursorFilters {
   limit?: number;
   cursor_after?: string;

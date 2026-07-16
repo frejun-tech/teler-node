@@ -2,7 +2,7 @@ import { TrunkResourceManager } from "./trunks";
 import { HttpResourceManager } from "../http";
 
 
-export class SIPResourceManager {
+export class SipResourceManager {
     public readonly trunks: TrunkResourceManager;
 
     constructor(http: HttpResourceManager) {

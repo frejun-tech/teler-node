@@ -1,6 +1,6 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import type { HttpMethod } from "../types/common";
-import { TelerException, BadParametersException, UnauthorizedException, ForbiddenException, UnprocessableRequestException, InternalServerErrorException, NotImplementedException, NotFoundException } from "../exceptions";
+import { TelerException, BadParametersException, UnauthorizedException, ForbiddenException, UnprocessableRequestException, InternalServerErrorException, NotImplementedException, NotFoundException, RateLimitException } from "../exceptions";
 
 export class HttpResourceManager {
     private readonly httpClient: AxiosInstance;
@@ -33,15 +33,15 @@ export class HttpResourceManager {
         });
     }
 
-    public async get<T, P = unknown>(path: string, params?: P): Promise<T> {
+    public async get<T, P = unknown>(path: string, params?: P, config?: AxiosRequestConfig): Promise<T> {
         return this.request<T>('GET', path, undefined, params);
     }
 
-    public async post<T, P>(path: string, data?: P): Promise<T> {
+    public async post<T, P = unknown>(path: string, data?: P): Promise<T> {
         return this.request<T, P>('POST', path, data);
     }
 
-    public async patch<T, P>(path: string, data?: P): Promise<T> {
+    public async patch<T, P = unknown>(path: string, data?: P): Promise<T> {
         return this.request<T, P>('PATCH', path, data);
     }
 
@@ -66,7 +66,7 @@ export class HttpResourceManager {
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 const status = err.response?.status;
-                const message = err.response?.data?.message || err.message;
+                const message = err.response?.data?.message || err?.message;
 
                 switch (status) {
                     case 400: throw new BadParametersException(message);
@@ -74,6 +74,7 @@ export class HttpResourceManager {
                     case 403: throw new ForbiddenException(message);
                     case 404: throw new NotFoundException(message);
                     case 422: throw new UnprocessableRequestException(message);
+                    case 429: throw new RateLimitException(message);
                     default:
                         if (status === 501) {
                             throw new NotImplementedException(message, status);

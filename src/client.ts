@@ -1,9 +1,11 @@
 import { BadParametersException } from "./exceptions";
 import { VoiceResourceManager } from "./resources/voice/voice";
-import { SIPResourceManager } from "./resources/sip/sip";
+import { SipResourceManager } from "./resources/sip/sip";
 import { HttpResourceManager } from "./resources/http";
 import { setLogLevel } from "./logger";
-import { VNResourceManager } from "./resources/vns/vn";
+import { VNResourceManager } from "./resources/vns";
+import { EventResourceManager } from "./resources/events";
+import { RecordingResourceManager } from "./resources/recordings";
 
 export interface ClientOptions {
     logLevel?: string;
@@ -15,8 +17,10 @@ export class Client {
     
     private readonly    http:   HttpResourceManager;
     public readonly     voice:  VoiceResourceManager;
-    public readonly     sip:    SIPResourceManager;
-    public readonly     vn:     VNResourceManager;
+    public readonly     sip:    SipResourceManager;
+    public readonly     vns:     VNResourceManager;
+    public readonly     events: EventResourceManager;
+    public readonly     recordings: RecordingResourceManager;
 
     constructor(apiKey: string, options?: ClientOptions) {
         if (!apiKey) throw new BadParametersException("API Key", "Missing Teler API Key. Please provide one when initializing the client.");
@@ -28,7 +32,9 @@ export class Client {
 
         this.http   = new HttpResourceManager(this.apiKey, this.baseURL);
         this.voice  = new VoiceResourceManager(this.http)
-        this.sip    = new SIPResourceManager(this.http);
-        this.vn     = new VNResourceManager(this.http);
+        this.sip    = new SipResourceManager(this.http);
+        this.vns     = new VNResourceManager(this.http);
+        this.events  = new EventResourceManager(this.http);
+        this.recordings = new RecordingResourceManager(this.http);
     }
 }

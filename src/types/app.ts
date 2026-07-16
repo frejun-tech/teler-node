@@ -1,4 +1,4 @@
-import { CursorFilters } from "./common";
+import { CursorFilters, CursorResponse, type WebhookApiVersion } from "./common";
 import { Status } from "./core";
 /**
  * Voice Apps Types
@@ -23,20 +23,27 @@ export interface UpdateAppPayload {
   flow_url?: string;
   webhook_url?: string;
   fallback_url?: string | null;
-  channel_limit?: number;
+  channel_limit?: number | null;
   secret_id?: string | null;
+  webhook_api_version: WebhookApiVersion;
 }
 
-export interface VoiceAppResponse extends VoiceAppBase {
+export interface VoiceAppDetails extends VoiceAppBase {
   id: string;
   status: Status;
-  channel_limit: number;
+  channel_limit: number | null;
   vn_count: number;
   secret_id?: string | null;
   secret_name?: string | null;
+  webhook_api_version: WebhookApiVersion;
+  account_id: string;
 }
 
-export interface ListAppFilters extends CursorFilters {
+export interface VoiceAppResponse extends CursorResponse {
+  data: VoiceAppDetails[];
+}
+
+export interface AppFilters extends CursorFilters {
   search?: string;
   status?: Status[];
 }

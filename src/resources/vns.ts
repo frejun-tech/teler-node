@@ -1,6 +1,7 @@
-import { AssignVNPayload, ListVNFilters, UnassignVNPayload, UpdateVNPayload, VNListResponse } from "../../types/core";
-import { HttpResourceManager } from "../http";
-import type { DefaultResponse } from "../../types/common";
+import { AssignVNPayload, VNFilters, UnassignVNPayload, UpdateVNPayload, VNResponse, VNDetails } from "../types/core";
+import { HttpResourceManager } from "./http";
+import type { DefaultResponse } from "../types/common";
+import { RawCursorResponse, toCursorResponse } from "../utils/cursor";
 
 
 export class VNResourceManager {
@@ -12,8 +13,9 @@ export class VNResourceManager {
      * @param params - Optional filters and cursor, which includes search, status, limit, cursor_after and cursor_before.
      * @returns A list of virtual numbers.
      */
-    public async list(params?: ListVNFilters): Promise<VNListResponse[]> {
-        return this.http.get<VNListResponse[], ListVNFilters>(this.basePath, params);
+    public async list(params?: VNFilters): Promise<VNResponse> {
+        const raw = await this.http.get<RawCursorResponse<VNDetails>, VNFilters>(this.basePath, params);
+        return toCursorResponse<VNDetails, VNDetails>(raw, (item) => item);
     }
 
     /**
@@ -22,8 +24,8 @@ export class VNResourceManager {
      * @param payload - UpdateVNPayload with fields to update.
      * @returns Details of the updated virtual number.
      */
-    public async update(vnId: string, payload: UpdateVNPayload): Promise<VNListResponse> {
-        return this.http.patch<VNListResponse, UpdateVNPayload>(`${this.basePath}/${vnId}`, payload);
+    public async update(vnId: string, payload: UpdateVNPayload): Promise<VNDetails> {
+        return this.http.patch<VNDetails, UpdateVNPayload>(`${this.basePath}/${vnId}`, payload);
     }
 
     /**

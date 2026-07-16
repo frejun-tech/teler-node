@@ -2,9 +2,9 @@
  * Teler Base Exception model
  */
 export class TelerException extends Error {
-    public code: number;
+    public code;
 
-    constructor(message: string = "", code: number = 500) {
+    constructor(message = "", code = 500) {
         super(message);
         this.name = this.constructor.name;
         this.code = code;
@@ -18,7 +18,7 @@ export class TelerException extends Error {
 export class BadParametersException extends TelerException {
     public param: string;
 
-    constructor(param: string = "", message: string = "Bad Parameter(s).", code: number = 400) {
+    constructor(param = "", message = "Bad Parameter(s).", code = 400) {
         super(message, code);
         this.param = param;
     }
@@ -30,7 +30,7 @@ export class BadParametersException extends TelerException {
  */
 export class UnprocessableRequestException extends TelerException {
 
-    constructor(message: string = "Unprocessable Request.", code: number = 422) {
+    constructor(message = "Unprocessable Request.", code = 422) {
         super(message, code);
     }
 }
@@ -41,7 +41,7 @@ export class UnprocessableRequestException extends TelerException {
  */
 export class UnauthorizedException extends TelerException {
 
-    constructor(message: string = "Unauthorized.", code: number = 401) {
+    constructor(message = "Unauthorized.", code = 401) {
         super(message, code);
     }
 }
@@ -52,7 +52,7 @@ export class UnauthorizedException extends TelerException {
  */
 export class ForbiddenException extends TelerException {
     
-    constructor(message: string = "Forbidden.", code: number = 403) {
+    constructor(message = "Forbidden.", code = 403) {
         super(message, code);
     }
 }
@@ -63,7 +63,18 @@ export class ForbiddenException extends TelerException {
  */
 export class NotFoundException extends TelerException {
     
-    constructor(message: string = "Not Found.", code: number = 404) {
+    constructor(message = "Not Found.", code = 404) {
+        super(message, code);
+    }
+}
+
+/**
+ * 
+ * If rate limit is reached.
+ */
+export class RateLimitException extends TelerException {
+
+    constructor(message = "Rate Limit.", code = 429) {
         super(message, code);
     }
 }
@@ -74,7 +85,7 @@ export class NotFoundException extends TelerException {
  */
 export class InternalServerErrorException extends TelerException {
     
-    constructor(message: string = "Internal Server Error", code: number = 500) {
+    constructor(message = "Internal Server Error.", code = 500) {
         super(message, code);
     }
 }
@@ -85,7 +96,7 @@ export class InternalServerErrorException extends TelerException {
  */
 export class NotImplementedException extends TelerException {
     
-    constructor(message: string = "Not implemented.", code: number = 501) {
+    constructor(message = "Not implemented.", code = 501) {
         super(message, code);
     }
 }

@@ -1,7 +1,8 @@
 import type { DefaultResponse } from "../../types/common";
-import { CreateTrunkPayload, UpdateTrunkPayload, SIPTrunkResponse, ListTrunkFilters } from "../../types/trunk";
+import { CreateTrunkPayload, UpdateTrunkPayload, SipTrunkResponse, TrunkFilters, SipTrunkDetails } from "../../types/trunk";
 import { HttpResourceManager } from "../http";
-import { ListVNFilters, VNListResponse } from "../../types/core";
+import { VNDetails, VNFilters, VNResponse } from "../../types/core";
+import { RawCursorResponse, toCursorResponse } from "../../utils/cursor";
 
 export class TrunkResourceManager {
     private readonly basePath = '/sip/trunks';
@@ -12,8 +13,8 @@ export class TrunkResourceManager {
      * @param payload - CreateTrunkPayload.
      * @returns Details of the sip trunk.
      */
-    public async create(payload: CreateTrunkPayload): Promise<SIPTrunkResponse> {
-        return this.http.post<SIPTrunkResponse, CreateTrunkPayload>(`${this.basePath}`, payload);
+    public async create(payload: CreateTrunkPayload): Promise<SipTrunkDetails> {
+        return this.http.post<SipTrunkDetails, CreateTrunkPayload>(`${this.basePath}`, payload);
     }
 
     /**
@@ -21,8 +22,8 @@ export class TrunkResourceManager {
      * @param sipTrunkId - The sip trunk ID to fetch
      * @returns Details of the sip trunk.
      */
-    public async get(sipTrunkId: string): Promise<SIPTrunkResponse> {
-        return this.http.get<SIPTrunkResponse>(`${this.basePath}/${sipTrunkId}`);
+    public async retrieve(sipTrunkId: string): Promise<SipTrunkDetails> {
+        return this.http.get<SipTrunkDetails>(`${this.basePath}/${sipTrunkId}`);
     }
     
     /**
@@ -30,8 +31,9 @@ export class TrunkResourceManager {
      * @param params - Optional filters and cursor, which includes search, status, limit, cursor_after and cursor_before.
      * @returns A list of sip trunks.
      */
-    public async list(params?: ListTrunkFilters): Promise<SIPTrunkResponse[]> {
-        return this.http.get<SIPTrunkResponse[], ListTrunkFilters>(`${this.basePath}`, params);
+    public async list(params?: TrunkFilters): Promise<SipTrunkResponse> {
+        const raw = await this.http.get<RawCursorResponse<SipTrunkDetails>, TrunkFilters>(this.basePath, params);
+        return toCursorResponse<SipTrunkDetails, SipTrunkDetails>(raw, (item) => item);
     }
 
     /**
@@ -39,8 +41,8 @@ export class TrunkResourceManager {
      * @param sipTrunkId - sip trunk ID to update, payload - UpdateTrunkPayload.
      * @returns Details of the updated trunk.
      */
-    public async update(sipTrunkId: string, payload: UpdateTrunkPayload): Promise<SIPTrunkResponse> {
-        return this.http.patch<SIPTrunkResponse, UpdateTrunkPayload>(`${this.basePath}/${sipTrunkId}`, payload);
+    public async update(sipTrunkId: string, payload: UpdateTrunkPayload): Promise<SipTrunkDetails> {
+        return this.http.patch<SipTrunkDetails, UpdateTrunkPayload>(`${this.basePath}/${sipTrunkId}`, payload);
     }
 
     /**
@@ -57,7 +59,8 @@ export class TrunkResourceManager {
      * @param sipTrunkId - sipTrunkID to fetch vns.
      * @returns Details of the vns assigned to the sip trunk.
      */
-    public async getVns(sipTrunkId: string, params?: ListVNFilters): Promise<VNListResponse> {
-        return this.http.get<VNListResponse, ListVNFilters>(`${this.basePath}/${sipTrunkId}/vns`, params);
+    public async getVns(sipTrunkId: string, params?: VNFilters): Promise<VNResponse> {
+        const raw = await this.http.get<RawCursorResponse<VNDetails>, VNFilters>(`${this.basePath}/${sipTrunkId}/vns`, params);
+        return toCursorResponse<VNDetails, VNDetails>(raw, (item) => item);
     }
 }

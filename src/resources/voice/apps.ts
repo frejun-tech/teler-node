@@ -1,7 +1,8 @@
-import { ListVNFilters, VNListResponse } from "../../types/core";
-import { CreateAppPayload, VoiceAppResponse, ListAppFilters, UpdateAppPayload } from "../../types/app";
+import { VNDetails, VNFilters, VNResponse } from "../../types/core";
+import { CreateAppPayload, VoiceAppResponse, AppFilters, UpdateAppPayload, VoiceAppDetails } from "../../types/app";
 import type { DefaultResponse } from "../../types/common";
 import { HttpResourceManager } from "../http";
+import { RawCursorResponse, toCursorResponse } from "../../utils/cursor";
 
 
 export class AppResourceManager {
@@ -13,8 +14,8 @@ export class AppResourceManager {
      * @param payload - CreateAppPayload.
      * @returns Details of the voice app.
      */
-    public async create(payload: CreateAppPayload): Promise<VoiceAppResponse> {
-        return this.http.post<VoiceAppResponse, CreateAppPayload>(this.basePath, payload);
+    public async create(payload: CreateAppPayload): Promise<VoiceAppDetails> {
+        return this.http.post<VoiceAppDetails, CreateAppPayload>(this.basePath, payload);
     }
 
     /**
@@ -22,8 +23,9 @@ export class AppResourceManager {
      * @param params - Optional filters and cursor, which includes search, status, limit, cursor_after and cursor_before.
      * @returns A list of voice apps.
      */
-    public async list(params?: ListAppFilters): Promise<VoiceAppResponse[]> {
-        return this.http.get<VoiceAppResponse[], ListAppFilters>(this.basePath, params);
+    public async list(params?: AppFilters): Promise<VoiceAppResponse> {
+        const raw = await this.http.get<RawCursorResponse<VoiceAppDetails>, AppFilters>(this.basePath, params);
+        return toCursorResponse<VoiceAppDetails, VoiceAppDetails>(raw, (item) => item);
     }
 
     /**
@@ -31,8 +33,8 @@ export class AppResourceManager {
      * @param voiceAppId - The voice app ID to fetch.
      * @returns Details of the voice app.
      */
-    public async get(voiceAppId: string): Promise<VoiceAppResponse> {
-        return this.http.get<VoiceAppResponse>(`${this.basePath}/${voiceAppId}`);
+    public async retrieve(voiceAppId: string): Promise<VoiceAppDetails> {
+        return this.http.get<VoiceAppDetails>(`${this.basePath}/${voiceAppId}`);
     }
 
     /**
@@ -41,8 +43,8 @@ export class AppResourceManager {
      * @param payload - UpdateAppPayload with fields to update.
      * @returns Details of the updated voice app.
      */
-    public async update(voiceAppId: string, payload: UpdateAppPayload): Promise<VoiceAppResponse> {
-        return this.http.patch<VoiceAppResponse, UpdateAppPayload>(`${this.basePath}/${voiceAppId}`, payload);
+    public async update(voiceAppId: string, payload: UpdateAppPayload): Promise<VoiceAppDetails> {
+        return this.http.patch<VoiceAppDetails, UpdateAppPayload>(`${this.basePath}/${voiceAppId}`, payload);
     }
 
     /**
@@ -59,7 +61,8 @@ export class AppResourceManager {
      * @param voiceAppId - voice app ID to fetch vns.
      * @returns Details of the vns assigned to the voice app.
      */
-    public async getVns(voiceAppId: string, params?: ListVNFilters): Promise<VNListResponse> {
-        return this.http.get<VNListResponse, ListVNFilters>(`${this.basePath}/${voiceAppId}/vns`, params);
+    public async getVns(voiceAppId: string, params?: VNFilters): Promise<VNResponse> {
+        const raw = await this.http.get<RawCursorResponse<VNDetails>, VNFilters>(`${this.basePath}/${voiceAppId}/vns`, params);
+        return toCursorResponse<VNDetails, VNDetails>(raw, (item) => item);
     }
 }
