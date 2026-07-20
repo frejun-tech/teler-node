@@ -6,6 +6,7 @@ import { setLogLevel } from "./logger";
 import { VNResourceManager } from "./resources/vns";
 import { EventResourceManager } from "./resources/events";
 import { RecordingResourceManager } from "./resources/recordings";
+import { SecretResourceManager } from "./resources/secrets";
 
 export interface ClientOptions {
     logLevel?: string;
@@ -14,7 +15,7 @@ export interface ClientOptions {
 /**
  * Teler API Client.
  * 
- * Provides unified access to all Teler SDK resource managers including voice, SIP, virtual numbers (VNs), events, and recordings.
+ * Provides unified access to all Teler SDK resource managers including voice, SIP, virtual numbers (VNs), events, recordings, and secrets.
  */
 export class Client {
     private readonly apiKey:    string;
@@ -26,6 +27,7 @@ export class Client {
     public readonly     vns:        VNResourceManager;
     public readonly     events:     EventResourceManager;
     public readonly     recordings: RecordingResourceManager;
+    public readonly     secrets:    SecretResourceManager;
 
     /**
      * Initializes the Teler Client.
@@ -47,5 +49,6 @@ export class Client {
         this.vns     = new VNResourceManager(this.http);
         this.events  = new EventResourceManager(this.http);
         this.recordings = new RecordingResourceManager(this.http);
+        this.secrets = new SecretResourceManager(this.http);
     }
 }
