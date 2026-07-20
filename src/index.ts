@@ -1,11 +1,9 @@
 export { Client } from "./client";
 export * from "./types/core";
-export * from "./types/app";
-export * from "./types/call";
+export * from "./types/voice";
 export * from "./types/common";
-export * from "./types/trunk";
+export * from "./types/sip";
 export * from "./types/events";
 export * from "./exceptions";
 export * from "./lib/flows";
 export * from "./lib/stream";
-export * from "./utils/cursor";

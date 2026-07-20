@@ -1,6 +1,6 @@
-import { EventDetails, EventFilters, EventRedeliverStatus, EventResponse } from "../types/events";
+import { EventResponse, EventFilters, EventRedeliverStatus } from "../types/events";
 import { HttpResourceManager } from "./http";
-import { RawCursorResponse, toCursorResponse } from "../utils/cursor";
+import { CursorResponse } from "../types/common";
 
 
 export class EventResourceManager {
@@ -9,12 +9,11 @@ export class EventResourceManager {
 
     /**
      * List all webhook events.
-     * @param params - Optional filters and cursor, which includes call_id, type, occurred_after, delivery_status, limit, cursor_after and cursor_before.
+     * @param filters - Optional filters and cursor, which includes call_id, type, occurred_after, delivery_status, limit, cursor_after and cursor_before.
      * @returns A list of webhook events.
      */
-    public async list(params?: EventFilters): Promise<EventResponse> {
-        const raw = await this.http.get<RawCursorResponse<EventDetails>, EventFilters>(this.basePath, params);
-        return toCursorResponse<EventDetails, EventDetails>(raw, (item) => item);
+    public async list(filters?: EventFilters): Promise<CursorResponse<EventResponse>> {
+        return this.http.get<CursorResponse<EventResponse>, EventFilters>(this.basePath, filters);
     }
 
     /**
@@ -22,8 +21,8 @@ export class EventResourceManager {
      * @param eventId - The webhook event ID to fetch
      * @returns Details of the webhook event.
      */
-    public async retrieve(eventId: string): Promise<EventDetails> {
-        return this.http.get<EventDetails>(`${this.basePath}/${eventId}`);
+    public async retrieve(eventId: string): Promise<EventResponse> {
+        return this.http.get<EventResponse>(`${this.basePath}/${eventId}`);
     }
 
     /**

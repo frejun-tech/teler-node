@@ -37,8 +37,8 @@ export class HttpResourceManager {
         return this.request<T>('GET', path, undefined, params);
     }
 
-    public async post<T, P = unknown>(path: string, data?: P): Promise<T> {
-        return this.request<T, P>('POST', path, data);
+    public async post<T, P = unknown>(path: string, data?: P, headers?: Record<string, string>): Promise<T> {
+        return this.request<T, P>('POST', path, data, undefined, headers);
     }
 
     public async patch<T, P = unknown>(path: string, data?: P): Promise<T> {
@@ -59,9 +59,9 @@ export class HttpResourceManager {
     * @returns The response data of type T.
     */
 
-    private async request<T, P = unknown>(method: HttpMethod, path: string, data?: P, params?: Record<string, any>): Promise<T> {
+    private async request<T, P = unknown>(method: HttpMethod, path: string, data?: P, params?: Record<string, any>, headers?: Record<string, string>): Promise<T> {
         try {
-            const response = await this.httpClient.request<T>({ method, url: path, data, params });
+            const response = await this.httpClient.request<T>({ method, url: path, data, params, headers });
             return response.data;
         } catch (err) {
             if (axios.isAxiosError(err)) {

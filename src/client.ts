@@ -11,17 +11,28 @@ export interface ClientOptions {
     logLevel?: string;
 }
 
+/**
+ * Teler API Client.
+ * 
+ * Provides unified access to all Teler SDK resource managers including voice, SIP, virtual numbers (VNs), events, and recordings.
+ */
 export class Client {
     private readonly apiKey:    string;
-    private readonly baseURL:   string = 'http://localhost:8000/api/v1';
+    private readonly baseURL:   string = 'https://sandbox.frejun.ai/api/v1';
     
-    private readonly    http:   HttpResourceManager;
-    public readonly     voice:  VoiceResourceManager;
-    public readonly     sip:    SipResourceManager;
-    public readonly     vns:     VNResourceManager;
-    public readonly     events: EventResourceManager;
+    private readonly    http:       HttpResourceManager;
+    public readonly     voice:      VoiceResourceManager;
+    public readonly     sip:        SipResourceManager;
+    public readonly     vns:        VNResourceManager;
+    public readonly     events:     EventResourceManager;
     public readonly     recordings: RecordingResourceManager;
 
+    /**
+     * Initializes the Teler Client.
+     * 
+     * @param apiKey - Teler API Key.
+     * @param options - Optional configuration options.
+     */
     constructor(apiKey: string, options?: ClientOptions) {
         if (!apiKey) throw new BadParametersException("API Key", "Missing Teler API Key. Please provide one when initializing the client.");
         this.apiKey = apiKey;

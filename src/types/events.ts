@@ -31,7 +31,7 @@ export interface EventFilters extends CursorFilters {
   limit?: number;
 }
 
-export interface EventDetails {
+export interface EventResponse {
   id: string;
   account_id: string;
   call_id: string;
@@ -48,10 +48,6 @@ export interface EventDetails {
   last_error: string;
   delivered_at: string;
   created_at: string;
-}
-
-export interface EventResponse extends CursorResponse {
-  data: EventDetails[];
 }
 
 export interface EventRedeliverStatus {

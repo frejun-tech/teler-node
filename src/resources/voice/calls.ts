@@ -1,4 +1,5 @@
-import type { CreateCallPayload, CallResource, CreateCallParams } from "../../types/call";
+import { CursorResponse } from "../../types/common";
+import type { CreateCallPayload, CallResource, CreateCallParams, VoiceCallFilters, VoiceCallResponse, VoiceCallLegResponse } from "../../types/voice";
 import { HttpResourceManager } from "../http";
 
 export class CallResourceManager {
@@ -8,8 +9,8 @@ export class CallResourceManager {
     /**
      * Initiate Call API
      * 
-     * @param {CreateCallParams} params - The parameters to create a call
-     * @returns {Promise<CallResource>} Response of the call
+     * @param params - The parameters to create a call
+     * @returns Response of the call
      */
     public async create(params: CreateCallParams): Promise<CallResource> {
         const data: CreateCallPayload = {
@@ -20,7 +21,33 @@ export class CallResourceManager {
             record: params?.record ?? true
         };
 
-        const response = this.http.post<CallResource, CreateCallPayload>(`${this.basePath}/initiate`, data);
-        return response;
+        return this.http.post<CallResource, CreateCallPayload>(`${this.basePath}/initiate`, data);
+    }
+
+    /**
+     * List all voice calls.
+     * @param filters - Optional filters and cursor, which includes state, from_number, to_number, created_after, created_before, limit, cursor_after and cursor_before.
+     * @returns A list of voice calls.
+     */
+    public async list(filters?: VoiceCallFilters): Promise<CursorResponse<VoiceCallResponse>> {
+        return this.http.get<CursorResponse<VoiceCallResponse>, VoiceCallFilters>(this.basePath, filters);
+    }
+    
+    /**
+     * Fetch a voice call.
+     * @param callId - The call ID to fetch
+     * @returns Details of the voice call.
+     */
+    public async retrieve(callId: string): Promise<VoiceCallResponse> {
+        return this.http.get<VoiceCallResponse>(`${this.basePath}/${callId}`);
+    }
+    
+    /**
+     * Fetch a voice call legs.
+     * @param callId - The call ID's legs to fetch
+     * @returns Details of the voice call legs.
+     */
+    public async getLegs(callId: string): Promise<CursorResponse<VoiceCallLegResponse>> {
+        return this.http.get<CursorResponse<VoiceCallLegResponse>>(`${this.basePath}/${callId}/legs`);
     }
 }

@@ -1,5 +1,5 @@
-import { StreamOP, StreamType } from "../types/call";
-import type { StreamHandler, StreamHandlerResult, StreamData } from "../types/call";
+import { StreamOP, StreamType } from "../types/voice";
+import type { StreamHandler, StreamHandlerResult, StreamData } from "../types/voice";
 import { NotImplementedException, BadParametersException } from "../exceptions";
 import { logger } from "../logger";
 import { WebSocket } from 'ws';
@@ -42,8 +42,8 @@ export class StreamConnector {
     /**
      * Bridges stream between callWs and remoteWs
      * 
-     * @param {WebSocket} callWs - Teler's websocket connection
-     * @returns {Promise<WebSocket>} The remote WebSocket instance
+     * @param callWs - Teler's websocket connection
+     * @returns The remote WebSocket instance
      */
     public async bridgeStream(callWs: WebSocket): Promise<WebSocket> {
 

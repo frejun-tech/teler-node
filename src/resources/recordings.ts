@@ -10,7 +10,7 @@ export class RecordingResourceManager {
     
     /**
      * Fetch recording.
-     * @param recordingId, expiresIn - The recording to fetch and signedURL expires in duration.
+     * @param params - The recording parameters including recording_id and optional expires_in duration.
      * @returns Redirect to the recording.
      */
     public async retrieve(params: RecordingParams): Promise<Readable> {

@@ -1,6 +1,6 @@
-import { VoiceAppListResponse } from "./app";
+import { VoiceAppListResponse } from "./voice";
 import { CursorFilters, CursorResponse } from "./common";
-import { SipTrunkListResponse } from "./trunk";
+import { SipTrunkListResponse } from "./sip";
 
 /**
  * Core Types
@@ -25,7 +25,7 @@ export interface VNFilters extends CursorFilters {
   location?: string[];
 }
 
-export interface VNDetails {
+export interface VNResponse {
   id: string;
   account_id: string;
   name: string;
@@ -33,10 +33,6 @@ export interface VNDetails {
   location: LocationResponse;
   voice_app?: VoiceAppListResponse;
   sip_trunk?: SipTrunkListResponse;
-}
-
-export interface VNResponse extends CursorResponse {
-  data: VNDetails[];
 }
 
 export interface UpdateVNPayload {

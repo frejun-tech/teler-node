@@ -1,4 +1,4 @@
-import { CursorFilters, CursorResponse, type WebhookApiVersion } from "./common";
+import { CallDirection, CursorFilters, CursorResponse, type WebhookApiVersion } from "./common";
 import { Status } from "./core";
 
 /**
@@ -62,7 +62,7 @@ export interface UpdateTrunkPayload {
 }
 
 
-export interface SipTrunkDetails {
+export interface SipTrunkResponse {
   id: string;
   account_id: string;
   cps_limit: number;
@@ -84,11 +84,6 @@ export interface SipTrunkDetails {
 }
 
 
-export interface SipTrunkResponse extends CursorResponse {
-  data: SipTrunkDetails[];
-}
-
-
 export interface TrunkFilters extends CursorFilters {
   search?: string;
   status?: Status[];
@@ -98,4 +93,37 @@ export interface TrunkFilters extends CursorFilters {
 export interface SipTrunkListResponse {
   id: string;
   name: string;
+}
+
+
+/**
+ * 
+ * SIP Call Types
+ */
+
+
+export interface SipCallFilters extends CursorFilters { 
+  trunk_id?: string;
+  from_number?: string;
+  to_number?: string;
+  created_after?: string;
+  created_before?: string;
+}
+
+
+export interface SipCallResponse {
+  id: string;
+  account_id: string;
+  sip_trunk_id: string;
+  state: string;
+  direction: CallDirection;
+  from_number: string;
+  to_number: string;
+  created_at: string;
+  answered_at: string | null;
+  ended_at: string | null;
+  duration_seconds: number;
+  reason: string | null;
+  ended_by: string | null;
+  recordings: string[];
 }
