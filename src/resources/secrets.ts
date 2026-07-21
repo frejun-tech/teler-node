@@ -1,6 +1,6 @@
-import { CreateSecretPayload, UpdateSecretPayload, SecretFilters, SecretResponse } from "../types/secrets";
+import type { CreateSecretPayload, UpdateSecretPayload, SecretFilters, SecretResponse } from "../types/secrets";
 import type { CursorResponse, DefaultResponse } from "../types/common";
-import { HttpResourceManager } from "./http";
+import type { HttpResourceManager } from "./http";
 
 
 export class SecretResourceManager {

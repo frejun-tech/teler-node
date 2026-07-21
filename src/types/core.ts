@@ -1,6 +1,6 @@
-import { VoiceAppListResponse } from "./voice";
-import { CursorFilters, CursorResponse } from "./common";
-import { SipTrunkListResponse } from "./sip";
+import type { VoiceAppListResponse } from "./voice";
+import type { CursorFilters } from "./common";
+import type { SipTrunkListResponse } from "./sip";
 
 /**
  * Core Types

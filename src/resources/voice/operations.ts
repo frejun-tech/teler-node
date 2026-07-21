@@ -1,6 +1,5 @@
-import { TransferPayload, TransferResponse } from "../../types/voice";
-import { HttpResourceManager } from "../http";
-import { NotImplementedException } from "../../exceptions";
+import type { TransferPayload, TransferResponse } from "../../types/voice";
+import type { HttpResourceManager } from "../http";
 import { resolveIdempotencyKey } from "../../lib/idempotency";
 
 

@@ -1,21 +1,9 @@
-import { CursorFilters, CursorResponse } from "./common";
+import type { CursorFilters } from "./common";
 
 /**
  * Event types
  */
 
-
-// export enum CallWebhookEvents  {
-//   CALL_INITIATED = 'call.initated',
-//   CALL_ANSWERED = 'call.answered',
-//   CALL_COMPLETED = 'call.completed',
-//   CALL_FAILED = 'call.failed'
-// }
-
-// export enum StreamWebhookEvents {
-//   STREAM_INITATED = 'stream.initiated',
-//   STREAM_COMPLETED = 'stream.completed'
-// }
 
 export enum DeliveryStatus {
   PENDING = "pending", 

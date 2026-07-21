@@ -1,6 +1,6 @@
-import { RecordingParams } from "../types/core";
-import { HttpResourceManager } from "./http";
-import { Readable } from "node:stream";
+import type { RecordingParams } from "../types/core";
+import type { HttpResourceManager } from "./http";
+import type { Readable } from "node:stream";
 
 
 export class RecordingResourceManager {

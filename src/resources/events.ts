@@ -1,6 +1,6 @@
-import { EventResponse, EventFilters, EventRedeliverStatus } from "../types/events";
-import { HttpResourceManager } from "./http";
-import { CursorResponse } from "../types/common";
+import type { EventResponse, EventFilters, EventRedeliverStatus } from "../types/events";
+import type { HttpResourceManager } from "./http";
+import type { CursorResponse } from "../types/common";
 
 
 export class EventResourceManager {

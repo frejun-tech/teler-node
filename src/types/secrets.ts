@@ -1,12 +1,13 @@
+import type { CursorFilters } from "./common";
+import type { SipTrunkListResponse } from "./sip";
+import type { VoiceAppListResponse } from "./voice";
+
 /**
  * 
  * Secret Types
  *
  */
 
-import { CursorFilters } from "./common";
-import { SipTrunkListResponse } from "./sip";
-import { VoiceAppListResponse } from "./voice";
 
 export interface CreateSecretPayload {
   name: string;

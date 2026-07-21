@@ -1,5 +1,5 @@
-import { URL } from "node:url";
-import { CallDirection, CursorFilters, type WebhookApiVersion } from "./common";
+import type { URL } from "node:url";
+import type { CallDirection, CursorFilters, WebhookApiVersion } from "./common";
 import { Status } from "./core";
 
 

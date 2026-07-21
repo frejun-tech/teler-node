@@ -1,6 +1,6 @@
-import { CursorResponse } from "../../types/common";
+import type { CursorResponse } from "../../types/common";
 import type { CreateCallPayload, CallResource, CreateCallParams, VoiceCallFilters, VoiceCallResponse, VoiceCallLegResponse } from "../../types/voice";
-import { HttpResourceManager } from "../http";
+import type { HttpResourceManager } from "../http";
 
 export class CallResourceManager {
     private readonly basePath = '/voice/calls';

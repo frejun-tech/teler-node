@@ -1,7 +1,7 @@
 import type { CursorResponse, DefaultResponse } from "../../types/common";
-import { CreateTrunkPayload, UpdateTrunkPayload, TrunkFilters, SipTrunkResponse } from "../../types/sip";
-import { HttpResourceManager } from "../http";
-import { VNResponse, VNFilters } from "../../types/core";
+import type { CreateTrunkPayload, UpdateTrunkPayload, TrunkFilters, SipTrunkResponse } from "../../types/sip";
+import type { HttpResourceManager } from "../http";
+import type { VNResponse, VNFilters } from "../../types/core";
 
 export class TrunkResourceManager {
     private readonly basePath = '/sip/trunks';

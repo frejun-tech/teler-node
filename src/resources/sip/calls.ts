@@ -1,6 +1,6 @@
-import { SipCallResponse, SipCallFilters } from "../../types/sip";
-import { HttpResourceManager } from "../http";
-import { CursorResponse } from "../../types/common";
+import type { SipCallResponse, SipCallFilters } from "../../types/sip";
+import type { HttpResourceManager } from "../http";
+import type { CursorResponse } from "../../types/common";
 
 export class SipCallResourceManager {
     private readonly basePath = '/sip/calls';

@@ -1,5 +1,5 @@
-import { AssignVNPayload, VNFilters, UnassignVNPayload, UpdateVNPayload, VNResponse } from "../types/core";
-import { HttpResourceManager } from "./http";
+import type { AssignVNPayload, VNFilters, UnassignVNPayload, UpdateVNPayload, VNResponse } from "../types/core";
+import type { HttpResourceManager } from "./http";
 import type { CursorResponse, DefaultResponse } from "../types/common";
 
 

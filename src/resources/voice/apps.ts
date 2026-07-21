@@ -1,7 +1,7 @@
-import { VNResponse, VNFilters } from "../../types/core";
-import { CreateAppPayload, AppFilters, UpdateAppPayload, VoiceAppResponse } from "../../types/voice";
+import type { VNResponse, VNFilters } from "../../types/core";
+import type { CreateAppPayload, AppFilters, UpdateAppPayload, VoiceAppResponse } from "../../types/voice";
 import type { CursorResponse, DefaultResponse } from "../../types/common";
-import { HttpResourceManager } from "../http";
+import type { HttpResourceManager } from "../http";
 
 
 export class AppResourceManager {

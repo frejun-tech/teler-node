@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import type { HttpMethod } from "../types/common";
 import { TelerException, BadParametersException, UnauthorizedException, ForbiddenException, UnprocessableRequestException, InternalServerErrorException, NotImplementedException, NotFoundException, RateLimitException } from "../exceptions";
 
@@ -66,23 +66,24 @@ export class HttpResourceManager {
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 const status = err.response?.status;
-                const message = err.response?.data?.message || err?.message;
+                const message = err.response?.data?.message ?? err?.message;
+                const details = err.response?.data?.errors ?? '';
 
                 switch (status) {
-                    case 400: throw new BadParametersException(message);
-                    case 401: throw new UnauthorizedException(message);
-                    case 403: throw new ForbiddenException(message);
-                    case 404: throw new NotFoundException(message);
-                    case 422: throw new UnprocessableRequestException(message);
-                    case 429: throw new RateLimitException(message);
+                    case 400: throw new BadParametersException(message, details);
+                    case 401: throw new UnauthorizedException(message, details);
+                    case 403: throw new ForbiddenException(message, details);
+                    case 404: throw new NotFoundException(message, details);
+                    case 422: throw new UnprocessableRequestException(message, details);
+                    case 429: throw new RateLimitException(message, details);
                     default:
                         if (status === 501) {
-                            throw new NotImplementedException(message, status);
+                            throw new NotImplementedException(message, details, status);
                         }
                         else if (status >= 500) {
-                            throw new InternalServerErrorException(message, status);
+                            throw new InternalServerErrorException(message, details, status);
                         }
-                        throw new TelerException(`API Error: ${message}`, status);
+                        throw new TelerException(`API Error: ${message}`, details, status);
                 }
             }
             throw new TelerException("An unknown error occurred while calling the API.");

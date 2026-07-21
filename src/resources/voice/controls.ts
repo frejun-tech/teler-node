@@ -1,5 +1,5 @@
-import { HangupPayload, ControlResponse, MutePayload, DTMFPayload, PlayPayload } from "../../types/voice";
-import { HttpResourceManager } from "../http";
+import type { HangupPayload, ControlResponse, MutePayload, DTMFPayload, PlayPayload } from "../../types/voice";
+import type { HttpResourceManager } from "../http";
 import { resolveIdempotencyKey } from "../../lib/idempotency";
 
 
