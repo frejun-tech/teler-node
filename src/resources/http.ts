@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import type { HttpMethod } from "../types/common";
-import { TelerException, BadParametersException, UnauthorizedException, ForbiddenException, UnprocessableRequestException, InternalServerErrorException, NotImplementedException, NotFoundException, RateLimitException } from "../exceptions";
+import { TelerException, BadParametersException, UnauthorizedException, ForbiddenException, UnprocessableRequestException, InternalServerErrorException, NotImplementedException, NotFoundException, RateLimitException, ConflictException } from "../exceptions";
 
 export class HttpResourceManager {
     private readonly httpClient: AxiosInstance;
@@ -68,13 +68,14 @@ export class HttpResourceManager {
             if (axios.isAxiosError(err)) {
                 const status = err.response?.status;
                 const message = err.response?.data?.message ?? err?.message;
-                const details = err.response?.data?.errors ?? '';
+                const details = err.response?.data?.errors ?? err?.message;
 
                 switch (status) {
                     case 400: throw new BadParametersException(message, details);
                     case 401: throw new UnauthorizedException(message, details);
                     case 403: throw new ForbiddenException(message, details);
                     case 404: throw new NotFoundException(message, details);
+                    case 409: throw new ConflictException(message, details);
                     case 422: throw new UnprocessableRequestException(message, details);
                     case 429: throw new RateLimitException(message, details);
                     default:
