@@ -56,6 +56,7 @@ export class HttpResourceManager {
     * @param path - API endpoint path.
     * @param data - The request payload body of type P.
     * @param params - URL query parameters.
+    * @param headers - Additional HTTP headers to include with the request.
     * @returns The response data of type T.
     */
 
