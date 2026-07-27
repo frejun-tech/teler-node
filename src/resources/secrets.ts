@@ -1,4 +1,4 @@
-import type { CreateSecretPayload, UpdateSecretPayload, SecretFilters, SecretResponse } from "../types/secrets";
+import type { CreateSecretPayload, UpdateSecretPayload, SecretFilters, SecretResponse, SecretListResponse } from "../types/secrets";
 import type { CursorResponse, DefaultResponse } from "../types/common";
 import type { HttpResourceManager } from "./http";
 
@@ -21,8 +21,17 @@ export class SecretResourceManager {
      * @param filters - Optional filters and cursor, which includes search, status, limit, cursor_after and cursor_before.
      * @returns A list of secrets.
      */
-    public async list(filters?: SecretFilters): Promise<CursorResponse<SecretResponse>> {
-        return this.http.get<CursorResponse<SecretResponse>, SecretFilters>(this.basePath, filters);
+    public async list(filters?: SecretFilters): Promise<CursorResponse<SecretListResponse>> {
+        return this.http.get<CursorResponse<SecretListResponse>, SecretFilters>(this.basePath, filters);
+    }
+
+    /**
+     * Fetch a secrets details.
+     * @param filters - Optional filters and cursor, which includes search, status, limit, cursor_after and cursor_before.
+     * @returns A list of secrets.
+     */
+    public async retrieve(secretId: string): Promise<SecretResponse> {
+        return this.http.get<SecretResponse>(`${this.basePath}/${secretId}`);
     }
 
     /**

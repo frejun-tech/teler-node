@@ -32,3 +32,8 @@ export interface SecretResponse {
   voice_apps: VoiceAppListResponse[];
   sip_trunks: SipTrunkListResponse[];
 }
+
+export interface SecretListResponse {
+  id: string;
+  name: string;
+}
