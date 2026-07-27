@@ -3,7 +3,7 @@ import { VoiceResourceManager } from "./resources/voice/voice";
 import { SipResourceManager } from "./resources/sip/sip";
 import { HttpResourceManager } from "./resources/http";
 import { setLogLevel } from "./logger";
-import { VNResourceManager } from "./resources/vns";
+import { VirtualNumberResourceManager } from "./resources/vns";
 import { EventResourceManager } from "./resources/events";
 import { RecordingResourceManager } from "./resources/recordings";
 import { SecretResourceManager } from "./resources/secrets";
@@ -21,13 +21,13 @@ export class Client {
     private readonly apiKey:    string;
     private readonly baseURL:   string = 'https://sandbox.frejun.ai/api/v1';
     
-    private readonly    http:       HttpResourceManager;
-    public readonly     voice:      VoiceResourceManager;
-    public readonly     sip:        SipResourceManager;
-    public readonly     vns:        VNResourceManager;
-    public readonly     events:     EventResourceManager;
-    public readonly     recordings: RecordingResourceManager;
-    public readonly     secrets:    SecretResourceManager;
+    private readonly    http:                   HttpResourceManager;
+    public readonly     voice:                  VoiceResourceManager;
+    public readonly     sip:                    SipResourceManager;
+    public readonly     virtualNumbers:         VirtualNumberResourceManager;
+    public readonly     events:                 EventResourceManager;
+    public readonly     recordings:             RecordingResourceManager;
+    public readonly     secrets:                SecretResourceManager;
 
     /**
      * Initializes the Teler Client.
@@ -43,12 +43,12 @@ export class Client {
             setLogLevel(options.logLevel);
         }
 
-        this.http   = new HttpResourceManager(this.apiKey, this.baseURL);
-        this.voice  = new VoiceResourceManager(this.http)
-        this.sip    = new SipResourceManager(this.http);
-        this.vns     = new VNResourceManager(this.http);
-        this.events  = new EventResourceManager(this.http);
-        this.recordings = new RecordingResourceManager(this.http);
-        this.secrets = new SecretResourceManager(this.http);
+        this.http               = new HttpResourceManager(this.apiKey, this.baseURL);
+        this.voice              = new VoiceResourceManager(this.http)
+        this.sip                = new SipResourceManager(this.http);
+        this.virtualNumbers     = new VirtualNumberResourceManager(this.http);
+        this.events             = new EventResourceManager(this.http);
+        this.recordings         = new RecordingResourceManager(this.http);
+        this.secrets            = new SecretResourceManager(this.http);
     }
 }
