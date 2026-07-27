@@ -1,4 +1,4 @@
-import type { EventResponse, EventFilters, EventRedeliverStatus } from "../types/events";
+import type { EventResponse, EventFilters, EventRedeliverResponse } from "../types/events";
 import type { HttpResourceManager } from "./http";
 import type { CursorResponse } from "../types/common";
 
@@ -30,7 +30,7 @@ export class EventResourceManager {
      * @param eventId - The webhook event ID to redeliver
      * @returns Details of the redelivery.
      */
-    public async redeliver(eventId: string): Promise<EventRedeliverStatus> {
-        return this.http.post<EventRedeliverStatus>(`${this.basePath}/${eventId}/redeliver`);
+    public async redeliver(eventId: string): Promise<EventRedeliverResponse> {
+        return this.http.post<EventRedeliverResponse>(`${this.basePath}/${eventId}/redeliver`);
     }
 }

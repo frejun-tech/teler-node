@@ -1,5 +1,5 @@
 import type { VNResponse, VNFilters } from "../../types/core";
-import type { CreateAppPayload, AppFilters, UpdateAppPayload, VoiceAppResponse } from "../../types/voice";
+import type { CreateVoiceAppPayload, VoiceAppFilters, UpdateVoiceAppPayload, VoiceAppResponse } from "../../types/voice";
 import type { CursorResponse, DefaultResponse } from "../../types/common";
 import type { HttpResourceManager } from "../http";
 
@@ -10,11 +10,11 @@ export class AppResourceManager {
 
     /**
      * Create a new voice app.
-     * @param payload - CreateAppPayload.
+     * @param payload - CreateVoiceAppPayload.
      * @returns Details of the voice app.
      */
-    public async create(payload: CreateAppPayload): Promise<VoiceAppResponse> {
-        return this.http.post<VoiceAppResponse, CreateAppPayload>(this.basePath, payload);
+    public async create(payload: CreateVoiceAppPayload): Promise<VoiceAppResponse> {
+        return this.http.post<VoiceAppResponse, CreateVoiceAppPayload>(this.basePath, payload);
     }
 
     /**
@@ -22,8 +22,8 @@ export class AppResourceManager {
      * @param filters - Optional filters and cursor, which includes search, status, limit, cursor_after and cursor_before.
      * @returns A list of voice apps.
      */
-    public async list(filters?: AppFilters): Promise<CursorResponse<VoiceAppResponse>> {
-        return this.http.get<CursorResponse<VoiceAppResponse>, AppFilters>(this.basePath, filters);
+    public async list(filters?: VoiceAppFilters): Promise<CursorResponse<VoiceAppResponse>> {
+        return this.http.get<CursorResponse<VoiceAppResponse>, VoiceAppFilters>(this.basePath, filters);
     }
 
     /**
@@ -38,11 +38,11 @@ export class AppResourceManager {
     /**
      * Update a voice app.
      * @param voiceAppId - voice app ID to update
-     * @param payload - UpdateAppPayload with fields to update.
+     * @param payload - UpdateVoiceAppPayload with fields to update.
      * @returns Details of the updated voice app.
      */
-    public async update(voiceAppId: string, payload: UpdateAppPayload): Promise<VoiceAppResponse> {
-        return this.http.patch<VoiceAppResponse, UpdateAppPayload>(`${this.basePath}/${voiceAppId}`, payload);
+    public async update(voiceAppId: string, payload: UpdateVoiceAppPayload): Promise<VoiceAppResponse> {
+        return this.http.patch<VoiceAppResponse, UpdateVoiceAppPayload>(`${this.basePath}/${voiceAppId}`, payload);
     }
 
     /**

@@ -8,7 +8,7 @@ export class OperationResourceManager {
     constructor(private readonly http: HttpResourceManager) {}
 
     /**
-     * Initiate call transfer on an active call
+     * Transfer an in-progress call to a new destination — a phone number
      *
      * @param callId         - The active call ID
      * @param payload        - The transfer payload

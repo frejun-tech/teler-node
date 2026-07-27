@@ -4,7 +4,7 @@ import type { CursorResponse, DefaultResponse } from "../types/common";
 
 
 export class VNResourceManager {
-    private readonly basePath = '/vns';
+    private readonly basePath = '/virtual-numbers';
     constructor(private readonly http: HttpResourceManager) {}
 
     /**
@@ -32,7 +32,7 @@ export class VNResourceManager {
      * @returns success/ failure.
      */
     public async assignVn(payload: AssignVNPayload): Promise<DefaultResponse> {
-        return this.http.post<DefaultResponse, AssignVNPayload>(`${this.basePath}/assign-vns`, payload);
+        return this.http.post<DefaultResponse, AssignVNPayload>(`${this.basePath}/assign`, payload);
     }
 
     /**
@@ -41,6 +41,6 @@ export class VNResourceManager {
      * @returns success/ failure.
      */
     public async unassignVn(payload: UnassignVNPayload): Promise<DefaultResponse> {
-        return this.http.patch<DefaultResponse, UnassignVNPayload>(`${this.basePath}/unassign-vns`, payload);
+        return this.http.post<DefaultResponse, UnassignVNPayload>(`${this.basePath}/unassign`, payload);
     }
 }

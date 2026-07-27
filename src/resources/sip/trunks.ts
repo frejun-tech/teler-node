@@ -1,5 +1,5 @@
 import type { CursorResponse, DefaultResponse } from "../../types/common";
-import type { CreateTrunkPayload, UpdateTrunkPayload, TrunkFilters, SipTrunkResponse } from "../../types/sip";
+import type { CreateSipTrunkPayload, UpdateSipTrunkPayload, SipTrunkFilters, SipTrunkResponse } from "../../types/sip";
 import type { HttpResourceManager } from "../http";
 import type { VNResponse, VNFilters } from "../../types/core";
 
@@ -9,11 +9,11 @@ export class TrunkResourceManager {
 
     /**
      * Create a new sip trunk
-     * @param payload - CreateTrunkPayload.
+     * @param payload - CreateSipTrunkPayload.
      * @returns Details of the sip trunk.
      */
-    public async create(payload: CreateTrunkPayload): Promise<SipTrunkResponse> {
-        return this.http.post<SipTrunkResponse, CreateTrunkPayload>(`${this.basePath}`, payload);
+    public async create(payload: CreateSipTrunkPayload): Promise<SipTrunkResponse> {
+        return this.http.post<SipTrunkResponse, CreateSipTrunkPayload>(`${this.basePath}`, payload);
     }
 
     /**
@@ -30,18 +30,18 @@ export class TrunkResourceManager {
      * @param filters - Optional filters and cursor, which includes search, status, limit, cursor_after and cursor_before.
      * @returns A list of sip trunks.
      */
-    public async list(filters?: TrunkFilters): Promise<CursorResponse<SipTrunkResponse>> {
-        return this.http.get<CursorResponse<SipTrunkResponse>, TrunkFilters>(this.basePath, filters);
+    public async list(filters?: SipTrunkFilters): Promise<CursorResponse<SipTrunkResponse>> {
+        return this.http.get<CursorResponse<SipTrunkResponse>, SipTrunkFilters>(this.basePath, filters);
     }
 
     /**
      * Update a sip trunk.
-     * @param sipTrunkId - SIP trunk ID to update.
-     * @param payload - UpdateTrunkPayload.
+     * @param sipTrunkId - Sip trunk ID to update.
+     * @param payload - UpdateSipTrunkPayload.
      * @returns Details of the updated trunk.
      */
-    public async update(sipTrunkId: string, payload: UpdateTrunkPayload): Promise<SipTrunkResponse> {
-        return this.http.patch<SipTrunkResponse, UpdateTrunkPayload>(`${this.basePath}/${sipTrunkId}`, payload);
+    public async update(sipTrunkId: string, payload: UpdateSipTrunkPayload): Promise<SipTrunkResponse> {
+        return this.http.patch<SipTrunkResponse, UpdateSipTrunkPayload>(`${this.basePath}/${sipTrunkId}`, payload);
     }
 
     /**

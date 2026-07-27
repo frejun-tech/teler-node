@@ -25,7 +25,7 @@ export type CallDetails = {
 }
 
 
-export type CallResource = {
+export type CallResponse = {
   message: string;
   data: CallDetails,
 }
@@ -73,12 +73,13 @@ interface VoiceAppBase {
   fallback_url?: string | null;
 }
 
-export interface CreateAppPayload extends VoiceAppBase {
+export interface CreateVoiceAppPayload extends VoiceAppBase {
   vn_ids?: string[];
   secret_id?: string | null;
+  webhook_api_version?: WebhookApiVersion;
 }
 
-export interface UpdateAppPayload {
+export interface UpdateVoiceAppPayload {
   name?: string;
   status?: Status;
   flow_url?: string;
@@ -86,7 +87,7 @@ export interface UpdateAppPayload {
   fallback_url?: string | null;
   channel_limit?: number | null;
   secret_id?: string | null;
-  webhook_api_version: WebhookApiVersion;
+  webhook_api_version?: WebhookApiVersion;
 }
 
 export interface VoiceAppResponse extends VoiceAppBase {
@@ -100,7 +101,7 @@ export interface VoiceAppResponse extends VoiceAppBase {
   account_id: string;
 }
 
-export interface AppFilters extends CursorFilters {
+export interface VoiceAppFilters extends CursorFilters {
   search?: string;
   status?: Status[];
 }
@@ -166,14 +167,14 @@ export interface VoiceCallLegResponse {
 
 /**
  * 
- * Call Control Types
+ * Call Mutation Types
  */
 
-export interface ControlBase {
+export interface MutationBase {
   leg_id?: string;
 }
 
-export interface HangupPayload extends ControlBase {
+export interface HangupPayload extends MutationBase {
   reason?: string;
 }
 
@@ -182,18 +183,18 @@ export interface MutePayload {
   on: boolean;
 }
 
-export interface DTMFPayload extends ControlBase {
+export interface DTMFPayload extends MutationBase {
   digits: string;
   duration_ms?: number;
 }
 
-export interface PlayPayload extends ControlBase {
+export interface PlayPayload extends MutationBase {
   media_url: URL;
   loop?: number;
   on_dtmf?: "stop" | "ignore";
 }
 
-export interface ControlResponse {
+export interface MutationResponse {
   request_id: string;
   playback_id: string;
 }

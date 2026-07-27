@@ -1,5 +1,5 @@
 import type { CursorResponse } from "../../types/common";
-import type { CreateCallPayload, CallResource, CreateCallParams, VoiceCallFilters, VoiceCallResponse, VoiceCallLegResponse } from "../../types/voice";
+import type { CreateCallPayload, CallResponse, CreateCallParams, VoiceCallFilters, VoiceCallResponse, VoiceCallLegResponse } from "../../types/voice";
 import type { HttpResourceManager } from "../http";
 
 export class CallResourceManager {
@@ -12,7 +12,7 @@ export class CallResourceManager {
      * @param params - The parameters to create a call
      * @returns Response of the call
      */
-    public async create(params: CreateCallParams): Promise<CallResource> {
+    public async create(params: CreateCallParams): Promise<CallResponse> {
         const data: CreateCallPayload = {
             from_number: params.fromNumber,
             to_number: params.toNumber,
@@ -21,7 +21,7 @@ export class CallResourceManager {
             record: params?.record ?? true
         };
 
-        return this.http.post<CallResource, CreateCallPayload>(`${this.basePath}/initiate`, data);
+        return this.http.post<CallResponse, CreateCallPayload>(`${this.basePath}/initiate`, data);
     }
 
     /**

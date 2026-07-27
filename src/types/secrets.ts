@@ -29,6 +29,6 @@ export interface SecretResponse {
   rotated_at?: string | null;
   created_at: string;
   needs_rotation: boolean;
-  call_apps: VoiceAppListResponse[];
+  voice_apps: VoiceAppListResponse[];
   sip_trunks: SipTrunkListResponse[];
 }

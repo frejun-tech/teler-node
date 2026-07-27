@@ -16,7 +16,6 @@ export interface EventFilters extends CursorFilters {
   type?: string;
   occurred_after?: string;
   delivery_status?: DeliveryStatus;
-  limit?: number;
 }
 
 export interface EventResponse {
@@ -38,7 +37,7 @@ export interface EventResponse {
   created_at: string;
 }
 
-export interface EventRedeliverStatus {
+export interface EventRedeliverResponse {
   event_id: string;
   redelivered_at: string;
 }

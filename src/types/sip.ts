@@ -31,22 +31,23 @@ export type InboundRoute = {
 }
 
 
-export interface CreateTrunkPayload {
+export interface CreateSipTrunkPayload {
   name: string;
-  domain_name: string;
-  channel_limit?: number;
-  recording?: boolean;
   secure?: boolean;
+  secret_id?: string;
+  domain_name: string;
+  recording?: boolean;
   webhook_url?: string;
+  channel_limit?: number;
   authentication_type: AuthenticationType;
   auth_credential?: SipAuthCredentialInput;
   auth_addresses?: SipAuthAddressInput[];
   inbound_route: InboundRoute;
-  secret_id?: string;
+  webhook_api_version?: WebhookApiVersion;
 }
 
 
-export interface UpdateTrunkPayload {
+export interface UpdateSipTrunkPayload {
   name?: string;
   channel_limit?: number;
   recording?: boolean;
@@ -58,7 +59,7 @@ export interface UpdateTrunkPayload {
   auth_addresses?: SipAuthAddressInput[];
   inbound_route?: InboundRoute;
   secret_id?: string;
-  webhook_api_version: WebhookApiVersion;
+  webhook_api_version?: WebhookApiVersion;
 }
 
 
@@ -69,12 +70,12 @@ export interface SipTrunkResponse {
   name: string;
   domain_name: string;
   recording_enabled: boolean;
-  channel_limit: number;
+  channel_limit?: number | null;
   secure: boolean;
   is_active: boolean;
   auth_ip_addresses?: string[];
   auth_credential_usernames?: string[];
-  sip_route: InboundRoute;
+  sip_route?: InboundRoute | null;
   webhook_url?: string;
   created_at?: string;
   updated_at?: string;
@@ -84,7 +85,7 @@ export interface SipTrunkResponse {
 }
 
 
-export interface TrunkFilters extends CursorFilters {
+export interface SipTrunkFilters extends CursorFilters {
   search?: string;
   status?: Status[];
 }
@@ -98,7 +99,7 @@ export interface SipTrunkListResponse {
 
 /**
  * 
- * SIP Call Types
+ * Sip Call Types
  */
 
 
