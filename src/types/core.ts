@@ -20,12 +20,12 @@ type LocationResponse = {
   country_name?: string | null;
 }
 
-export interface VNFilters extends CursorFilters {
+export interface VirtualNumberFilters extends CursorFilters {
   search?: string;
   location?: string[];
 }
 
-export interface VNResponse {
+export interface VirtualNumberResponse {
   id: string;
   account_id: string;
   name: string;
@@ -35,18 +35,18 @@ export interface VNResponse {
   sip_trunk?: SipTrunkListResponse;
 }
 
-export interface UpdateVNPayload {
+export interface UpdateVirtualNumberPayload {
   name: string;
 }
 
-export interface AssignVNPayload {
+export interface AssignVirtualNumberPayload {
   vn_ids?: string[];
   apply_to_all?: boolean;
   voice_app_id?: string;
   sip_trunk_id?: string;
 }
 
-export interface UnassignVNPayload {
+export interface UnassignVirtualNumberPayload {
   vn_ids?: string[];
   apply_to_all?: boolean;
 }

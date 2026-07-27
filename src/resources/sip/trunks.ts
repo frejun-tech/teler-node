@@ -1,7 +1,7 @@
 import type { CursorResponse, DefaultResponse } from "../../types/common";
 import type { CreateSipTrunkPayload, UpdateSipTrunkPayload, SipTrunkFilters, SipTrunkResponse } from "../../types/sip";
 import type { HttpResourceManager } from "../http";
-import type { VNResponse, VNFilters } from "../../types/core";
+import type { VirtualNumberResponse , VirtualNumberFilters } from "../../types/core";
 
 export class TrunkResourceManager {
     private readonly basePath = '/sip/trunks';
@@ -58,7 +58,7 @@ export class TrunkResourceManager {
      * @param sipTrunkId - sipTrunkID to fetch vns.
      * @returns Details of the vns assigned to the sip trunk.
      */
-    public async getVns(sipTrunkId: string, params?: VNFilters): Promise<CursorResponse<VNResponse>> {
-        return this.http.get<CursorResponse<VNResponse>, VNFilters>(`${this.basePath}/${sipTrunkId}/vns`, params);
+    public async listVirtualNumbers(sipTrunkId: string, params?: VirtualNumberFilters): Promise<CursorResponse<VirtualNumberResponse>> {
+        return this.http.get<CursorResponse<VirtualNumberResponse>, VirtualNumberFilters>(`${this.basePath}/${sipTrunkId}/virtual-numbers`, params);
     }
 }

@@ -1,4 +1,4 @@
-import type { VNResponse, VNFilters } from "../../types/core";
+import type { VirtualNumberResponse , VirtualNumberFilters } from "../../types/core";
 import type { CreateVoiceAppPayload, VoiceAppFilters, UpdateVoiceAppPayload, VoiceAppResponse } from "../../types/voice";
 import type { CursorResponse, DefaultResponse } from "../../types/common";
 import type { HttpResourceManager } from "../http";
@@ -59,7 +59,7 @@ export class AppResourceManager {
      * @param voiceAppId - voice app ID to fetch vns.
      * @returns Details of the vns assigned to the voice app.
      */
-    public async getVns(voiceAppId: string, params?: VNFilters): Promise<CursorResponse<VNResponse>> {
-        return this.http.get<CursorResponse<VNResponse>, VNFilters>(`${this.basePath}/${voiceAppId}/vns`, params);
+    public async listVirtualNumbers(voiceAppId: string, params?: VirtualNumberFilters): Promise<CursorResponse<VirtualNumberResponse>> {
+        return this.http.get<CursorResponse<VirtualNumberResponse>, VirtualNumberFilters>(`${this.basePath}/${voiceAppId}/virtual-numbers`, params);
     }
 }
