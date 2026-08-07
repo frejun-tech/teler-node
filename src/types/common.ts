@@ -26,3 +26,20 @@ export interface CursorResponse<T> {
   previous_cursor: string | null;
   has_more: boolean;
 }
+
+export type RingbackMode = 'suppress' | 'passthrough';
+
+export type RecordingType = "stereo" | "mono" | "per_leg";
+
+export type DialNestedAction = PlayAction | HangupAction;
+
+interface PlayAction {
+  action: "play";
+  media_url: string;
+  loop?: boolean;
+}
+
+interface HangupAction {
+  action: "hangup";
+}
+

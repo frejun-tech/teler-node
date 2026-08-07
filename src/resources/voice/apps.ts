@@ -1,4 +1,4 @@
-import type { VirtualNumberResponse , VirtualNumberFilters } from "../../types/core";
+import type { VirtualNumberResponse, VirtualNumberFilters } from "../../types/core";
 import type { CreateVoiceAppPayload, VoiceAppFilters, UpdateVoiceAppPayload, VoiceAppResponse } from "../../types/voice";
 import type { CursorResponse, DefaultResponse } from "../../types/common";
 import type { HttpResourceManager } from "../http";

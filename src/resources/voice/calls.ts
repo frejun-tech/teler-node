@@ -43,7 +43,7 @@ export class CallResourceManager {
     }
     
     /**
-     * Fetch a voice call legs.
+     * Fetch voice call legs.
      * @param callId - The call ID's legs to fetch
      * @returns Details of the voice call legs.
      */
