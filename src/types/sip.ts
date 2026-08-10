@@ -99,6 +99,54 @@ export interface SipTrunkListResponse {
 
 /**
  * 
+ * SIP IP Access Control Lists
+ */
+
+
+export interface IpAclEntryInput {
+  address: string;
+  description?: string | null;
+}
+
+export interface CreateIpAclPayload {
+  name: string;
+  addresses: IpAclEntryInput[];
+}
+
+export interface UpdateIpAclPayload {
+  name?: string | null;
+  addresses?: IpAclEntryInput[] | null;
+}
+
+export interface IpAclEntryResponse {
+  address: string;
+  description?: string | null;
+}
+
+export interface IpAclResponse {
+  id: string;
+  name: string;
+  addresses: IpAclEntryResponse[];
+  trunk_count: number;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface IpAclListResponse {
+  id: string;
+  name: string;
+  address_count: number;
+  trunk_count: number;
+  created_at?: string | null;
+}
+
+export interface IpAclFilters extends CursorFilters {
+  search?: string;
+}
+
+
+/**
+ * 
  * Sip Call Types
  */
 
