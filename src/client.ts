@@ -19,7 +19,7 @@ export interface ClientOptions {
  */
 export class Client {
     private readonly apiKey:    string;
-    private readonly baseURL:   string = 'https://sandbox.frejun.ai/api/v1';
+    private readonly baseURL:   string = 'https://api.frejun.ai/api/v1';
     
     private readonly    http:                   HttpResourceManager;
     public readonly     voice:                  VoiceResourceManager;

@@ -9,8 +9,12 @@
     "sourceMap": false,
     "outDir": "./dist",
     "baseUrl": "./",
-    "incremental": true
+    "incremental": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "@test/*": ["test/*"]
+    }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "test/api/secrets.test.ts"],
   "exclude": ["node_modules", "test", "lib", "**/*spec.ts"]
 }
