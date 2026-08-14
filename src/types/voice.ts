@@ -215,7 +215,7 @@ export interface DialTarget {
   custom_headers?: Record<string, string>;
 }
 
-export interface DialMusic {
+export interface TransferAction {
   action: "play" | "say" | "hangup";
   media_url?: string;
   text?: string;
@@ -231,9 +231,9 @@ export interface TransferPayload {
   timeout?: number;
   record?: boolean;
   ringback?: "suppress" | "passthrough";
-  dial_music?: DialMusic;
-  confirm_sound?: DialMusic;
-  on_failure?: DialMusic;
+  dial_music?: TransferAction;
+  confirm_sound?: TransferAction;
+  on_failure?: TransferAction;
 }
 
 export interface TransferResponse {

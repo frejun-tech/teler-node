@@ -166,12 +166,12 @@ export interface SipCallResponse {
   sip_trunk_id: string;
   state: string;
   direction: CallDirection;
-  from_number: string;
-  to_number: string;
+  from_number: string | null;
+  to_number: string | null;
   created_at: string;
   answered_at: string | null;
   ended_at: string | null;
-  duration_seconds: number;
+  duration_seconds: number | null;
   reason: string | null;
   ended_by: string | null;
   recordings: string[];
