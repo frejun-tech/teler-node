@@ -1,0 +1,10 @@
+{
+  "files": [
+    "dist",
+    "!dist/**/*.tsbuildinfo",
+    "!dist/tsconfig.test.tsbuildinfo",
+    "!dist/tsconfig.test.tsbuildinfo",
+    "README.md",
+    "LICENSE"
+  ]
+}

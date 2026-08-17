@@ -8,6 +8,7 @@
     "noEmit": true,
     "skipLibCheck": true,
     "baseUrl": "./",
+    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.test.tsbuildinfo",
     "paths": {
       "@/*": ["src/*"],
       "@test/*": ["test/*"]
