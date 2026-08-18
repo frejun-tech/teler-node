@@ -56,7 +56,10 @@ Initiates bidirectional WebSocket streaming of the call's audio.
 ```json
 {
     "action": "stream",
-    "url": "wss://your-domain.com/stream"
+    "ws_url": "wss://your-domain.com/stream",
+    "sample_rate": "8k",
+    "chunk_size": 400,
+    "record": true,
 }
 ```
 
@@ -67,7 +70,7 @@ Plays an audio file to the caller.
 ```json
 {
     "action": "play",
-    "url": "https://example.com/audio.mp3"
+    "media_url": "https://example.com/audio.mp3"
 }
 ```
 
@@ -98,16 +101,36 @@ It takes the following parameters:
 
 ### Stream Handlers
 
-A `StreamHandler` asynchronous function receives the incoming messages on a WebSocket, processes them, and returns a tuple (e.g., `[string, StreamOp]`) where `StreamOp` is an operation flag that decides the subsequent action the `StreamConnector` will take.
+A `StreamHandler` asynchronous function receives incoming messages over a WebSocket, processes them, and returns a tuple (for example, `[StreamData, StreamOp]`). The `StreamOp` value determines the action that the `StreamConnector` takes next.
 
-- **`callStreamHandler`**: Receives audio data from the caller and forwards it to an AI model.
-- **`remoteStreamHandler`**: Receives audio data from the remote endpoint (e.g., AI agent's response) and sent back to the caller.
+- **`callStreamHandler`**  
+  Receives audio data from the caller and forwards it to an AI model.
 
-`StreamOp` can be one of:
+- **`remoteStreamHandler`**  
+  Receives audio data from the remote endpoint (for example, an AI agent's response) and sends it back to the caller.
 
-- `StreamOp.RELAY` - Relays the message to the other stream. The message needs to be supplied as a string as the first item in the returned tuple.
-- `StreamOp.PASS` - Does not relay any message to the other stream. Any message in the returned tuple will be ignored.
-- `StreamOp.STOP` - Stops both streams, ends the call and exits gracefully. Any message in the returned tuple will be ignored.
+### `StreamOp`
+
+`StreamOp` can be one of the following:
+
+- **`StreamOp.RELAY`**  
+  Relays the message to the other stream. The first element of the returned tuple must contain the message to relay.
+
+- **`StreamOp.PASS`**  
+  Does not relay any message to the other stream. Any message included in the returned tuple is ignored.
+
+- **`StreamOp.STOP`**  
+  Stops both streams, ends the call, and exits gracefully. Any message included in the returned tuple is ignored.
+
+### `StreamData`
+
+`StreamData` represents the data returned by a stream handler. It can be any of the following:
+
+- `string`
+- `Buffer`
+- `Uint8Array`
+- `ArrayBuffer`
+- `Blob`
 
 ## Error Handling
 
