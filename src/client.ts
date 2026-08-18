@@ -15,7 +15,7 @@ export interface ClientOptions {
 /**
  * Teler API Client.
  * 
- * Provides unified access to all Teler SDK resource managers including voice, sip, virtual numbers, events, recordings, and secrets.
+ * Provides unified access to all Teler SDK resource managers including voice, sip, ip-acls, virtual numbers, events, recordings, and secrets.
  */
 export class Client {
     private readonly apiKey:    string;

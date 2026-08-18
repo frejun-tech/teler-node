@@ -11,7 +11,7 @@ export class CallFlow {
      * 
      * @param wsUrl - Remote WebSocket URL
      * @param options - Options object
-     * @param options.flowUrl - Optional. Execute flow_url for the next flow.
+     * @param options.flowUrl - Optional. Execute flow_url for the next flow. **(Beta)**
      * @param options.sampleRate - Sample rate of Teler audio (default: "8k")
      * @param options.chunkSize - Chunk size of Teler audio (default: 400)
      * @param options.record - Record the call (default: true)
@@ -36,7 +36,7 @@ export class CallFlow {
      * ends if this was the last step).
      * 
      * @param mediaUrl - URL of the audio to be played.
-     * @param flowUrl - Optional. Execute flow_url for the next flow.
+     * @param flowUrl - Optional. Execute flow_url for the next flow. **(Beta)**
      * @returns JSON response containing the play details
      */
     static play(mediaUrl: string, flowUrl?: string) {
@@ -69,7 +69,7 @@ export class CallFlow {
      *
      * @param to - E.164 phone number or SIP URI (e.g. "sip:user@host"). Single target only.
      * @param options - Options object
-     * @param options.flowUrl - Execute flow_url for the next flow.
+     * @param options.flowUrl - Execute flow_url for the next flow. **(Beta)**
      * @param options.timeout - Seconds to wait for pickup before treating as no-answer. Range 1..600 (default: 30)
      * @param options.record - Recording mode: `false`, `true`/"stereo", "mono", or "per_leg" (default: false)
      * @param options.customHeaders - Extra SIP headers on the outbound INVITE. Keys must start with "X-". Max 16 headers, values <= 256 bytes.
