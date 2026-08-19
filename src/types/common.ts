@@ -1,18 +1,18 @@
 /**
  * Common Types
- * 
+ *
  */
 
 export type DefaultResponse = {
   success: boolean;
   message: string;
-}
+};
 
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export type WebhookApiVersion = "2026-06-01" | "2025-08-01";
 
-export type CallDirection = 'inbound' | 'outbound';
+export type CallDirection = "inbound" | "outbound";
 
 export interface CursorFilters {
   limit?: number;
@@ -27,7 +27,7 @@ export interface CursorResponse<T> {
   has_more: boolean;
 }
 
-export type RingbackMode = 'suppress' | 'passthrough';
+export type RingbackMode = "suppress" | "passthrough";
 
 export type RecordingType = "stereo" | "mono" | "per_leg";
 
@@ -42,4 +42,3 @@ interface PlayAction {
 interface HangupAction {
   action: "hangup";
 }
-

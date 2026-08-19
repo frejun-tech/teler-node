@@ -3,11 +3,10 @@ import type { SipTrunkListResponse } from "./sip";
 import type { VoiceAppListResponse } from "./voice";
 
 /**
- * 
+ *
  * Secret Types
  *
  */
-
 
 export interface CreateSecretPayload {
   name: string;

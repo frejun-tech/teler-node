@@ -13,14 +13,16 @@ describe('RecordingResourceManager (unit)', () => {
   });
 
   describe('retrieve', () => {
-    it('gets /recordings with recording params', async () => {
+    it('gets /recordings with recording params and streams the response', async () => {
       const params = recordingParamsFixture();
       const fakeStream = {} as any;
       http.get.mockResolvedValue(fakeStream);
 
       const result = await recordings.retrieve(params);
 
-      expect(http.get).toHaveBeenCalledWith('/recordings', params);
+      expect(http.get).toHaveBeenCalledWith('/recordings', params, {
+        responseType: 'stream',
+      });
       expect(result).toBe(fakeStream);
     });
 
@@ -30,9 +32,13 @@ describe('RecordingResourceManager (unit)', () => {
 
       await recordings.retrieve(params);
 
-      expect(http.get).toHaveBeenCalledWith('/recordings', expect.objectContaining({
-        recording_id: 'rec_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-      }));
+      expect(http.get).toHaveBeenCalledWith(
+        '/recordings',
+        expect.objectContaining({
+          recording_id: 'rec_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+        }),
+        { responseType: 'stream' }
+      );
     });
 
     it('propagates errors from the http layer', async () => {

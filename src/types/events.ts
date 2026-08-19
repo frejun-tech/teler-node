@@ -4,11 +4,10 @@ import type { CursorFilters } from "./common";
  * Event types
  */
 
-
 export enum DeliveryStatus {
-  PENDING = "pending", 
-  DELIVERED = "delivered", 
-  FAILED_PERMANENT = "failed_permanent"
+  PENDING = "pending",
+  DELIVERED = "delivered",
+  FAILED_PERMANENT = "failed_permanent",
 }
 
 export interface EventFilters extends CursorFilters {
@@ -27,7 +26,7 @@ export interface EventResponse {
   type: string;
   api_version: string;
   occurred_at: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   delivery_status: string;
   attempt_count: number;
   last_attempt_at: string;

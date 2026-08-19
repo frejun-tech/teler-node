@@ -29,7 +29,9 @@ describe('OperationResourceManager (unit)', () => {
         '/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/transfer',
         payload,
         expect.objectContaining({
-          'Idempotency-Key': expect.any(String),
+          headers: expect.objectContaining({
+            'Idempotency-Key': expect.any(String),
+          }),
         })
       );
       expect(result).toEqual(fixture);
@@ -48,7 +50,32 @@ describe('OperationResourceManager (unit)', () => {
       expect(http.post).toHaveBeenCalledWith(
         '/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/transfer',
         payload,
-        { 'Idempotency-Key': 'transfer_idem_123' }
+        expect.objectContaining({
+          headers: { 'Idempotency-Key': 'transfer_idem_123' },
+        })
+      );
+    });
+
+    it('passes retry and baseRetryDelayMs through when provided', async () => {
+      const payload = transferPayloadFixture();
+      http.post.mockResolvedValue(transferResponseFixture());
+
+      await operations.transfer(
+        'cs_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+        payload,
+        'transfer_idem_123',
+        true,
+        3000
+      );
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/transfer',
+        payload,
+        expect.objectContaining({
+          headers: { 'Idempotency-Key': 'transfer_idem_123' },
+          retry: true,
+          baseRetryDelayMs: 3000,
+        })
       );
     });
 

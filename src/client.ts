@@ -1,4 +1,5 @@
 import { BadParametersException } from "./exceptions";
+import { CallResourceManager } from "./resources/calls";
 import { VoiceResourceManager } from "./resources/voice/voice";
 import { SipResourceManager } from "./resources/sip/sip";
 import { HttpResourceManager } from "./resources/http";
@@ -7,48 +8,64 @@ import { VirtualNumberResourceManager } from "./resources/vns";
 import { EventResourceManager } from "./resources/events";
 import { RecordingResourceManager } from "./resources/recordings";
 import { SecretResourceManager } from "./resources/secrets";
+import { config } from "./config";
 
 export interface ClientOptions {
-    logLevel?: string;
+  baseURL?: string;
+  logLevel?: "info" | "warn" | "error" | "debug";
+  timeout?: number;
 }
 
 /**
  * Teler API Client.
- * 
+ *
  * Provides unified access to all Teler SDK resource managers including voice, sip, ip-acls, virtual numbers, events, recordings, and secrets.
  */
 export class Client {
-    private readonly apiKey:    string;
-    private readonly baseURL:   string = 'https://api.frejun.ai/api/v1';
-    
-    private readonly    http:                   HttpResourceManager;
-    public readonly     voice:                  VoiceResourceManager;
-    public readonly     sip:                    SipResourceManager;
-    public readonly     virtualNumbers:         VirtualNumberResourceManager;
-    public readonly     events:                 EventResourceManager;
-    public readonly     recordings:             RecordingResourceManager;
-    public readonly     secrets:                SecretResourceManager;
+  private readonly apiKey: string;
+  private readonly baseURL: string = config.BASE_URL;
 
-    /**
-     * Initializes the Teler Client.
-     * 
-     * @param apiKey - Teler API Key.
-     * @param options - Optional configuration options.
-     */
-    constructor(apiKey: string, options?: ClientOptions) {
-        if (!apiKey) throw new BadParametersException("API Key", "Missing Teler API Key. Please provide one when initializing the client.");
-        this.apiKey = apiKey;
+  private readonly http: HttpResourceManager;
+  public readonly calls: CallResourceManager;
+  public readonly voice: VoiceResourceManager;
+  public readonly sip: SipResourceManager;
+  public readonly virtualNumbers: VirtualNumberResourceManager;
+  public readonly events: EventResourceManager;
+  public readonly recordings: RecordingResourceManager;
+  public readonly secrets: SecretResourceManager;
 
-        if (options?.logLevel) {
-            setLogLevel(options.logLevel);
-        }
+  /**
+   * Initializes the Teler Client.
+   *
+   * @param apiKey - Teler API Key.
+   * @param options - Optional configuration options.
+   */
+  constructor(apiKey: string, options?: ClientOptions) {
+    if (!apiKey)
+      throw new BadParametersException(
+        "API Key",
+        "Missing Teler API Key. Please provide one when initializing the client.",
+      );
+    this.apiKey = apiKey;
 
-        this.http               = new HttpResourceManager(this.apiKey, this.baseURL);
-        this.voice              = new VoiceResourceManager(this.http)
-        this.sip                = new SipResourceManager(this.http);
-        this.virtualNumbers     = new VirtualNumberResourceManager(this.http);
-        this.events             = new EventResourceManager(this.http);
-        this.recordings         = new RecordingResourceManager(this.http);
-        this.secrets            = new SecretResourceManager(this.http);
+    if (options?.logLevel) {
+      setLogLevel(options.logLevel);
     }
+    if (options?.baseURL) {
+      this.baseURL = options.baseURL;
+    }
+
+    this.http = new HttpResourceManager(
+      this.apiKey,
+      this.baseURL,
+      options?.timeout,
+    );
+    this.calls = new CallResourceManager(this.http);
+    this.voice = new VoiceResourceManager(this.http);
+    this.sip = new SipResourceManager(this.http);
+    this.virtualNumbers = new VirtualNumberResourceManager(this.http);
+    this.events = new EventResourceManager(this.http);
+    this.recordings = new RecordingResourceManager(this.http);
+    this.secrets = new SecretResourceManager(this.http);
+  }
 }

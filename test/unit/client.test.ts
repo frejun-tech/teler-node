@@ -21,6 +21,10 @@ describe('Client (unit)', () => {
     );
   });
 
+  it('accepts a custom baseURL option', () => {
+    expect(() => new Client('valid_key_123', { baseURL: 'https://sandbox.frejun.ai/api/v1' })).not.toThrow();
+  });
+
   it('accepts optional client options such as logLevel', () => {
     const client = new Client('valid_key_123', { logLevel: 'debug' });
     expect(client).toBeDefined();

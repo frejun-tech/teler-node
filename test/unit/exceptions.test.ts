@@ -10,6 +10,7 @@ import {
   RateLimitException,
   InternalServerErrorException,
   NotImplementedException,
+  NetworkException
 } from '@/exceptions';
 
 describe('TelerException hierarchy', () => {
@@ -26,10 +27,10 @@ describe('TelerException hierarchy', () => {
       expect(new TelerException()).toBeInstanceOf(Error);
     });
 
-    it('defaults code to 500 and message to empty string', () => {
+    it('defaults message to empty string, code and details to undefined', () => {
       const err = new TelerException();
       expect(err.message).toBe('');
-      expect(err.code).toBe(500);
+      expect(err.code).toBeUndefined();
       expect(err.details).toBeUndefined();
     });
   });
@@ -189,6 +190,22 @@ describe('TelerException hierarchy', () => {
 
     it('is an instance of TelerException', () => {
       expect(new NotImplementedException()).toBeInstanceOf(TelerException);
+    });
+  });
+
+  describe('NetworkException', () => {
+    it('assigns message, details, and code correctly', () => {
+      const err = new NetworkException('Connection refused', { host: 'api.frejun.ai' }, 'ECONNREFUSED');
+      expect(err.name).toBe('NetworkException');
+      expect(err.message).toBe('Connection refused');
+      expect(err.details).toEqual({ host: 'api.frejun.ai' });
+      expect(err.code).toBe('ECONNREFUSED');
+    });
+
+    it('is an instance of TelerException and Error', () => {
+      const err = new NetworkException('err');
+      expect(err).toBeInstanceOf(TelerException);
+      expect(err).toBeInstanceOf(Error);
     });
   });
 

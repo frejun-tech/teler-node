@@ -5,31 +5,26 @@ import { Status } from "./core";
  * Sip Trunk Types
  */
 
-
 export enum AuthenticationType {
   CREDENTIAL = "credential",
-  IP = "IP"
+  IP = "IP",
 }
-
 
 export type SipAuthCredentialInput = {
   username: string;
-  password: string
-}
-
+  password: string;
+};
 
 export type SipAuthAddressInput = {
   name: string;
-  address: string
-}
-
+  address: string;
+};
 
 export type InboundRoute = {
   name: string;
   sip_url: string;
-  sip_user?: string
-}
-
+  sip_user?: string;
+};
 
 export interface CreateSipTrunkPayload {
   name: string;
@@ -42,10 +37,9 @@ export interface CreateSipTrunkPayload {
   authentication_type: AuthenticationType;
   auth_credential?: SipAuthCredentialInput;
   auth_addresses?: SipAuthAddressInput[];
-  inbound_route: InboundRoute;
+  inbound_route?: InboundRoute;
   webhook_api_version?: WebhookApiVersion;
 }
-
 
 export interface UpdateSipTrunkPayload {
   name?: string;
@@ -61,7 +55,6 @@ export interface UpdateSipTrunkPayload {
   secret_id?: string;
   webhook_api_version?: WebhookApiVersion;
 }
-
 
 export interface SipTrunkResponse {
   id: string;
@@ -84,24 +77,20 @@ export interface SipTrunkResponse {
   webhook_api_version: WebhookApiVersion;
 }
 
-
 export interface SipTrunkFilters extends CursorFilters {
   search?: string;
   status?: Status[];
 }
-
 
 export interface SipTrunkListResponse {
   id: string;
   name: string;
 }
 
-
 /**
- * 
+ *
  * SIP IP Access Control Lists
  */
-
 
 export interface IpAclEntryInput {
   address: string;
@@ -144,21 +133,18 @@ export interface IpAclFilters extends CursorFilters {
   search?: string;
 }
 
-
 /**
- * 
+ *
  * Sip Call Types
  */
 
-
-export interface SipCallFilters extends CursorFilters { 
+export interface SipCallFilters extends CursorFilters {
   trunk_id?: string;
   from_number?: string;
   to_number?: string;
   created_after?: string;
   created_before?: string;
 }
-
 
 export interface SipCallResponse {
   id: string;

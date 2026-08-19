@@ -32,7 +32,9 @@ describe('MutationResourceManager (unit)', () => {
         '/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/hangup',
         payload,
         expect.objectContaining({
-          'Idempotency-Key': expect.any(String),
+          headers: expect.objectContaining({
+            'Idempotency-Key': expect.any(String),
+          }),
         })
       );
       expect(result).toEqual(fixture);
@@ -47,7 +49,26 @@ describe('MutationResourceManager (unit)', () => {
       expect(http.post).toHaveBeenCalledWith(
         '/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/hangup',
         payload,
-        { 'Idempotency-Key': 'custom_idem_123' }
+        expect.objectContaining({
+          headers: { 'Idempotency-Key': 'custom_idem_123' },
+        })
+      );
+    });
+
+    it('passes retry and baseRetryDelayMs through when provided', async () => {
+      const payload = hangupPayloadFixture();
+      http.post.mockResolvedValue(mutationResponseFixture());
+
+      await mutations.hangup('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ', payload, 'custom_idem_123', true, 2500);
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/hangup',
+        payload,
+        expect.objectContaining({
+          headers: { 'Idempotency-Key': 'custom_idem_123' },
+          retry: true,
+          baseRetryDelayMs: 2500,
+        })
       );
     });
 
@@ -86,7 +107,9 @@ describe('MutationResourceManager (unit)', () => {
         '/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/mute',
         payload,
         expect.objectContaining({
-          'Idempotency-Key': expect.any(String),
+          headers: expect.objectContaining({
+            'Idempotency-Key': expect.any(String),
+          }),
         })
       );
       expect(result).toEqual(fixture);
@@ -101,7 +124,26 @@ describe('MutationResourceManager (unit)', () => {
       expect(http.post).toHaveBeenCalledWith(
         '/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/mute',
         payload,
-        { 'Idempotency-Key': 'mute_idem_456' }
+        expect.objectContaining({
+          headers: { 'Idempotency-Key': 'mute_idem_456' },
+        })
+      );
+    });
+
+    it('passes retry and baseRetryDelayMs through when provided', async () => {
+      const payload = mutePayloadFixture();
+      http.post.mockResolvedValue(mutationResponseFixture());
+
+      await mutations.mute('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ', payload, 'mute_idem_456', true, 1500);
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/mute',
+        payload,
+        expect.objectContaining({
+          headers: { 'Idempotency-Key': 'mute_idem_456' },
+          retry: true,
+          baseRetryDelayMs: 1500,
+        })
       );
     });
 
@@ -128,7 +170,9 @@ describe('MutationResourceManager (unit)', () => {
         '/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/dtmf',
         payload,
         expect.objectContaining({
-          'Idempotency-Key': expect.any(String),
+          headers: expect.objectContaining({
+            'Idempotency-Key': expect.any(String),
+          }),
         })
       );
       expect(result).toEqual(fixture);
@@ -143,7 +187,26 @@ describe('MutationResourceManager (unit)', () => {
       expect(http.post).toHaveBeenCalledWith(
         '/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/dtmf',
         payload,
-        { 'Idempotency-Key': 'dtmf_idem_789' }
+        expect.objectContaining({
+          headers: { 'Idempotency-Key': 'dtmf_idem_789' },
+        })
+      );
+    });
+
+    it('passes retry and baseRetryDelayMs through when provided', async () => {
+      const payload = dtmfPayloadFixture();
+      http.post.mockResolvedValue(mutationResponseFixture());
+
+      await mutations.dtmf('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ', payload, 'dtmf_idem_789', true, 4000);
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/dtmf',
+        payload,
+        expect.objectContaining({
+          headers: { 'Idempotency-Key': 'dtmf_idem_789' },
+          retry: true,
+          baseRetryDelayMs: 4000,
+        })
       );
     });
 
@@ -170,7 +233,9 @@ describe('MutationResourceManager (unit)', () => {
         '/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/play',
         payload,
         expect.objectContaining({
-          'Idempotency-Key': expect.any(String),
+          headers: expect.objectContaining({
+            'Idempotency-Key': expect.any(String),
+          }),
         })
       );
       expect(result).toEqual(fixture);
@@ -185,7 +250,26 @@ describe('MutationResourceManager (unit)', () => {
       expect(http.post).toHaveBeenCalledWith(
         '/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/play',
         payload,
-        { 'Idempotency-Key': 'play_idem_abc' }
+        expect.objectContaining({
+          headers: { 'Idempotency-Key': 'play_idem_abc' },
+        })
+      );
+    });
+
+    it('passes retry and baseRetryDelayMs through when provided', async () => {
+      const payload = playPayloadFixture();
+      http.post.mockResolvedValue(mutationResponseFixture());
+
+      await mutations.play('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ', payload, 'play_idem_abc', true, 3500);
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/play',
+        payload,
+        expect.objectContaining({
+          headers: { 'Idempotency-Key': 'play_idem_abc' },
+          retry: true,
+          baseRetryDelayMs: 3500,
+        })
       );
     });
 

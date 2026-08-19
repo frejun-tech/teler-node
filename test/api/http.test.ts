@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from '@test/msw/server';
 import { HttpResourceManager } from '@/resources/http';
@@ -8,6 +8,7 @@ import {
   BadParametersException,
   UnauthorizedException,
   ForbiddenException,
+  NotFoundException,
   ConflictException,
   UnprocessableRequestException,
   RateLimitException,
@@ -28,6 +29,7 @@ describe('HttpResourceManager (integration)', () => {
     { status: 400, exception: BadParametersException, name: 'BadParametersException' },
     { status: 401, exception: UnauthorizedException, name: 'UnauthorizedException' },
     { status: 403, exception: ForbiddenException, name: 'ForbiddenException' },
+    { status: 404, exception: NotFoundException, name: 'NotFoundException' },
     { status: 409, exception: ConflictException, name: 'ConflictException' },
     { status: 422, exception: UnprocessableRequestException, name: 'UnprocessableRequestException' },
     { status: 429, exception: RateLimitException, name: 'RateLimitException' },
@@ -47,6 +49,7 @@ describe('HttpResourceManager (integration)', () => {
       await expect(httpClient.get('/test-endpoint')).rejects.toMatchObject({
         name,
         code: status,
+        message: `error ${status}`,
       });
     });
   });
@@ -62,6 +65,57 @@ describe('HttpResourceManager (integration)', () => {
     await expect(httpClient.get('/test-endpoint')).rejects.toMatchObject({
       name: 'TelerException',
     });
+  });
+
+  it('throws NetworkException when the request fails with no response', async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () => HttpResponse.error())
+    );
+    const httpClient = createHttp();
+
+    await expect(httpClient.get('/test-endpoint')).rejects.toMatchObject({
+      name: 'NetworkException',
+      message: expect.any(String),
+    });
+  });
+
+  it('retries on 503 and eventually succeeds, reusing the request until it does', async () => {
+    let attempts = 0;
+    server.use(
+      http.post(`${TEST_CONFIG.baseUrl}/test-endpoint`, () => {
+        attempts++;
+        if (attempts < 2) {
+          return HttpResponse.json({ message: 'unavailable' }, { status: 503 });
+        }
+        return HttpResponse.json({ ok: true });
+      })
+    );
+    const httpClient = createHttp();
+
+    const result = await httpClient.post(
+      '/test-endpoint',
+      {},
+      { retry: true, baseRetryDelayMs: 10 }
+    );
+
+    expect(attempts).toBe(2);
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('does not retry on a non-retryable status even when retry is true', async () => {
+    let attempts = 0;
+    server.use(
+      http.post(`${TEST_CONFIG.baseUrl}/test-endpoint`, () => {
+        attempts++;
+        return HttpResponse.json({ message: 'bad request' }, { status: 400 });
+      })
+    );
+    const httpClient = createHttp();
+
+    await expect(
+      httpClient.post('/test-endpoint', {}, { retry: true, baseRetryDelayMs: 10 })
+    ).rejects.toThrow(BadParametersException);
+    expect(attempts).toBe(1);
   });
 
   it('serializes array query params as repeated keys', async () => {

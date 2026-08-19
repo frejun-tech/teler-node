@@ -1,7 +1,5 @@
-import type { URL } from "node:url";
 import type { CallDirection, CursorFilters, WebhookApiVersion } from "./common";
 import { Status } from "./core";
-
 
 /**
  * Voice Call Types
@@ -13,8 +11,7 @@ export type CreateCallParams = {
   flowUrl: string;
   statusCallbackUrl: string;
   record?: boolean;
-}
-
+};
 
 export type CallDetails = {
   id: string;
@@ -22,13 +19,12 @@ export type CallDetails = {
   to_number: string;
   status_callback_url: string;
   record: boolean;
-}
-
+};
 
 export type CallResponse = {
   message: string;
-  data: CallDetails,
-}
+  data: CallDetails;
+};
 
 export type CreateCallPayload = {
   from_number: string;
@@ -36,16 +32,15 @@ export type CreateCallPayload = {
   flow_url: string;
   status_callback_url: string;
   record?: boolean;
-}
-
+};
 
 /**
  * Stream Types
- */ 
+ */
 
 export enum StreamType {
   UNIDIRECTIONAL = 0,
-  BIDIRECTIONAL  = 1
+  BIDIRECTIONAL = 1,
 }
 
 export enum StreamOP {
@@ -58,12 +53,13 @@ export type StreamData = string | Buffer | Uint8Array | ArrayBuffer | Blob;
 
 export type StreamHandlerResult = [StreamData, StreamOP];
 
-export type StreamHandler = (message: StreamData) => Promise<StreamHandlerResult>;
-
+export type StreamHandler = (
+  message: StreamData,
+) => Promise<StreamHandlerResult>;
 
 /**
  * Voice Apps Types
- * 
+ *
  */
 
 interface VoiceAppBase {
@@ -111,17 +107,31 @@ export interface VoiceAppListResponse {
   name: string;
 }
 
-
 /**
- * 
+ *
  * Voice Call Types
  */
 
-export type CallSessionStates = "initiated" | "ringing" | "answered" | "completed" | "failed";
+export type CallSessionStates =
+  | "initiated"
+  | "ringing"
+  | "answered"
+  | "completed"
+  | "failed";
 
-export type CallLegRole = "primary" | "dial_target" | "transfer_target" | "monitor" | "parked";
+export type CallLegRole =
+  | "primary"
+  | "dial_target"
+  | "transfer_target"
+  | "monitor"
+  | "parked";
 
-export type CallLegState = "created" | "ringing" | "answered" | "completed" | "failed";
+export type CallLegState =
+  | "created"
+  | "ringing"
+  | "answered"
+  | "completed"
+  | "failed";
 
 export interface VoiceCallFilters extends CursorFilters {
   state?: CallSessionStates;
@@ -139,7 +149,7 @@ export interface VoiceCallResponse {
   direction: CallDirection;
   from_number: string;
   to_number: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   created_at: string;
   answered_at: string;
   ended_at: string;
@@ -164,9 +174,8 @@ export interface VoiceCallLegResponse {
   ended_by: string;
 }
 
-
 /**
- * 
+ *
  * Call Mutation Types
  */
 
@@ -189,19 +198,18 @@ export interface DTMFPayload extends MutationBase {
 }
 
 export interface PlayPayload extends MutationBase {
-  media_url: URL;
+  media_url: string;
   loop?: number;
   on_dtmf?: "stop" | "ignore";
 }
 
 export interface MutationResponse {
   request_id: string;
-  playback_id: string;
+  playback_id?: string;
 }
 
-
 /**
- * 
+ *
  * Voice Operation Types
  */
 
@@ -237,10 +245,10 @@ export interface TransferPayload {
 }
 
 export interface TransferResponse {
-  id: string,
-  call_id: string,
-  status: CallSessionStates,
-  target_leg_id: string,
-  mode: CallTransferMode,
-  request_id: string
+  id: string;
+  call_id: string;
+  status: CallSessionStates;
+  target_leg_id: string;
+  mode: CallTransferMode;
+  request_id: string;
 }

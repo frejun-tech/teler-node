@@ -6,10 +6,9 @@ import type { SipTrunkListResponse } from "./sip";
  * Core Types
  */
 
-
 export enum Status {
   ACTIVE = "active",
-  INACTIVE = "inactive"
+  INACTIVE = "inactive",
 }
 
 type LocationResponse = {
@@ -18,7 +17,7 @@ type LocationResponse = {
   region_code: string;
   country_code: string;
   country_name?: string | null;
-}
+};
 
 export interface VirtualNumberFilters extends CursorFilters {
   search?: string;
