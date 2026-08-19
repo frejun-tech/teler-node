@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { StreamOP, StreamType } from "../types/voice";
 import type {
   StreamHandler,

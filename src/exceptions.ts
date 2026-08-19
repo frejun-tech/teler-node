@@ -130,7 +130,7 @@ export class NotImplementedException extends TelerException {
  * responses (4xx/5xx), since no response was ever received.
  */
 export class NetworkException extends TelerException {
-  constructor(message: string, details?: unknown, code?: number) {
+  constructor(message: string, details?: unknown, code?: string) {
     super(message, details, code);
   }
 }

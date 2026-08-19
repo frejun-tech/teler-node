@@ -22,8 +22,13 @@ interface RequestOptions {
   config?: AxiosRequestConfig;
 }
 
-type QueryParamValue = string | number | boolean | null | undefined;
-type QueryParams = Record<string, QueryParamValue | QueryParamValue[]>;
+interface TelerErrorResponseBody {
+  success?: boolean;
+  type?: string;
+  code?: string;
+  message?: string;
+  errors?: unknown;
+}
 
 export class HttpResourceManager {
   private readonly httpClient: AxiosInstance;
@@ -44,10 +49,13 @@ export class HttpResourceManager {
           Object.entries(params).forEach(([key, value]) => {
             if (Array.isArray(value)) {
               value
-                .filter((v) => v !== null && v !== undefined)
-                .forEach((v) => searchParams.append(key, v));
-            } else if (value !== undefined) {
-              searchParams.append(key, value);
+                .filter(
+                  (v): v is string | number | boolean =>
+                    v !== null && v !== undefined,
+                )
+                .forEach((v) => searchParams.append(key, String(v)));
+            } else if (value !== undefined && value !== null) {
+              searchParams.append(key, String(value));
             }
           });
           return searchParams.toString();
@@ -64,12 +72,19 @@ export class HttpResourceManager {
    * @param config - Optional. Additional axios request config (e.g. responseType, maxRedirects).
    * @returns The response data of type T.
    */
-  public async get<T, P extends QueryParams | undefined = undefined>(
+  public async get<T, P = unknown>(
     path: string,
     params?: P,
     config?: AxiosRequestConfig,
   ): Promise<T> {
-    return this.request<T>("GET", path, undefined, params, undefined, config);
+    return this.request<T>(
+      "GET",
+      path,
+      undefined,
+      params as Record<string, unknown> | undefined,
+      undefined,
+      config,
+    );
   }
 
   /**
@@ -77,9 +92,7 @@ export class HttpResourceManager {
    *
    * @param path - API endpoint path.
    * @param data - Optional. The request payload body.
-   * @param headers - Optional. Additional HTTP headers to include (e.g. Idempotency-Key).
-   * @param retry - Optional. Whether to retry on network errors/503s, reusing the same request each attempt. (Default: false)
-   * @param baseRetryDelayMs - Optional. Base delay unit (ms) for exponential backoff. Only relevant if `retry` is true. (Default: 5000)
+   * @param options - Optional. Headers, retry, and backoff configuration.
    * @returns The response data of type T.
    */
   public async post<T, P = unknown>(
@@ -174,7 +187,7 @@ export class HttpResourceManager {
     method: HttpMethod,
     path: string,
     data?: P,
-    params?: QueryParams,
+    params?: Record<string, unknown>,
     headers?: Record<string, string>,
     config?: AxiosRequestConfig,
     retry = false,
@@ -196,15 +209,15 @@ export class HttpResourceManager {
       );
       return response.data;
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const status = err.response?.status;
-        const message = err.response?.data?.message ?? err?.message;
-        const details = err.response?.data?.errors ?? err?.message;
-        const param = err.response?.data?.code ?? "";
-
+      if (axios.isAxiosError<TelerErrorResponseBody>(err)) {
         if (!err.response) {
           throw new NetworkException(err.message, undefined, undefined);
         }
+
+        const status = err.response.status;
+        const message = err.response?.data?.message ?? err?.message;
+        const details = err.response?.data?.errors ?? err?.message;
+        const param = err.response?.data?.code ?? "";
 
         switch (status) {
           case 400:
@@ -224,7 +237,7 @@ export class HttpResourceManager {
           default:
             if (status === 501) {
               throw new NotImplementedException(message, details, status);
-            } else if (status !== undefined && status >= 500) {
+            } else if (status >= 500) {
               throw new InternalServerErrorException(message, details, status);
             }
             throw new TelerException(`API Error: ${message}`, details, status);
