@@ -51,7 +51,7 @@ export class HttpResourceManager {
               value
                 .filter(
                   (v): v is string | number | boolean =>
-                    v !== null && v !== undefined,
+                    v !== null && v !== undefined
                 )
                 .forEach((v) => searchParams.append(key, String(v)));
             } else if (value !== undefined && value !== null) {
@@ -75,7 +75,7 @@ export class HttpResourceManager {
   public async get<T, P = unknown>(
     path: string,
     params?: P,
-    config?: AxiosRequestConfig,
+    config?: AxiosRequestConfig
   ): Promise<T> {
     return this.request<T>(
       "GET",
@@ -83,7 +83,7 @@ export class HttpResourceManager {
       undefined,
       params as Record<string, unknown> | undefined,
       undefined,
-      config,
+      config
     );
   }
 
@@ -98,7 +98,7 @@ export class HttpResourceManager {
   public async post<T, P = unknown>(
     path: string,
     data?: P,
-    options?: RequestOptions,
+    options?: RequestOptions
   ): Promise<T> {
     return this.request<T, P>(
       "POST",
@@ -108,7 +108,7 @@ export class HttpResourceManager {
       options?.headers,
       options?.config,
       options?.retry ?? false,
-      options?.baseRetryDelayMs ?? 5000,
+      options?.baseRetryDelayMs ?? 5000
     );
   }
 
@@ -151,7 +151,7 @@ export class HttpResourceManager {
   private async executeWithRetry<T>(
     request: () => Promise<T>,
     maxRetries = 3,
-    baseRetryDelayMs = 5000,
+    baseRetryDelayMs = 5000
   ): Promise<T> {
     let lastError: unknown;
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -163,7 +163,7 @@ export class HttpResourceManager {
           throw err;
         }
         await new Promise((r) =>
-          setTimeout(r, 2 ** attempt * baseRetryDelayMs),
+          setTimeout(r, 2 ** attempt * baseRetryDelayMs)
         );
       }
     }
@@ -191,7 +191,7 @@ export class HttpResourceManager {
     headers?: Record<string, string>,
     config?: AxiosRequestConfig,
     retry = false,
-    baseRetryDelayMs = 5000,
+    baseRetryDelayMs = 5000
   ): Promise<T> {
     try {
       const response = await this.executeWithRetry(
@@ -205,7 +205,7 @@ export class HttpResourceManager {
             ...config,
           }),
         retry ? CONFIG.RETRY_COUNT : 0,
-        baseRetryDelayMs,
+        baseRetryDelayMs
       );
       return response.data;
     } catch (err) {
@@ -244,7 +244,7 @@ export class HttpResourceManager {
         }
       }
       throw new TelerException(
-        "An unknown error occurred while calling the API.",
+        "An unknown error occurred while calling the API."
       );
     }
   }

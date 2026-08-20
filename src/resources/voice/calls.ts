@@ -30,7 +30,7 @@ export class CallResourceManager {
 
     return this.http.post<CallResponse, CreateCallPayload>(
       `${this.basePath}/initiate`,
-      data,
+      data
     );
   }
 
@@ -40,11 +40,11 @@ export class CallResourceManager {
    * @returns A list of voice calls.
    */
   public async list(
-    filters?: VoiceCallFilters,
+    filters?: VoiceCallFilters
   ): Promise<CursorResponse<VoiceCallResponse>> {
     return this.http.get<CursorResponse<VoiceCallResponse>, VoiceCallFilters>(
       this.basePath,
-      filters,
+      filters
     );
   }
 
@@ -63,10 +63,10 @@ export class CallResourceManager {
    * @returns Details of the voice call legs.
    */
   public async getLegs(
-    callId: string,
+    callId: string
   ): Promise<CursorResponse<VoiceCallLegResponse>> {
     return this.http.get<CursorResponse<VoiceCallLegResponse>>(
-      `${this.basePath}/${callId}/legs`,
+      `${this.basePath}/${callId}/legs`
     );
   }
 }

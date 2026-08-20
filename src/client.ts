@@ -44,7 +44,7 @@ export class Client {
     if (!apiKey)
       throw new BadParametersException(
         "API Key",
-        "Missing Teler API Key. Please provide one when initializing the client.",
+        "Missing Teler API Key. Please provide one when initializing the client."
       );
     this.apiKey = apiKey;
 
@@ -58,7 +58,7 @@ export class Client {
     this.http = new HttpResourceManager(
       this.apiKey,
       this.baseURL,
-      options?.timeout,
+      options?.timeout
     );
     this.calls = new CallResourceManager(this.http);
     this.voice = new VoiceResourceManager(this.http);

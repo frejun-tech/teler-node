@@ -20,7 +20,7 @@ export class IpAclResourceManager {
   public async create(payload: CreateIpAclPayload): Promise<IpAclResponse> {
     return this.http.post<IpAclResponse, CreateIpAclPayload>(
       `${this.basePath}`,
-      payload,
+      payload
     );
   }
 
@@ -30,11 +30,11 @@ export class IpAclResourceManager {
    * @returns A list of IP access control lists.
    */
   public async list(
-    filters?: IpAclFilters,
+    filters?: IpAclFilters
   ): Promise<CursorResponse<IpAclListResponse>> {
     return this.http.get<CursorResponse<IpAclListResponse>, IpAclFilters>(
       this.basePath,
-      filters,
+      filters
     );
   }
 
@@ -56,11 +56,11 @@ export class IpAclResourceManager {
    */
   public async update(
     ipAclId: string,
-    payload: UpdateIpAclPayload,
+    payload: UpdateIpAclPayload
   ): Promise<IpAclResponse> {
     return this.http.patch<IpAclResponse, UpdateIpAclPayload>(
       `${this.basePath}/${ipAclId}`,
-      payload,
+      payload
     );
   }
 

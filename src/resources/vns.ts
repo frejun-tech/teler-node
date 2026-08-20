@@ -18,7 +18,7 @@ export class VirtualNumberResourceManager {
    * @returns A list of virtual numbers.
    */
   public async list(
-    filters?: VirtualNumberFilters,
+    filters?: VirtualNumberFilters
   ): Promise<CursorResponse<VirtualNumberResponse>> {
     return this.http.get<
       CursorResponse<VirtualNumberResponse>,
@@ -34,11 +34,11 @@ export class VirtualNumberResourceManager {
    */
   public async update(
     vnId: string,
-    payload: UpdateVirtualNumberPayload,
+    payload: UpdateVirtualNumberPayload
   ): Promise<VirtualNumberResponse> {
     return this.http.patch<VirtualNumberResponse, UpdateVirtualNumberPayload>(
       `${this.basePath}/${vnId}`,
-      payload,
+      payload
     );
   }
 
@@ -48,11 +48,11 @@ export class VirtualNumberResourceManager {
    * @returns success/ failure.
    */
   public async assign(
-    payload: AssignVirtualNumberPayload,
+    payload: AssignVirtualNumberPayload
   ): Promise<DefaultResponse> {
     return this.http.post<DefaultResponse, AssignVirtualNumberPayload>(
       `${this.basePath}/assign`,
-      payload,
+      payload
     );
   }
 
@@ -62,11 +62,11 @@ export class VirtualNumberResourceManager {
    * @returns success/ failure.
    */
   public async unassign(
-    payload: UnassignVirtualNumberPayload,
+    payload: UnassignVirtualNumberPayload
   ): Promise<DefaultResponse> {
     return this.http.post<DefaultResponse, UnassignVirtualNumberPayload>(
       `${this.basePath}/unassign`,
-      payload,
+      payload
     );
   }
 }

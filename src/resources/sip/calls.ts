@@ -12,11 +12,11 @@ export class SipCallResourceManager {
    * @returns A list of sip calls.
    */
   public async list(
-    filters?: SipCallFilters,
+    filters?: SipCallFilters
   ): Promise<CursorResponse<SipCallResponse>> {
     return this.http.get<CursorResponse<SipCallResponse>, SipCallFilters>(
       this.basePath,
-      filters,
+      filters
     );
   }
 

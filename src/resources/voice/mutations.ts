@@ -27,7 +27,7 @@ export class MutationResourceManager {
     payload: HangupPayload,
     idempotencyKey?: string,
     retry?: boolean,
-    baseRetryDelayMs?: number,
+    baseRetryDelayMs?: number
   ): Promise<MutationResponse> {
     const key = resolveIdempotencyKey(idempotencyKey);
     return this.http.post<MutationResponse, HangupPayload>(
@@ -37,7 +37,7 @@ export class MutationResourceManager {
         headers: { "Idempotency-Key": key },
         retry: retry,
         baseRetryDelayMs: baseRetryDelayMs,
-      },
+      }
     );
   }
 
@@ -56,7 +56,7 @@ export class MutationResourceManager {
     payload: MutePayload,
     idempotencyKey?: string,
     retry?: boolean,
-    baseRetryDelayMs?: number,
+    baseRetryDelayMs?: number
   ): Promise<MutationResponse> {
     const key = resolveIdempotencyKey(idempotencyKey);
     return this.http.post<MutationResponse, MutePayload>(
@@ -66,7 +66,7 @@ export class MutationResourceManager {
         headers: { "Idempotency-Key": key },
         retry: retry,
         baseRetryDelayMs: baseRetryDelayMs,
-      },
+      }
     );
   }
 
@@ -85,7 +85,7 @@ export class MutationResourceManager {
     payload: DTMFPayload,
     idempotencyKey?: string,
     retry?: boolean,
-    baseRetryDelayMs?: number,
+    baseRetryDelayMs?: number
   ): Promise<MutationResponse> {
     const key = resolveIdempotencyKey(idempotencyKey);
     return this.http.post<MutationResponse, DTMFPayload>(
@@ -95,7 +95,7 @@ export class MutationResourceManager {
         headers: { "Idempotency-Key": key },
         retry: retry,
         baseRetryDelayMs: baseRetryDelayMs,
-      },
+      }
     );
   }
 
@@ -114,7 +114,7 @@ export class MutationResourceManager {
     payload: PlayPayload,
     idempotencyKey?: string,
     retry?: boolean,
-    baseRetryDelayMs?: number,
+    baseRetryDelayMs?: number
   ): Promise<MutationResponse> {
     const key = resolveIdempotencyKey(idempotencyKey);
     return this.http.post<MutationResponse, PlayPayload>(
@@ -124,7 +124,7 @@ export class MutationResourceManager {
         headers: { "Idempotency-Key": key },
         retry: retry,
         baseRetryDelayMs: baseRetryDelayMs,
-      },
+      }
     );
   }
 }

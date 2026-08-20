@@ -10,7 +10,7 @@ export class TelerException extends Error {
     message = "",
     details?: unknown,
     code?: number | string,
-    param: string = "",
+    param: string = ""
   ) {
     super(message);
     this.name = this.constructor.name;
@@ -29,7 +29,7 @@ export class BadParametersException extends TelerException {
     public param = "",
     message = "Bad Parameter(s).",
     details?: unknown,
-    code = 400,
+    code = 400
   ) {
     super(message, details, code, param);
   }
@@ -83,7 +83,7 @@ export class UnprocessableRequestException extends TelerException {
   constructor(
     message = "Unprocessable Request.",
     details?: unknown,
-    code = 422,
+    code = 422
   ) {
     super(message, details, code);
   }
@@ -107,7 +107,7 @@ export class InternalServerErrorException extends TelerException {
   constructor(
     message = "Internal Server Error.",
     details?: unknown,
-    code = 500,
+    code = 500
   ) {
     super(message, details, code);
   }

@@ -26,7 +26,7 @@ export class CallResourceManager {
 
     return this.http.post<CallResponse, CreateCallPayload>(
       `${this.basePath}/initiate`,
-      data,
+      data
     );
   }
 }

@@ -16,11 +16,11 @@ export class EventResourceManager {
    * @returns A list of webhook events.
    */
   public async list(
-    filters?: EventFilters,
+    filters?: EventFilters
   ): Promise<CursorResponse<EventResponse>> {
     return this.http.get<CursorResponse<EventResponse>, EventFilters>(
       this.basePath,
-      filters,
+      filters
     );
   }
 
@@ -40,7 +40,7 @@ export class EventResourceManager {
    */
   public async redeliver(eventId: string): Promise<EventRedeliverResponse> {
     return this.http.post<EventRedeliverResponse>(
-      `${this.basePath}/${eventId}/redeliver`,
+      `${this.basePath}/${eventId}/redeliver`
     );
   }
 }

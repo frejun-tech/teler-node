@@ -21,7 +21,7 @@ export class OperationResourceManager {
     payload: TransferPayload,
     idempotencyKey?: string,
     retry?: boolean,
-    baseRetryDelayMs?: number,
+    baseRetryDelayMs?: number
   ): Promise<TransferResponse> {
     const key = resolveIdempotencyKey(idempotencyKey);
     return this.http.post<TransferResponse, TransferPayload>(
@@ -31,7 +31,7 @@ export class OperationResourceManager {
         headers: { "Idempotency-Key": key },
         retry: retry,
         baseRetryDelayMs: baseRetryDelayMs,
-      },
+      }
     );
   }
 }

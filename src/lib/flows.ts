@@ -28,7 +28,7 @@ export class CallFlow {
       sampleRate?: string;
       chunkSize?: number;
       record?: boolean;
-    } = {},
+    } = {}
   ) {
     return {
       action: "stream",
@@ -109,7 +109,7 @@ export class CallFlow {
       onNoAnswer?: DialNestedAction;
       onBusy?: DialNestedAction;
       onFailure?: DialNestedAction;
-    } = {},
+    } = {}
   ) {
     return {
       action: "dial",

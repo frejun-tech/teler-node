@@ -21,11 +21,11 @@ export class AppResourceManager {
    * @returns Details of the voice app.
    */
   public async create(
-    payload: CreateVoiceAppPayload,
+    payload: CreateVoiceAppPayload
   ): Promise<VoiceAppResponse> {
     return this.http.post<VoiceAppResponse, CreateVoiceAppPayload>(
       this.basePath,
-      payload,
+      payload
     );
   }
 
@@ -35,11 +35,11 @@ export class AppResourceManager {
    * @returns A list of voice apps.
    */
   public async list(
-    filters?: VoiceAppFilters,
+    filters?: VoiceAppFilters
   ): Promise<CursorResponse<VoiceAppResponse>> {
     return this.http.get<CursorResponse<VoiceAppResponse>, VoiceAppFilters>(
       this.basePath,
-      filters,
+      filters
     );
   }
 
@@ -60,11 +60,11 @@ export class AppResourceManager {
    */
   public async update(
     voiceAppId: string,
-    payload: UpdateVoiceAppPayload,
+    payload: UpdateVoiceAppPayload
   ): Promise<VoiceAppResponse> {
     return this.http.patch<VoiceAppResponse, UpdateVoiceAppPayload>(
       `${this.basePath}/${voiceAppId}`,
-      payload,
+      payload
     );
   }
 
@@ -84,7 +84,7 @@ export class AppResourceManager {
    */
   public async listVirtualNumbers(
     voiceAppId: string,
-    params?: VirtualNumberFilters,
+    params?: VirtualNumberFilters
   ): Promise<CursorResponse<VirtualNumberResponse>> {
     return this.http.get<
       CursorResponse<VirtualNumberResponse>,

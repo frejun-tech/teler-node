@@ -20,7 +20,7 @@ export class SecretResourceManager {
   public async create(payload: CreateSecretPayload): Promise<SecretResponse> {
     return this.http.post<SecretResponse, CreateSecretPayload>(
       this.basePath,
-      payload,
+      payload
     );
   }
 
@@ -30,11 +30,11 @@ export class SecretResourceManager {
    * @returns A list of secrets.
    */
   public async list(
-    filters?: SecretFilters,
+    filters?: SecretFilters
   ): Promise<CursorResponse<SecretListResponse>> {
     return this.http.get<CursorResponse<SecretListResponse>, SecretFilters>(
       this.basePath,
-      filters,
+      filters
     );
   }
 
@@ -55,11 +55,11 @@ export class SecretResourceManager {
    */
   public async update(
     secretId: string,
-    payload: UpdateSecretPayload,
+    payload: UpdateSecretPayload
   ): Promise<SecretResponse> {
     return this.http.patch<SecretResponse, UpdateSecretPayload>(
       `${this.basePath}/${secretId}`,
-      payload,
+      payload
     );
   }
 

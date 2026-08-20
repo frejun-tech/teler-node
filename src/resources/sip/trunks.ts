@@ -21,11 +21,11 @@ export class TrunkResourceManager {
    * @returns Details of the sip trunk.
    */
   public async create(
-    payload: CreateSipTrunkPayload,
+    payload: CreateSipTrunkPayload
   ): Promise<SipTrunkResponse> {
     return this.http.post<SipTrunkResponse, CreateSipTrunkPayload>(
       `${this.basePath}`,
-      payload,
+      payload
     );
   }
 
@@ -44,11 +44,11 @@ export class TrunkResourceManager {
    * @returns A list of sip trunks.
    */
   public async list(
-    filters?: SipTrunkFilters,
+    filters?: SipTrunkFilters
   ): Promise<CursorResponse<SipTrunkResponse>> {
     return this.http.get<CursorResponse<SipTrunkResponse>, SipTrunkFilters>(
       this.basePath,
-      filters,
+      filters
     );
   }
 
@@ -60,11 +60,11 @@ export class TrunkResourceManager {
    */
   public async update(
     sipTrunkId: string,
-    payload: UpdateSipTrunkPayload,
+    payload: UpdateSipTrunkPayload
   ): Promise<SipTrunkResponse> {
     return this.http.patch<SipTrunkResponse, UpdateSipTrunkPayload>(
       `${this.basePath}/${sipTrunkId}`,
-      payload,
+      payload
     );
   }
 
@@ -84,7 +84,7 @@ export class TrunkResourceManager {
    */
   public async listVirtualNumbers(
     sipTrunkId: string,
-    params?: VirtualNumberFilters,
+    params?: VirtualNumberFilters
   ): Promise<CursorResponse<VirtualNumberResponse>> {
     return this.http.get<
       CursorResponse<VirtualNumberResponse>,

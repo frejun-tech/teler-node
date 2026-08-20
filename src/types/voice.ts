@@ -54,7 +54,7 @@ export type StreamData = string | Buffer | Uint8Array | ArrayBuffer | Blob;
 export type StreamHandlerResult = [StreamData, StreamOP];
 
 export type StreamHandler = (
-  message: StreamData,
+  message: StreamData
 ) => Promise<StreamHandlerResult>;
 
 /**

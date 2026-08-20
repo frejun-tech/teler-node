@@ -26,7 +26,7 @@ export class StreamConnector {
     streamType: StreamType = StreamType.BIDIRECTIONAL,
     callStreamHandler: StreamHandler,
     remoteStreamHandler: StreamHandler,
-    headers: Record<string, string> = {},
+    headers: Record<string, string> = {}
   ) {
     this.remoteUrl = remoteUrl;
     this.streamType = streamType;
@@ -36,14 +36,14 @@ export class StreamConnector {
 
     if (this.streamType === StreamType.UNIDIRECTIONAL) {
       throw new NotImplementedException(
-        "Unidirectional streams are not supported yet.",
+        "Unidirectional streams are not supported yet."
       );
     }
 
     if (!this.remoteUrl?.trim()) {
       throw new BadParametersException(
         "remoteUrl",
-        "remoteUrl is a required parameter.",
+        "remoteUrl is a required parameter."
       );
     }
     try {
@@ -51,7 +51,7 @@ export class StreamConnector {
     } catch {
       throw new BadParametersException(
         "remoteUrl",
-        "remoteUrl must be a valid URL.",
+        "remoteUrl must be a valid URL."
       );
     }
   }
@@ -77,7 +77,7 @@ export class StreamConnector {
           event: "connected",
           remote_url: this.remoteUrl,
         },
-        "Connected to remote server",
+        "Connected to remote server"
       );
       while (messageQueue.length > 0) {
         const queuedMessage = messageQueue.shift();
@@ -106,19 +106,19 @@ export class StreamConnector {
           } else if (messageQueue.length < MAX_QUEUE_SIZE) {
             logger.info(
               { component: "StreamConnector" },
-              "Buffering message for remote.",
+              "Buffering message for remote."
             );
             messageQueue.push(data);
           } else {
             logger.warn(
               { component: "StreamConnector" },
-              "Message queue full, dropping message.",
+              "Message queue full, dropping message."
             );
           }
         } else if (streamOp === StreamOP.STOP) {
           logger.warn(
             { component: "StreamConnector", event: "stream_stopped" },
-            "Stream stopped by client.",
+            "Stream stopped by client."
           );
           remoteWs.close();
           callWs.close();
@@ -128,7 +128,7 @@ export class StreamConnector {
           exception instanceof Error ? exception.message : String(exception);
         logger.error(
           { component: "StreamConnector", event: "call_stream_error" },
-          `[StreamConnector]: Invalid response from call stream handler: ${errorMessage}`,
+          `[StreamConnector]: Invalid response from call stream handler: ${errorMessage}`
         );
       }
     });
@@ -150,7 +150,7 @@ export class StreamConnector {
         } else if (streamOp === StreamOP.STOP) {
           logger.warn(
             { component: "StreamConnector", event: "stream_stopped" },
-            "Stream stopped by client.",
+            "Stream stopped by client."
           );
           callWs.close();
           remoteWs.close();
@@ -160,7 +160,7 @@ export class StreamConnector {
           exception instanceof Error ? exception.message : String(exception);
         logger.error(
           { component: "StreamConnector", event: "remote_stream_error" },
-          `[StreamConnector]: Invalid response from remote stream handler: ${errorMessage}`,
+          `[StreamConnector]: Invalid response from remote stream handler: ${errorMessage}`
         );
       }
     });
@@ -173,7 +173,7 @@ export class StreamConnector {
           code: event.code,
           reason: event.reason,
         },
-        "Remote URL connection closed.",
+        "Remote URL connection closed."
       );
       callWs.close();
     });
@@ -186,7 +186,7 @@ export class StreamConnector {
           code: event.code,
           reason: event.reason,
         },
-        "Call disconnected.",
+        "Call disconnected."
       );
       remoteWs.close();
     });
@@ -194,7 +194,7 @@ export class StreamConnector {
     remoteWs.addEventListener("error", (error) => {
       logger.error(
         { component: "StreamConnector", event: "ws_error", reason: error },
-        "WebSocket error",
+        "WebSocket error"
       );
       callWs.close();
     });
@@ -202,7 +202,7 @@ export class StreamConnector {
     callWs.addEventListener("error", (error) => {
       logger.error(
         { component: "StreamConnector", event: "ws_error", reason: error },
-        "WebSocket error",
+        "WebSocket error"
       );
       remoteWs.close();
     });
