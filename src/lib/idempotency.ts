@@ -13,13 +13,17 @@ export function resolveIdempotencyKey(key?: string): string {
   }
   if (key.length === 0) {
     throw new UnprocessableRequestException(
+      "Idempotency-Key is required",
       "Idempotency-Key must not be empty. A UUID is recommended.",
+      422,
       "Idempotency-Key"
     );
   }
   if (key.length > config.IDEMPOTENCY_KEY_MAX_LEN) {
     throw new UnprocessableRequestException(
+      "Idempotency-Key too long",
       `Idempotency-Key must not exceed ${config.IDEMPOTENCY_KEY_MAX_LEN} characters (got ${key.length}).`,
+      422,
       "Idempotency-Key"
     );
   }
