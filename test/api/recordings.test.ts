@@ -45,10 +45,10 @@ describe('Recordings API (integration)', () => {
 });
 
   it('sends recording_id and expires_in query params correctly', async () => {
-    let capturedUrl: URL | null = null;
+    const captured: {url: URL | null} = {url: null};
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/recordings`, ({ request }) => {
-        capturedUrl = new URL(request.url);
+        captured.url = new URL(request.url);
         return new HttpResponse('RIFF....WAVEfmt ', {
           status: 200,
           headers: { 'Content-Type': 'audio/wav' },
@@ -60,8 +60,8 @@ describe('Recordings API (integration)', () => {
       recording_id: 'rec_01J5ABCDEFGHJKMNPQRSTVWXYZ',
       expires_in: 1800,
     });
-    expect(capturedUrl?.searchParams.get('recording_id')).toBe('rec_01J5ABCDEFGHJKMNPQRSTVWXYZ');
-    expect(capturedUrl?.searchParams.get('expires_in')).toBe('1800');
+    expect(captured.url?.searchParams.get('recording_id')).toBe('rec_01J5ABCDEFGHJKMNPQRSTVWXYZ');
+    expect(captured.url?.searchParams.get('expires_in')).toBe('1800');
   });
 
   // --- Error Contract Tests ---

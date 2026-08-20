@@ -23,10 +23,10 @@ describe('Virtual Numbers API (integration)', () => {
   });
 
   it('sends query params correctly on list', async () => {
-    let capturedUrl: URL | null = null;
+    const captured: {url: URL | null} = {url: null};
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/virtual-numbers`, ({ request }) => {
-        capturedUrl = new URL(request.url);
+        captured.url = new URL(request.url);
         return HttpResponse.json(virtualNumberListFixture());
       })
     );
@@ -36,9 +36,9 @@ describe('Virtual Numbers API (integration)', () => {
       location: ['US'],
       limit: 10,
     });
-    expect(capturedUrl?.searchParams.get('search')).toBe('800');
-    expect(capturedUrl?.searchParams.get('location')).toBe('US');
-    expect(capturedUrl?.searchParams.get('limit')).toBe('10');
+    expect(captured.url?.searchParams.get('search')).toBe('800');
+    expect(captured.url?.searchParams.get('location')).toBe('US');
+    expect(captured.url?.searchParams.get('limit')).toBe('10');
   });
 
   it('updates a virtual number through the real http stack', async () => {

@@ -24,10 +24,10 @@ describe('Voice Operations API (integration)', () => {
   });
 
   it('sends custom Idempotency-Key header on transfer', async () => {
-    let capturedHeaders: Headers | null = null;
+    const captured: { headers: Headers | null } = { headers: null };
     server.use(
       http.post(`${TEST_CONFIG.baseUrl}/voice/calls/:id/transfer`, ({ request }) => {
-        capturedHeaders = request.headers;
+        captured.headers = request.headers;
         return HttpResponse.json(
           {
             id: 'tr_123',
@@ -50,7 +50,7 @@ describe('Voice Operations API (integration)', () => {
       },
       'transfer_custom_key'
     );
-    expect(capturedHeaders?.get('Idempotency-Key')).toBe('transfer_custom_key');
+    expect(captured.headers?.get('Idempotency-Key')).toBe('transfer_custom_key');
   });
 
   // --- Error Contract Tests ---

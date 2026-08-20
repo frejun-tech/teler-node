@@ -119,10 +119,10 @@ describe('HttpResourceManager (integration)', () => {
   });
 
   it('serializes array query params as repeated keys', async () => {
-    let capturedUrl: URL | null = null;
+    const captured: {url: URL | null} = {url: null};
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, ({ request }) => {
-        capturedUrl = new URL(request.url);
+        captured.url = new URL(request.url);
         return HttpResponse.json({ ok: true });
       })
     );
@@ -130,14 +130,14 @@ describe('HttpResourceManager (integration)', () => {
 
     await httpClient.get('/test-endpoint', { status: ['active', 'paused'] });
 
-    expect(capturedUrl?.searchParams.getAll('status')).toEqual(['active', 'paused']);
+    expect(captured.url?.searchParams.getAll('status')).toEqual(['active', 'paused']);
   });
 
   it('filters out null/undefined values from array query params', async () => {
-    let capturedUrl: URL | null = null;
+    const captured: {url: URL | null} = {url: null};
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, ({ request }) => {
-        capturedUrl = new URL(request.url);
+        captured.url = new URL(request.url);
         return HttpResponse.json({ ok: true });
       })
     );
@@ -145,14 +145,14 @@ describe('HttpResourceManager (integration)', () => {
 
     await httpClient.get('/test-endpoint', { status: ['active', null, undefined, 'paused'] as any });
 
-    expect(capturedUrl?.searchParams.getAll('status')).toEqual(['active', 'paused']);
+    expect(captured.url?.searchParams.getAll('status')).toEqual(['active', 'paused']);
   });
 
   it('omits undefined scalar query params entirely', async () => {
-    let capturedUrl: URL | null = null;
+    const captured: {url: URL | null} = {url: null};
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, ({ request }) => {
-        capturedUrl = new URL(request.url);
+        captured.url = new URL(request.url);
         return HttpResponse.json({ ok: true });
       })
     );
@@ -160,8 +160,8 @@ describe('HttpResourceManager (integration)', () => {
 
     await httpClient.get('/test-endpoint', { call_id: undefined, limit: 10 } as any);
 
-    expect(capturedUrl?.searchParams.has('call_id')).toBe(false);
-    expect(capturedUrl?.searchParams.get('limit')).toBe('10');
+    expect(captured.url?.searchParams.has('call_id')).toBe(false);
+    expect(captured.url?.searchParams.get('limit')).toBe('10');
   });
 
   it('sends a patch request with a body', async () => {

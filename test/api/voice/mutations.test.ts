@@ -47,10 +47,10 @@ describe('Voice Mutations API (integration)', () => {
   });
 
   it('sends custom Idempotency-Key header when provided', async () => {
-    let capturedHeaders: Headers | null = null;
+    const captured: { headers: Headers | null } = { headers: null };
     server.use(
       http.post(`${TEST_CONFIG.baseUrl}/voice/calls/:id/hangup`, ({ request }) => {
-        capturedHeaders = request.headers;
+        captured.headers = request.headers;
         return HttpResponse.json({ request_id: 'req_123', playback_id: 'pb_123' }, { status: 202 });
       })
     );
@@ -60,7 +60,7 @@ describe('Voice Mutations API (integration)', () => {
       {},
       'my_custom_idempotency_key'
     );
-    expect(capturedHeaders?.get('Idempotency-Key')).toBe('my_custom_idempotency_key');
+    expect(captured.headers?.get('Idempotency-Key')).toBe('my_custom_idempotency_key');
   });
 
   // --- Error Contract Tests ---

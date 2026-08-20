@@ -22,16 +22,16 @@ describe('Events API (integration)', () => {
   });
 
   it('sends query params correctly on list', async () => {
-    let capturedUrl: URL | null = null;
+    const captured: {url: URL | null} = {url: null};
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/events`, ({ request }) => {
-        capturedUrl = new URL(request.url);
+        captured.url = new URL(request.url);
         return HttpResponse.json(eventListFixture());
       })
     );
     const client = createTestClient();
     await client.events.list({ call_id: 'call_1' });
-    expect(capturedUrl?.searchParams.get('call_id')).toBe('call_1');
+    expect(captured.url?.searchParams.get('call_id')).toBe('call_1');
   });
 
   it('propagates 404 errors from the backend', async () => {

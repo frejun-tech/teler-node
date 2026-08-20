@@ -30,10 +30,10 @@ describe('SIP Calls API (integration)', () => {
   });
 
   it('sends query params correctly on list', async () => {
-    let capturedUrl: URL | null = null;
+    const captured: {url: URL | null} = {url: null};
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/sip/calls`, ({ request }) => {
-        capturedUrl = new URL(request.url);
+        captured.url = new URL(request.url);
         return HttpResponse.json(sipCallListFixture());
       })
     );
@@ -44,10 +44,10 @@ describe('SIP Calls API (integration)', () => {
       to_number: '+18005550200',
       limit: 10,
     });
-    expect(capturedUrl?.searchParams.get('trunk_id')).toBe('st_01J5ABCDEFGHJKMNPQRSTVWXYZ');
-    expect(capturedUrl?.searchParams.get('from_number')).toBe('+18005550100');
-    expect(capturedUrl?.searchParams.get('to_number')).toBe('+18005550200');
-    expect(capturedUrl?.searchParams.get('limit')).toBe('10');
+    expect(captured.url?.searchParams.get('trunk_id')).toBe('st_01J5ABCDEFGHJKMNPQRSTVWXYZ');
+    expect(captured.url?.searchParams.get('from_number')).toBe('+18005550100');
+    expect(captured.url?.searchParams.get('to_number')).toBe('+18005550200');
+    expect(captured.url?.searchParams.get('limit')).toBe('10');
   });
 
   // --- Error Contract Tests ---

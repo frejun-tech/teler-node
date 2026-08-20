@@ -34,17 +34,17 @@ describe('SIP IP ACLs API (integration)', () => {
   });
 
   it('sends query params correctly on list', async () => {
-    let capturedUrl: URL | null = null;
+    const captured: {url: URL | null} = {url: null};
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/sip/ip-acls`, ({ request }) => {
-        capturedUrl = new URL(request.url);
+        captured.url = new URL(request.url);
         return HttpResponse.json(ipAclListFixture());
       })
     );
     const client = createTestClient();
     await client.sip.ipAcls.list({ search: 'Office', limit: 10 });
-    expect(capturedUrl?.searchParams.get('search')).toBe('Office');
-    expect(capturedUrl?.searchParams.get('limit')).toBe('10');
+    expect(captured.url?.searchParams.get('search')).toBe('Office');
+    expect(captured.url?.searchParams.get('limit')).toBe('10');
   });
 
   it('retrieves an IP ACL through the real http stack', async () => {

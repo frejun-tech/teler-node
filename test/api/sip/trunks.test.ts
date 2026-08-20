@@ -57,10 +57,10 @@ describe('SIP Trunks API (integration)', () => {
   });
 
   it('sends query params correctly on list', async () => {
-    let capturedUrl: URL | null = null;
+    const captured: {url: URL | null} = {url: null};
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/sip/trunks`, ({ request }) => {
-        capturedUrl = new URL(request.url);
+        captured.url = new URL(request.url);
         return HttpResponse.json(sipTrunkListFixture());
       })
     );
@@ -70,9 +70,9 @@ describe('SIP Trunks API (integration)', () => {
       status: [Status.ACTIVE],
       limit: 10,
     });
-    expect(capturedUrl?.searchParams.get('search')).toBe('Primary');
-    expect(capturedUrl?.searchParams.get('status')).toBe('active');
-    expect(capturedUrl?.searchParams.get('limit')).toBe('10');
+    expect(captured.url?.searchParams.get('search')).toBe('Primary');
+    expect(captured.url?.searchParams.get('status')).toBe('active');
+    expect(captured.url?.searchParams.get('limit')).toBe('10');
   });
 
   it('retrieves a sip trunk through the real http stack', async () => {

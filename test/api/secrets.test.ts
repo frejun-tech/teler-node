@@ -32,10 +32,10 @@ describe('Secrets API (integration)', () => {
   });
 
   it('sends query params correctly on list', async () => {
-    let capturedUrl: URL | null = null;
+    const captured: {url: URL | null} = {url: null};
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/secrets`, ({ request }) => {
-        capturedUrl = new URL(request.url);
+        captured.url = new URL(request.url);
         return HttpResponse.json(secretListFixture());
       })
     );
@@ -45,9 +45,9 @@ describe('Secrets API (integration)', () => {
       limit: 5,
       cursor_after: 'eyJpZCI6InNrXzEifQ',
     });
-    expect(capturedUrl?.searchParams.get('search')).toBe('prod_key');
-    expect(capturedUrl?.searchParams.get('limit')).toBe('5');
-    expect(capturedUrl?.searchParams.get('cursor_after')).toBe('eyJpZCI6InNrXzEifQ');
+    expect(captured.url?.searchParams.get('search')).toBe('prod_key');
+    expect(captured.url?.searchParams.get('limit')).toBe('5');
+    expect(captured.url?.searchParams.get('cursor_after')).toBe('eyJpZCI6InNrXzEifQ');
   });
 
   it('retrieves a secret through the real http stack', async () => {
