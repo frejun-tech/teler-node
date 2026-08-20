@@ -7,14 +7,6 @@ import { InternalServerErrorException } from '@/exceptions';
 
 describe('Recordings API (integration)', () => {
   it('returns a Readable stream, not JSON-parsed data', async () => {
-    server.use(
-      http.get(`${TEST_CONFIG.baseUrl}/recordings`, () => {
-        return new HttpResponse('RIFF....WAVEfmt ', {
-          status: 200,
-          headers: { 'Content-Type': 'audio/wav' },
-        });
-      })
-    );
     const client = createTestClient();
     const result = await client.recordings.retrieve({
       recording_id: 'rec_01J5ABCDEFGHJKMNPQRSTVWXYZ',
@@ -26,15 +18,15 @@ describe('Recordings API (integration)', () => {
 
   it('follows the 307 redirect to the signed URL and streams the final response', async () => {
     server.use(
-      http.get(`${TEST_CONFIG.baseUrl}/recordings`, () => {
-        return HttpResponse.redirect('https://s3.example.com/signed-audio-url', 307);
-      }),
-      http.get('https://s3.example.com/signed-audio-url', () => {
-        return new HttpResponse('RIFF....WAVEfmt ', {
+      http.get(`${TEST_CONFIG.baseUrl}/recordings`, () =>
+        HttpResponse.redirect('https://s3.example.com/signed-audio-url', 307)
+      ),
+      http.get('https://s3.example.com/signed-audio-url', () =>
+        new HttpResponse('RIFF....WAVEfmt ', {
           status: 200,
           headers: { 'Content-Type': 'audio/wav' },
-        });
-      })
+        })
+      )
     );
     const client = createTestClient();
     const result = await client.recordings.retrieve({
@@ -42,10 +34,10 @@ describe('Recordings API (integration)', () => {
     });
 
     expect(typeof (result as any).pipe).toBe('function');
-});
+  });
 
   it('sends recording_id and expires_in query params correctly', async () => {
-    const captured: {url: URL | null} = {url: null};
+    const captured: { url: URL | null } = { url: null };
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/recordings`, ({ request }) => {
         captured.url = new URL(request.url);
