@@ -10,12 +10,13 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
     "paths": {
       "@/*": ["src/*"],
       "@test/*": ["test/*"]
     },
     "strictNullChecks": true
   },
-  "include": ["src/**/*", "test/api/secrets.test.ts"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "test", "lib", "**/*spec.ts"]
 }
