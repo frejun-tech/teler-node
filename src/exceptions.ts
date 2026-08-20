@@ -83,9 +83,10 @@ export class UnprocessableRequestException extends TelerException {
   constructor(
     message = "Unprocessable Request.",
     details?: unknown,
-    code = 422
+    code = 422,
+    param = ""
   ) {
-    super(message, details, code);
+    super(message, details, code, param);
   }
 }
 

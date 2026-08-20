@@ -5,7 +5,7 @@ import type {
   CreateCallParams,
   VoiceCallFilters,
   VoiceCallResponse,
-  VoiceCallLegResponse,
+  VoiceCallLegResponse
 } from "../../types/voice";
 import type { HttpResourceManager } from "../http";
 
@@ -25,7 +25,7 @@ export class CallResourceManager {
       to_number: params.toNumber,
       flow_url: params.flowUrl,
       status_callback_url: params?.statusCallbackUrl,
-      record: params?.record ?? true,
+      record: params?.record ?? true
     };
 
     return this.http.post<CallResponse, CreateCallPayload>(

@@ -7,7 +7,7 @@ import type { CursorFilters } from "./common";
 export enum DeliveryStatus {
   PENDING = "pending",
   DELIVERED = "delivered",
-  FAILED_PERMANENT = "failed_permanent",
+  FAILED_PERMANENT = "failed_permanent"
 }
 
 export interface EventFilters extends CursorFilters {

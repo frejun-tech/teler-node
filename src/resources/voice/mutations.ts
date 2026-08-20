@@ -3,7 +3,7 @@ import type {
   MutationResponse,
   MutePayload,
   DTMFPayload,
-  PlayPayload,
+  PlayPayload
 } from "../../types/voice";
 import type { HttpResourceManager } from "../http";
 import { resolveIdempotencyKey } from "../../lib/idempotency";
@@ -36,7 +36,7 @@ export class MutationResourceManager {
       {
         headers: { "Idempotency-Key": key },
         retry: retry,
-        baseRetryDelayMs: baseRetryDelayMs,
+        baseRetryDelayMs: baseRetryDelayMs
       }
     );
   }
@@ -65,7 +65,7 @@ export class MutationResourceManager {
       {
         headers: { "Idempotency-Key": key },
         retry: retry,
-        baseRetryDelayMs: baseRetryDelayMs,
+        baseRetryDelayMs: baseRetryDelayMs
       }
     );
   }
@@ -94,7 +94,7 @@ export class MutationResourceManager {
       {
         headers: { "Idempotency-Key": key },
         retry: retry,
-        baseRetryDelayMs: baseRetryDelayMs,
+        baseRetryDelayMs: baseRetryDelayMs
       }
     );
   }
@@ -123,7 +123,7 @@ export class MutationResourceManager {
       {
         headers: { "Idempotency-Key": key },
         retry: retry,
-        baseRetryDelayMs: baseRetryDelayMs,
+        baseRetryDelayMs: baseRetryDelayMs
       }
     );
   }

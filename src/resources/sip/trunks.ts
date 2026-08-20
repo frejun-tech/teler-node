@@ -3,12 +3,12 @@ import type {
   CreateSipTrunkPayload,
   UpdateSipTrunkPayload,
   SipTrunkFilters,
-  SipTrunkResponse,
+  SipTrunkResponse
 } from "../../types/sip";
 import type { HttpResourceManager } from "../http";
 import type {
   VirtualNumberResponse,
-  VirtualNumberFilters,
+  VirtualNumberFilters
 } from "../../types/core";
 
 export class TrunkResourceManager {

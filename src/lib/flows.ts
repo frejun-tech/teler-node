@@ -1,7 +1,7 @@
 import type {
   DialNestedAction,
   RecordingType,
-  RingbackMode,
+  RingbackMode
 } from "../types/common";
 
 export class CallFlow {
@@ -36,7 +36,7 @@ export class CallFlow {
       ...(options.flowUrl !== undefined && { flow_url: options.flowUrl }),
       sample_rate: options.sampleRate ?? "8k",
       chunk_size: options.chunkSize ?? 400,
-      record: options.record ?? true,
+      record: options.record ?? true
     };
   }
 
@@ -55,7 +55,7 @@ export class CallFlow {
     return {
       action: "play",
       media_url: mediaUrl,
-      ...(flowUrl !== undefined && { flow_url: flowUrl }),
+      ...(flowUrl !== undefined && { flow_url: flowUrl })
     };
   }
 
@@ -68,7 +68,7 @@ export class CallFlow {
    */
   static hangup() {
     return {
-      action: "hangup",
+      action: "hangup"
     };
   }
 
@@ -118,21 +118,21 @@ export class CallFlow {
       timeout: options.timeout ?? 30,
       record: options.record ?? false,
       ...(options.customHeaders !== undefined && {
-        custom_headers: options.customHeaders,
+        custom_headers: options.customHeaders
       }),
       ...(options.statusCallbackUrl !== undefined && {
-        status_callback_url: options.statusCallbackUrl,
+        status_callback_url: options.statusCallbackUrl
       }),
       ringback: options.ringback ?? "passthrough",
       ...(options.dialMusic !== undefined && { dial_music: options.dialMusic }),
       ...(options.confirmSound !== undefined && {
-        confirm_sound: options.confirmSound,
+        confirm_sound: options.confirmSound
       }),
       ...(options.onNoAnswer !== undefined && {
-        on_no_answer: options.onNoAnswer,
+        on_no_answer: options.onNoAnswer
       }),
       ...(options.onBusy !== undefined && { on_busy: options.onBusy }),
-      ...(options.onFailure !== undefined && { on_failure: options.onFailure }),
+      ...(options.onFailure !== undefined && { on_failure: options.onFailure })
     };
   }
 }

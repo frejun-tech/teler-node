@@ -40,13 +40,13 @@ export type CreateCallPayload = {
 
 export enum StreamType {
   UNIDIRECTIONAL = 0,
-  BIDIRECTIONAL = 1,
+  BIDIRECTIONAL = 1
 }
 
 export enum StreamOP {
   RELAY = 0,
   PASS = 1,
-  STOP = 2,
+  STOP = 2
 }
 
 export type StreamData = string | Buffer | Uint8Array | ArrayBuffer | Blob;

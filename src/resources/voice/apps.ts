@@ -1,12 +1,12 @@
 import type {
   VirtualNumberResponse,
-  VirtualNumberFilters,
+  VirtualNumberFilters
 } from "../../types/core";
 import type {
   CreateVoiceAppPayload,
   VoiceAppFilters,
   UpdateVoiceAppPayload,
-  VoiceAppResponse,
+  VoiceAppResponse
 } from "../../types/voice";
 import type { CursorResponse, DefaultResponse } from "../../types/common";
 import type { HttpResourceManager } from "../http";

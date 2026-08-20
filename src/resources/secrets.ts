@@ -3,7 +3,7 @@ import type {
   UpdateSecretPayload,
   SecretFilters,
   SecretResponse,
-  SecretListResponse,
+  SecretListResponse
 } from "../types/secrets";
 import type { CursorResponse, DefaultResponse } from "../types/common";
 import type { HttpResourceManager } from "./http";

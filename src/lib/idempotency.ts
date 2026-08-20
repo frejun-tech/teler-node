@@ -1,7 +1,6 @@
 import { randomUUID } from "crypto";
 import { UnprocessableRequestException } from "../exceptions";
-
-const IDEMPOTENCY_KEY_MAX_LEN = 255;
+import { config } from "../config";
 
 /**
  * Resolves the idempotency key: uses the caller-supplied value if provided,
@@ -14,12 +13,14 @@ export function resolveIdempotencyKey(key?: string): string {
   }
   if (key.length === 0) {
     throw new UnprocessableRequestException(
-      "Idempotency-Key must not be empty. A UUID is recommended."
+      "Idempotency-Key must not be empty. A UUID is recommended.",
+      "Idempotency-Key"
     );
   }
-  if (key.length > IDEMPOTENCY_KEY_MAX_LEN) {
+  if (key.length > config.IDEMPOTENCY_KEY_MAX_LEN) {
     throw new UnprocessableRequestException(
-      `Idempotency-Key must not exceed ${IDEMPOTENCY_KEY_MAX_LEN} characters (got ${key.length}).`
+      `Idempotency-Key must not exceed ${config.IDEMPOTENCY_KEY_MAX_LEN} characters (got ${key.length}).`,
+      "Idempotency-Key"
     );
   }
   return key;

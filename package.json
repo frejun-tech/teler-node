@@ -49,6 +49,7 @@
     "build": "tsc",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
     "test": "vitest run",
     "test:unit": "vitest run --project unit",
     "test:api": "vitest run --project api",

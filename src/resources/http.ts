@@ -12,7 +12,7 @@ import {
   NotFoundException,
   RateLimitException,
   ConflictException,
-  NetworkException,
+  NetworkException
 } from "../exceptions";
 
 interface RequestOptions {
@@ -40,7 +40,7 @@ export class HttpResourceManager {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "x-api-key": apiKey,
+        "x-api-key": apiKey
       },
       paramsSerializer: {
         indexes: false,
@@ -59,8 +59,8 @@ export class HttpResourceManager {
             }
           });
           return searchParams.toString();
-        },
-      },
+        }
+      }
     });
   }
 
@@ -202,7 +202,7 @@ export class HttpResourceManager {
             data,
             params,
             headers,
-            ...config,
+            ...config
           }),
         retry ? CONFIG.RETRY_COUNT : 0,
         baseRetryDelayMs
@@ -231,7 +231,12 @@ export class HttpResourceManager {
           case 409:
             throw new ConflictException(message, details);
           case 422:
-            throw new UnprocessableRequestException(message, details);
+            throw new UnprocessableRequestException(
+              message,
+              details,
+              422,
+              param
+            );
           case 429:
             throw new RateLimitException(message, details);
           default:

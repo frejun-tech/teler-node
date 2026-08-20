@@ -4,7 +4,7 @@ import type {
   IpAclFilters,
   IpAclListResponse,
   IpAclResponse,
-  UpdateIpAclPayload,
+  UpdateIpAclPayload
 } from "../../types/sip";
 import type { HttpResourceManager } from "../http";
 

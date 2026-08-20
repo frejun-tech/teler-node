@@ -8,7 +8,7 @@ import type { SipTrunkListResponse } from "./sip";
 
 export enum Status {
   ACTIVE = "active",
-  INACTIVE = "inactive",
+  INACTIVE = "inactive"
 }
 
 type LocationResponse = {

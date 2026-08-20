@@ -3,7 +3,7 @@ import type {
   VirtualNumberFilters,
   UnassignVirtualNumberPayload,
   UpdateVirtualNumberPayload,
-  VirtualNumberResponse,
+  VirtualNumberResponse
 } from "../types/core";
 import type { HttpResourceManager } from "./http";
 import type { CursorResponse, DefaultResponse } from "../types/common";

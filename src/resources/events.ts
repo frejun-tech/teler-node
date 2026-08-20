@@ -1,7 +1,7 @@
 import type {
   EventResponse,
   EventFilters,
-  EventRedeliverResponse,
+  EventRedeliverResponse
 } from "../types/events";
 import type { HttpResourceManager } from "./http";
 import type { CursorResponse } from "../types/common";

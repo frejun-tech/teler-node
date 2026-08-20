@@ -17,7 +17,7 @@ export class RecordingResourceManager {
    */
   public async retrieve(params: RecordingParams): Promise<Readable> {
     return this.http.get<Readable>(this.basePath, params, {
-      responseType: "stream",
+      responseType: "stream"
     });
   }
 }

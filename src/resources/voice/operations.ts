@@ -30,7 +30,7 @@ export class OperationResourceManager {
       {
         headers: { "Idempotency-Key": key },
         retry: retry,
-        baseRetryDelayMs: baseRetryDelayMs,
+        baseRetryDelayMs: baseRetryDelayMs
       }
     );
   }

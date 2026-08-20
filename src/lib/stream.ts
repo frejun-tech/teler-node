@@ -3,7 +3,7 @@ import { StreamOP, StreamType } from "../types/voice";
 import type {
   StreamHandler,
   StreamHandlerResult,
-  StreamData,
+  StreamData
 } from "../types/voice";
 import { NotImplementedException, BadParametersException } from "../exceptions";
 import { logger } from "../logger";
@@ -64,7 +64,7 @@ export class StreamConnector {
    */
   public async bridgeStream(callWs: WebSocket): Promise<WebSocket> {
     const remoteWs = new WebSocket(this.remoteUrl, {
-      headers: this.remoteHeaders,
+      headers: this.remoteHeaders
     });
 
     const messageQueue: StreamData[] = [];
@@ -75,7 +75,7 @@ export class StreamConnector {
         {
           component: "StreamConnector",
           event: "connected",
-          remote_url: this.remoteUrl,
+          remote_url: this.remoteUrl
         },
         "Connected to remote server"
       );
@@ -171,7 +171,7 @@ export class StreamConnector {
           component: "StreamConnector",
           event: "call_disconnected",
           code: event.code,
-          reason: event.reason,
+          reason: event.reason
         },
         "Remote URL connection closed."
       );
@@ -184,7 +184,7 @@ export class StreamConnector {
           component: "StreamConnector",
           event: "call_disconnected",
           code: event.code,
-          reason: event.reason,
+          reason: event.reason
         },
         "Call disconnected."
       );

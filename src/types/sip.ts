@@ -7,7 +7,7 @@ import { Status } from "./core";
 
 export enum AuthenticationType {
   CREDENTIAL = "credential",
-  IP = "IP",
+  IP = "IP"
 }
 
 export type SipAuthCredentialInput = {
