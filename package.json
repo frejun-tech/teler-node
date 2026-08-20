@@ -8,7 +8,13 @@
     "voice-api",
     "node-sdk",
     "call",
-    "stream"
+    "stream",
+    "voice",
+    "voice-apps",
+    "sip",
+    "sip-trunks",
+    "websocket",
+    "bridges"
   ],
   "homepage": "https://github.com/frejun-tech/teler-node#readme",
   "bugs": {
@@ -56,7 +62,7 @@
     "ws": "^8.19.0"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^9.39.5",
     "@types/node": "^25.0.8",
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.53.0",
