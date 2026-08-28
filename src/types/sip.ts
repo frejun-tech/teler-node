@@ -37,6 +37,7 @@ export interface CreateSipTrunkPayload {
   authentication_type: AuthenticationType;
   auth_credential?: SipAuthCredentialInput;
   auth_addresses?: SipAuthAddressInput[];
+  ip_acl_id?: string;
   inbound_route?: InboundRoute;
   webhook_api_version?: WebhookApiVersion;
 }
@@ -51,6 +52,7 @@ export interface UpdateSipTrunkPayload {
   authentication_type?: AuthenticationType;
   auth_credential?: SipAuthCredentialInput;
   auth_addresses?: SipAuthAddressInput[];
+  ip_acl_id?: string;
   inbound_route?: InboundRoute;
   secret_id?: string;
   webhook_api_version?: WebhookApiVersion;
@@ -66,8 +68,11 @@ export interface SipTrunkResponse {
   channel_limit?: number | null;
   secure: boolean;
   is_active: boolean;
+  authentication_type: AuthenticationType;
   auth_ip_addresses?: string[];
   auth_credential_usernames?: string[];
+  ip_acl_id?: string;
+  ip_acl_name?: string;
   sip_route?: InboundRoute | null;
   webhook_url?: string;
   created_at?: string;
