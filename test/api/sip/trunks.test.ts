@@ -3,9 +3,14 @@ import { http, HttpResponse } from 'msw';
 import { createTestClient } from '@test/support/client';
 import { server } from '@test/msw/server';
 import { TEST_CONFIG } from '@test/support/env';
-import { sipTrunkListFixture } from '@test/support/fixtures/sip';
-import { AuthenticationType } from '@/types/sip';
-import { Status } from '@/types/core';
+import {
+  sipTrunkListFixture,
+  createSipTrunkPayloadFixture,
+  createSipTrunkCredentialPayloadFixture,
+  updateSipTrunkPayloadFixture,
+  sipTrunkFiltersFixture,
+} from '@test/support/fixtures/sip';
+import { AuthenticationType, Transport } from '@/types/sip';
 import {
   BadParametersException,
   UnprocessableRequestException,
@@ -15,34 +20,62 @@ import {
 describe('SIP Trunks API (integration)', () => {
   it('creates a sip trunk through the real http stack', async () => {
     const client = createTestClient();
-    const result = await client.sip.trunks.create({
-      name: 'Primary Trunk',
-      domain_name: 'trunk1.pstn.teler.io',
-      authentication_type: AuthenticationType.IP,
-      inbound_route: {
-        name: 'Primary Route',
-        sip_url: 'sip:primary@example.com',
-      },
-    });
+    const payload = createSipTrunkPayloadFixture();
+    const result = await client.sip.trunks.create(payload);
     expect(result.id).toMatch(/^st_/);
-    expect(result.name).toBe('Primary Trunk');
+    expect(result.name).toBe(payload.name);
     expect(result.secure).toBe(true);
+    expect(result.transport).toBe(Transport.TLS);
     expect(result.is_active).toBe(true);
   });
 
   it('creates a credential-authenticated sip trunk', async () => {
     const client = createTestClient();
-    const result = await client.sip.trunks.create({
-      name: 'Credential Trunk',
-      domain_name: 'trunk2.pstn.teler.io',
-      authentication_type: AuthenticationType.CREDENTIAL,
-      auth_credential: { username: 'sipuser1', password: 'password123' },
-      inbound_route: {
-        name: 'Credential Route',
-        sip_url: 'sip:cred@example.com',
-      },
-    });
+    const payload = createSipTrunkCredentialPayloadFixture();
+    const result = await client.sip.trunks.create(payload);
     expect(result.id).toMatch(/^st_/);
+  });
+
+  it('handles transport tls when secure is passed as true', async () => {
+    const client = createTestClient();
+    const payload = createSipTrunkPayloadFixture({ secure: true });
+    const result = await client.sip.trunks.create(payload);
+    expect(result.secure).toBe(true);
+    expect(result.transport).toBe(Transport.TLS);
+  });
+
+  it('handles transport tcp when secure is passed as false', async () => {
+    const client = createTestClient();
+    const payload = createSipTrunkPayloadFixture({ secure: false });
+    const result = await client.sip.trunks.create(payload);
+    expect(result.secure).toBe(false);
+    expect(result.transport).toBe(Transport.TCP);
+  });
+
+  it('handles transport when passed explicitly in create', async () => {
+    const client = createTestClient();
+    const payload = createSipTrunkCredentialPayloadFixture({ transport: Transport.UDP });
+    const result = await client.sip.trunks.create(payload);
+    expect(result.transport).toBe(Transport.UDP);
+  });
+
+  it('rejects payload when both secure and transport are passed', async () => {
+    const client = createTestClient();
+    const payload = createSipTrunkPayloadFixture({ secure: true, transport: Transport.TLS });
+    await expect(client.sip.trunks.create(payload)).rejects.toThrow(
+      "Provide either 'secure' or 'transport', not both; 'transport' supersedes 'secure'"
+    );
+  });
+
+  it('rejects UDP transport with IP authentication', async () => {
+    const client = createTestClient();
+    const payload = createSipTrunkPayloadFixture({
+      transport: Transport.UDP,
+      authentication_type: AuthenticationType.IP,
+    });
+    await expect(client.sip.trunks.create(payload)).rejects.toThrow(
+      'UDP transport requires credential (digest) authentication. IP/ACL-based authentication over UDP is not permitted.'
+    );
   });
 
   it('lists sip trunks', async () => {
@@ -65,11 +98,7 @@ describe('SIP Trunks API (integration)', () => {
       })
     );
     const client = createTestClient();
-    await client.sip.trunks.list({
-      search: 'Primary',
-      status: [Status.ACTIVE],
-      limit: 10,
-    });
+    await client.sip.trunks.list(sipTrunkFiltersFixture());
     expect(captured.url?.searchParams.get('search')).toBe('Primary');
     expect(captured.url?.searchParams.get('status')).toBe('active');
     expect(captured.url?.searchParams.get('limit')).toBe('10');
@@ -84,12 +113,19 @@ describe('SIP Trunks API (integration)', () => {
 
   it('updates a sip trunk through the real http stack', async () => {
     const client = createTestClient();
-    const updated = await client.sip.trunks.update('st_01J5ABCDEFGHJKMNPQRSTVWXYZ', {
-      name: 'Updated Trunk Name',
-      channel_limit: 200,
-    });
+    const payload = updateSipTrunkPayloadFixture();
+    const updated = await client.sip.trunks.update('st_01J5ABCDEFGHJKMNPQRSTVWXYZ', payload);
     expect(updated.id).toBe('st_01J5ABCDEFGHJKMNPQRSTVWXYZ');
-    expect(updated.name).toBe('Updated Trunk Name');
+    expect(updated.name).toBe(payload.name);
+  });
+
+  it('updates transport on a sip trunk through the real http stack', async () => {
+    const client = createTestClient();
+    const payload = updateSipTrunkPayloadFixture({ transport: Transport.TCP });
+    const updated = await client.sip.trunks.update('st_01J5ABCDEFGHJKMNPQRSTVWXYZ', payload);
+    expect(updated.id).toBe('st_01J5ABCDEFGHJKMNPQRSTVWXYZ');
+    expect(updated.transport).toBe(Transport.TCP);
+    expect(updated.secure).toBe(false);
   });
 
   it('deletes a sip trunk through the real http stack', async () => {

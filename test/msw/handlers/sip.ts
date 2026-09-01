@@ -9,6 +9,8 @@ import {
   sipTrunkListFixture,
 } from '../../support/fixtures/sip';
 import { virtualNumberListFixture } from '../../support/fixtures/vns';
+import { AuthenticationType, Transport } from '@/types/sip';
+import type { CreateSipTrunkPayload, UpdateSipTrunkPayload, SipTrunkResponse } from '@/types/sip';
 
 const url = (path: string) => `${TEST_CONFIG.baseUrl}${path}`;
 
@@ -53,9 +55,51 @@ export const sipHandlers = [
 
   // SIP Trunks
   http.post(url('/sip/trunks'), async ({ request }) => {
-    const body = (await request.json().catch(() => ({}))) as { name?: string };
+    const body = (await request.json().catch(() => ({}))) as CreateSipTrunkPayload;
+
+    if (body.transport !== undefined && body.secure !== undefined) {
+      return HttpResponse.json(
+        {
+          success: false,
+          message:
+            "Provide either 'secure' or 'transport', not both; 'transport' supersedes 'secure'",
+        },
+        { status: 422 }
+      );
+    }
+
+    let transport: Transport;
+    let secure: boolean;
+    if (body.transport) {
+      transport = body.transport;
+      secure = transport === Transport.TLS;
+    } else if (body.secure !== undefined) {
+      secure = body.secure;
+      transport = secure ? Transport.TLS : Transport.TCP;
+    } else {
+      secure = true;
+      transport = Transport.TLS;
+    }
+
+    const authType = body.authentication_type || AuthenticationType.IP;
+    if (transport === Transport.UDP && authType !== AuthenticationType.CREDENTIAL) {
+      return HttpResponse.json(
+        {
+          success: false,
+          message:
+            'UDP transport requires credential (digest) authentication. IP/ACL-based authentication over UDP is not permitted.',
+        },
+        { status: 422 }
+      );
+    }
+
     return HttpResponse.json(
-      sipTrunkFixture({ name: body.name || 'Primary Trunk' }),
+      sipTrunkFixture({
+        name: body.name || 'Primary Trunk',
+        secure,
+        transport,
+        authentication_type: authType,
+      }),
       { status: 201 }
     );
   }),
@@ -71,11 +115,57 @@ export const sipHandlers = [
   ),
 
   http.patch(url('/sip/trunks/:id'), async ({ params, request }) => {
-    const body = (await request.json().catch(() => ({}))) as Partial<
-      ReturnType<typeof sipTrunkFixture>
-    >;
+    const body = (await request.json().catch(() => ({}))) as UpdateSipTrunkPayload;
+
+    if (body.transport !== undefined && body.secure !== undefined) {
+      return HttpResponse.json(
+        {
+          success: false,
+          message:
+            "Provide either 'secure' or 'transport', not both; 'transport' supersedes 'secure'",
+        },
+        { status: 422 }
+      );
+    }
+
+    let transportOverrides: Partial<SipTrunkResponse> = {};
+    let targetTransport: Transport | undefined = body.transport;
+
+    if (body.transport) {
+      targetTransport = body.transport;
+      transportOverrides = {
+        transport: body.transport,
+        secure: body.transport === Transport.TLS,
+      };
+    } else if (body.secure !== undefined) {
+      targetTransport = body.secure ? Transport.TLS : Transport.TCP;
+      transportOverrides = {
+        secure: body.secure,
+        transport: targetTransport,
+      };
+    }
+
+    if (
+      targetTransport === Transport.UDP &&
+      body.authentication_type &&
+      body.authentication_type !== AuthenticationType.CREDENTIAL
+    ) {
+      return HttpResponse.json(
+        {
+          success: false,
+          message:
+            'UDP transport requires credential (digest) authentication. IP/ACL-based authentication over UDP is not permitted.',
+        },
+        { status: 422 }
+      );
+    }
+
     return HttpResponse.json(
-      sipTrunkFixture({ id: params.id as string, ...body })
+      sipTrunkFixture({
+        id: params.id as string,
+        ...body,
+        ...transportOverrides,
+      })
     );
   }),
 

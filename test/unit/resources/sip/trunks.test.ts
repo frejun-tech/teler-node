@@ -15,6 +15,7 @@ import {
   virtualNumberFiltersFixture,
 } from '@test/support/fixtures/vns';
 import { Status } from '@/types/core';
+import { Transport } from '@/types/sip';
 
 describe('TrunkResourceManager (unit)', () => {
   let http: MockHttp;
@@ -45,6 +46,41 @@ describe('TrunkResourceManager (unit)', () => {
       await trunks.create(payload);
 
       expect(http.post).toHaveBeenCalledWith('/sip/trunks', payload);
+    });
+
+    it('handles transport tls when secure is passed as true', async () => {
+      const payload = createSipTrunkPayloadFixture({ secure: true });
+      const fixture = sipTrunkFixture({ secure: true, transport: Transport.TLS });
+      http.post.mockResolvedValue(fixture);
+
+      const result = await trunks.create(payload);
+
+      expect(http.post).toHaveBeenCalledWith('/sip/trunks', payload);
+      expect(result.transport).toBe(Transport.TLS);
+      expect(result.secure).toBe(true);
+    });
+
+    it('handles transport tcp when secure is passed as false', async () => {
+      const payload = createSipTrunkPayloadFixture({ secure: false });
+      const fixture = sipTrunkFixture({ secure: false, transport: Transport.TCP });
+      http.post.mockResolvedValue(fixture);
+
+      const result = await trunks.create(payload);
+
+      expect(http.post).toHaveBeenCalledWith('/sip/trunks', payload);
+      expect(result.transport).toBe(Transport.TCP);
+      expect(result.secure).toBe(false);
+    });
+
+    it('handles transport when passed explicitly', async () => {
+      const payload = createSipTrunkCredentialPayloadFixture({ transport: Transport.UDP });
+      const fixture = sipTrunkFixture({ transport: Transport.UDP });
+      http.post.mockResolvedValue(fixture);
+
+      const result = await trunks.create(payload);
+
+      expect(http.post).toHaveBeenCalledWith('/sip/trunks', payload);
+      expect(result.transport).toBe(Transport.UDP);
     });
 
     it('returns a trunk with the st_ id prefix', async () => {
@@ -196,6 +232,21 @@ describe('TrunkResourceManager (unit)', () => {
         '/sip/trunks/st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
         payload
       );
+    });
+
+    it('updates transport on a trunk', async () => {
+      const payload = updateSipTrunkPayloadFixture({ transport: Transport.TCP, secure: false });
+      const fixture = sipTrunkFixture({ transport: Transport.TCP, secure: false });
+      http.patch.mockResolvedValue(fixture);
+
+      const result = await trunks.update('st_01J5ABCDEFGHJKMNPQRSTVWXYZ', payload);
+
+      expect(http.patch).toHaveBeenCalledWith(
+        '/sip/trunks/st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+        payload
+      );
+      expect(result.transport).toBe(Transport.TCP);
+      expect(result.secure).toBe(false);
     });
 
     it('returns the response object reference unchanged', async () => {

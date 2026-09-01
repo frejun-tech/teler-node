@@ -10,6 +10,12 @@ export enum AuthenticationType {
   IP = "IP"
 }
 
+export enum Transport {
+  TLS = "tls",
+  TCP = "tcp",
+  UDP = "udp"
+}
+
 export type SipAuthCredentialInput = {
   username: string;
   password: string;
@@ -29,6 +35,7 @@ export type InboundRoute = {
 export interface CreateSipTrunkPayload {
   name: string;
   secure?: boolean;
+  transport?: Transport;
   secret_id?: string;
   domain_name: string;
   recording?: boolean;
@@ -47,6 +54,7 @@ export interface UpdateSipTrunkPayload {
   channel_limit?: number;
   recording?: boolean;
   secure?: boolean;
+  transport?: Transport;
   is_active?: boolean;
   webhook_url?: string;
   authentication_type?: AuthenticationType;
@@ -67,8 +75,9 @@ export interface SipTrunkResponse {
   recording_enabled: boolean;
   channel_limit?: number | null;
   secure: boolean;
+  transport?: Transport;
   is_active: boolean;
-  authentication_type: AuthenticationType;
+  authentication_type?: AuthenticationType;
   auth_ip_addresses?: string[];
   auth_credential_usernames?: string[];
   ip_acl_id?: string;

@@ -1,4 +1,4 @@
-import { AuthenticationType } from '@/types/sip';
+import { AuthenticationType, Transport } from '@/types/sip';
 import type {
   SipCallResponse,
   SipCallFilters,
@@ -184,6 +184,7 @@ export const sipTrunkFixture = (
   recording_enabled: false,
   channel_limit: 100,
   secure: true,
+  transport: Transport.TLS,
   is_active: true,
   authentication_type: AuthenticationType.IP,
   auth_ip_addresses: ['192.168.1.1'],
@@ -223,106 +224,133 @@ export const sipTrunkListFixture = (
   ...overrides,
 });
 
+const mergeSipPayload = <T extends { secure?: boolean; transport?: Transport }>(
+  base: T,
+  overrides: Partial<T>
+): T => {
+  const result = { ...base, ...overrides };
+  if ('transport' in overrides && !('secure' in overrides)) {
+    delete result.secure;
+  }
+  return result;
+};
+
 export const createSipTrunkPayloadFixture = (
   overrides: Partial<CreateSipTrunkPayload> = {}
-): CreateSipTrunkPayload => ({
-  name: 'Primary Trunk',
-  domain_name: 'trunk1.pstn.teler.io',
-  authentication_type: AuthenticationType.IP,
-  inbound_route: {
-    name: 'Primary Route',
-    sip_url: 'sip:primary@example.com',
-    sip_user: 'primary_user',
-  },
-  secure: true,
-  secret_id: 'sk_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-  recording: false,
-  webhook_url: 'https://example.com/webhook',
-  channel_limit: 100,
-  auth_addresses: [{ name: 'Office Router', address: '192.168.1.1' }],
-  webhook_api_version: '2026-06-01',
-  ...overrides,
-});
+): CreateSipTrunkPayload =>
+  mergeSipPayload(
+    {
+      name: 'Primary Trunk',
+      domain_name: 'trunk1.pstn.teler.io',
+      authentication_type: AuthenticationType.IP,
+      inbound_route: {
+        name: 'Primary Route',
+        sip_url: 'sip:primary@example.com',
+        sip_user: 'primary_user',
+      },
+      secure: true,
+      secret_id: 'sk_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+      recording: false,
+      webhook_url: 'https://example.com/webhook',
+      channel_limit: 100,
+      auth_addresses: [{ name: 'Office Router', address: '192.168.1.1' }],
+      webhook_api_version: '2026-06-01',
+    },
+    overrides
+  );
 
 export const createSipTrunkIpAclPayloadFixture = (
   overrides: Partial<CreateSipTrunkPayload> = {}
-): CreateSipTrunkPayload => ({
-  name: 'ACL-based Trunk',
-  domain_name: 'trunk3.pstn.teler.io',
-  authentication_type: AuthenticationType.IP,
-  inbound_route: {
-    name: 'ACL Route',
-    sip_url: 'sip:acl@example.com',
-    sip_user: 'acl_user',
-  },
-  secure: true,
-  ip_acl_id: 'acl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-  channel_limit: 100,
-  webhook_api_version: '2026-06-01',
-  ...overrides,
-});
+): CreateSipTrunkPayload =>
+  mergeSipPayload(
+    {
+      name: 'ACL-based Trunk',
+      domain_name: 'trunk3.pstn.teler.io',
+      authentication_type: AuthenticationType.IP,
+      inbound_route: {
+        name: 'ACL Route',
+        sip_url: 'sip:acl@example.com',
+        sip_user: 'acl_user',
+      },
+      secure: true,
+      ip_acl_id: 'acl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+      channel_limit: 100,
+      webhook_api_version: '2026-06-01',
+    },
+    overrides
+  );
 
 export const createSipTrunkCredentialPayloadFixture = (
   overrides: Partial<CreateSipTrunkPayload> = {}
-): CreateSipTrunkPayload => ({
-  name: 'Credential Trunk',
-  domain_name: 'trunk2.pstn.teler.io',
-  authentication_type: AuthenticationType.CREDENTIAL,
-  inbound_route: {
-    name: 'Credential Route',
-    sip_url: 'sip:cred@example.com',
-  },
-  auth_credential: {
-    username: 'sipuser1',
-    password: 'str0ngP@ssw0rd',
-  },
-  ...overrides,
-});
+): CreateSipTrunkPayload =>
+  mergeSipPayload(
+    {
+      name: 'Credential Trunk',
+      domain_name: 'trunk2.pstn.teler.io',
+      authentication_type: AuthenticationType.CREDENTIAL,
+      inbound_route: {
+        name: 'Credential Route',
+        sip_url: 'sip:cred@example.com',
+      },
+      auth_credential: {
+        username: 'sipuser1',
+        password: 'str0ngP@ssw0rd',
+      },
+      secure: true,
+    },
+    overrides
+  );
 
 export const updateSipTrunkPayloadFixture = (
   overrides: Partial<UpdateSipTrunkPayload> = {}
-): UpdateSipTrunkPayload => ({
-  name: 'Updated Trunk Name',
-  channel_limit: 200,
-  recording: true,
-  secure: true,
-  is_active: true,
-  webhook_url: 'https://example.com/webhook-updated',
-  authentication_type: AuthenticationType.CREDENTIAL,
-  auth_credential: {
-    username: 'sipuser_updated',
-    password: 'n3wStr0ngP@ss',
-  },
-  inbound_route: {
-    name: 'Updated Route',
-    sip_url: 'sip:updated@example.com',
-    sip_user: 'updated_user',
-  },
-  secret_id: 'sk_01J5BBBBBBBBBBBBBBBBBBBBBB',
-  webhook_api_version: '2026-06-01',
-  ...overrides,
-});
+): UpdateSipTrunkPayload =>
+  mergeSipPayload(
+    {
+      name: 'Updated Trunk Name',
+      channel_limit: 200,
+      recording: true,
+      secure: true,
+      is_active: true,
+      webhook_url: 'https://example.com/webhook-updated',
+      authentication_type: AuthenticationType.CREDENTIAL,
+      auth_credential: {
+        username: 'sipuser_updated',
+        password: 'n3wStr0ngP@ss',
+      },
+      inbound_route: {
+        name: 'Updated Route',
+        sip_url: 'sip:updated@example.com',
+        sip_user: 'updated_user',
+      },
+      secret_id: 'sk_01J5BBBBBBBBBBBBBBBBBBBBBB',
+      webhook_api_version: '2026-06-01',
+    },
+    overrides
+  );
 
 export const updateSipTrunkIpAclPayloadFixture = (
   overrides: Partial<UpdateSipTrunkPayload> = {}
-): UpdateSipTrunkPayload => ({
-  name: 'Updated Trunk Name',
-  channel_limit: 200,
-  recording: true,
-  secure: true,
-  is_active: true,
-  webhook_url: 'https://example.com/webhook-updated',
-  authentication_type: AuthenticationType.IP,
-  ip_acl_id: 'acl_01J5BBBBBBBBBBBBBBBBBBBBBB',
-  inbound_route: {
-    name: 'Updated Route',
-    sip_url: 'sip:updated@example.com',
-    sip_user: 'updated_user',
-  },
-  secret_id: 'sk_01J5BBBBBBBBBBBBBBBBBBBBBB',
-  webhook_api_version: '2026-06-01',
-  ...overrides,
-});
+): UpdateSipTrunkPayload =>
+  mergeSipPayload(
+    {
+      name: 'Updated Trunk Name',
+      channel_limit: 200,
+      recording: true,
+      secure: true,
+      is_active: true,
+      webhook_url: 'https://example.com/webhook-updated',
+      authentication_type: AuthenticationType.IP,
+      ip_acl_id: 'acl_01J5BBBBBBBBBBBBBBBBBBBBBB',
+      inbound_route: {
+        name: 'Updated Route',
+        sip_url: 'sip:updated@example.com',
+        sip_user: 'updated_user',
+      },
+      secret_id: 'sk_01J5BBBBBBBBBBBBBBBBBBBBBB',
+      webhook_api_version: '2026-06-01',
+    },
+    overrides
+  );
 
 export const sipTrunkFiltersFixture = (
   overrides: Partial<SipTrunkFilters> = {}
