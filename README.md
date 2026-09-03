@@ -7,17 +7,17 @@ This Node library offers a lightweight and developer-friendly abstraction over t
 Teler is a programmable voice API by FreJun. It handles carriers, phone numbers, and real-time audio streaming so you can connect AI models directly to phone calls. → [frejun.ai](https://frejun.ai)
 
 ## Requirements
-- Node.js 14.x or later
+- Node.js 18.x or later
 - npm or yarn
 
 ## Features
 - **Initiate Calls** — Start outbound calls using the Teler REST API.
-- **Call Flows** — Control call behavior with `Streaming`, `Playing Audio`, and `Hanging up`.
-- **Call Controls** — Manage live calls in real time with `mute`, `DTMF`, `playback`, and `transfer`.
-- **Real-time Media Streaming** — Stream call audio via WebSockets for Conversational AI, transcription, and insights.
+- **Call Flows** — Control call behavior with `CallFlow` helpers (`stream`, `play`, `hangup`, `dial`).
+- **Call Controls & Mutations** — Manage live calls in real time with `mute`, `DTMF`, `playback`, and `transfer`.
+- **Real-time Media Streaming** — Stream call audio via WebSockets using `StreamConnector` for Conversational AI, transcription, and insights.
 - **Voice Apps & Virtual Numbers** — Configure call routing and manage virtual numbers.
-- **SIP Trunking & Webhooks** — Connect your own carrier/PBX and track call events reliably.
-- **Secrets** — Create and rotate secrets to authenticate incoming webhooks from Teler.
+- **SIP Trunking & IP ACLs** — Connect your own carrier/PBX and manage IP access control lists.
+- **Secrets & Webhooks** — Create and rotate secrets to authenticate incoming webhooks from Teler.
 
 ## Installation
 
@@ -57,19 +57,30 @@ const call = await client.voice.calls.create({
 
 ## Call Flows
 
-When a call connects, Teler will fetch instructions from your `flow_url`. You can control the call using different actions:
+When a call connects, Teler fetches instructions from your `flow_url`. You can construct responses using the `CallFlow` helper class or raw JSON action payloads:
 
 ### Stream
 
 Initiates bidirectional WebSocket streaming of the call's audio.
 
+```typescript
+import { CallFlow } from "@frejun/teler";
+
+const flow = CallFlow.stream("wss://your-domain.com/stream", {
+  sampleRate: "8k",
+  chunkSize: 400,
+  record: true
+});
+```
+
+Equivalent JSON:
 ```json
 {
     "action": "stream",
     "ws_url": "wss://your-domain.com/stream",
     "sample_rate": "8k",
     "chunk_size": 400,
-    "record": true,
+    "record": true
 }
 ```
 
@@ -77,6 +88,13 @@ Initiates bidirectional WebSocket streaming of the call's audio.
 
 Plays an audio file to the caller.
 
+```typescript
+import { CallFlow } from "@frejun/teler";
+
+const flow = CallFlow.play("https://example.com/audio.mp3");
+```
+
+Equivalent JSON:
 ```json
 {
     "action": "play",
@@ -88,10 +106,30 @@ Plays an audio file to the caller.
 
 Ends the call immediately.
 
+```typescript
+import { CallFlow } from "@frejun/teler";
+
+const flow = CallFlow.hangup();
+```
+
+Equivalent JSON:
 ```json
 {
     "action": "hangup"
 }
+```
+
+### Dial
+
+Originates an outbound leg and bridges it once the target answers.
+
+```typescript
+import { CallFlow } from "@frejun/teler";
+
+const flow = CallFlow.dial("+919967xxxx", {
+  timeout: 30,
+  record: true
+});
 ```
 
 
@@ -101,32 +139,32 @@ The library provides a powerful interface for integrating real-time call audio s
 
 ### StreamConnector
 
-The `StreamConnector` lets you bridge the Teler call audio stream to your desired remote websocket endpoint (e.g., an AI agent). It handles message relaying between the two streams via pluggable handlers, making it highly customizable. It also handles graceful shutdown of the media streams in case of any unexpected errors.
+The `StreamConnector` lets you bridge the Teler call audio stream to your desired remote WebSocket endpoint (e.g., an AI agent). It handles message relaying between the two streams via pluggable handlers, making it highly customizable. It also handles graceful shutdown of the media streams in case of any unexpected errors.
 
-It takes the following parameters:
+`StreamConnector` accepts the following parameters in order:
 
-- `streamType` - Only `StreamType.BIDIRECTIONAL` is supported for now.
-- `remoteUrl` - The remote websocket URL where the call audio stream needs to be bridged.
-- `callStreamHandler` - An asynchronous `StreamHandler` function that handles incoming messages from the Teler call audio stream.
-- `remoteStreamHandler` - An asynchronous `StreamHandler` function that handles incoming messages from the remote audio stream (e.g., your AI agent).
-- `remoteHeaders` - Optional HTTP headers (e.g., authentication tokens, API KEY) sent when establishing the websocket connection to the remote endpoint.
+- `remoteUrl` — The remote WebSocket URL where the call audio stream needs to be bridged.
+- `streamType` — Stream mode (defaults to `StreamType.BIDIRECTIONAL`).
+- `callStreamHandler` — An asynchronous `StreamHandler` function that handles incoming messages from the Teler call audio stream.
+- `remoteStreamHandler` — An asynchronous `StreamHandler` function that handles incoming messages from the remote audio stream (e.g., your AI agent).
+- `headers` — Optional HTTP headers (e.g., authentication tokens, API Key) sent when establishing the WebSocket connection to the remote endpoint.
 
 ### Stream Handlers
 
-A `StreamHandler` asynchronous function receives incoming messages over a WebSocket, processes them, and returns a tuple (for example, `[StreamData, StreamOp]`). The `StreamOp` value determines the action that the `StreamConnector` takes next.
+A `StreamHandler` asynchronous function receives incoming messages over a WebSocket, processes them, and returns a `[StreamData, StreamOP]` tuple. The `StreamOP` value determines the action that the `StreamConnector` takes next.
 
-- **`callStreamHandler`** - Receives audio data from the caller and forwards it to an AI model.
-- **`remoteStreamHandler`** - Receives audio data from the remote endpoint (e.g., AI agent's response) and sends back to the caller.
+- **`callStreamHandler`** — Receives audio data from the caller and forwards it to an AI model.
+- **`remoteStreamHandler`** — Receives audio data from the remote endpoint (e.g., AI agent's response) and sends it back to the caller.
 
-`StreamOp` can be one of the following:
+`StreamOP` can be one of the following:
 
-- **`StreamOp.RELAY`**  
+- **`StreamOP.RELAY`**  
   Relays the message to the other stream. The first element of the returned tuple must contain the message to relay.
 
-- **`StreamOp.PASS`**  
+- **`StreamOP.PASS`**  
   Does not relay any message to the other stream. Any message included in the returned tuple is ignored.
 
-- **`StreamOp.STOP`**  
+- **`StreamOP.STOP`**  
   Stops both streams, ends the call, and exits gracefully. Any message included in the returned tuple is ignored.
 
 ### `StreamData`
@@ -142,30 +180,33 @@ A `StreamHandler` asynchronous function receives incoming messages over a WebSoc
 ### Example
 
 ```typescript
-import { StreamConnector, StreamType } from "teler";
+import { StreamConnector, StreamType, StreamOP } from "@frejun/teler";
+import { WebSocketServer, WebSocket } from "ws";
 
 export const wss = new WebSocketServer({
   noServer: true,
 });
 
-const connector = new StreamConnector({
-  streamType: StreamType.BIDIRECTIONAL,
-  remoteUrl: "wss://your-ai-agent.example.com/stream",
-  remoteHeaders: {
-    Authorization: `Bearer ${process.env.AGENT_API_KEY}`,
-  },
-  callStreamHandler: async (message) => {
+const connector = new StreamConnector(
+  "wss://your-ai-agent.example.com/stream",
+  StreamType.BIDIRECTIONAL,
+  async (message) => {
     // Handle audio/data coming from Teler
     console.log("Received from call:", message);
+    return [message, StreamOP.RELAY];
   },
-  remoteStreamHandler: async (message) => {
+  async (message) => {
     // Handle audio/data coming from your remote AI agent
     console.log("Received from agent:", message);
+    return [message, StreamOP.RELAY];
   },
-});
+  {
+    Authorization: `Bearer ${process.env.AGENT_API_KEY}`,
+  }
+);
 
-wss.on('connection', async (callWs: WebSocket) => {
-  console.log('Teler connected to WebSocket');
+wss.on("connection", async (callWs: WebSocket) => {
+  console.log("Teler connected to WebSocket");
   await connector.bridgeStream(callWs);
 });
 ```
@@ -173,7 +214,7 @@ wss.on('connection', async (callWs: WebSocket) => {
 
 ## Error Handling
 
-`teler` throws typed exceptions that extend the base `TelerException` class, allowing you to handle errors precisely.
+`@frejun/teler` throws typed exceptions that extend the base `TelerException` class, allowing you to handle errors precisely.
 
 ### Exception Hierarchy
 ```
@@ -186,7 +227,8 @@ TelerException (base)
 ├── UnprocessableRequestException (422)
 ├── RateLimitException (429)
 ├── InternalServerErrorException (500)
-└── NotImplementedException (501)
+├── NotImplementedException (501)
+└── NetworkException
 ```
 
 
@@ -204,12 +246,13 @@ TelerException (base)
 | `RateLimitException` | `429` | The rate limit has been exceeded |
 | `InternalServerErrorException` | `500` | An internal server error occurred |
 | `NotImplementedException` | `501` | The requested feature is not implemented |
+| `NetworkException` | — | Network-level failure (timeout, DNS failure, connection refused) |
 
 ### Properties
 
 All exceptions expose:
 - `message` — human-readable error description
-- `code` — HTTP-style status code
+- `code` — HTTP-style status code or error code
 - `name` — exception class name (e.g. `"BadParametersException"`)
 - `details` — optional additional context about the error (e.g. raw response body)
 
@@ -229,4 +272,4 @@ When an exception is serialized (e.g. in logs or an API error response), it is w
     "details": "Request failed with status code 403"
   }
 }
-```
+```
