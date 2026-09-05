@@ -5,6 +5,7 @@ import { server } from '@test/msw/server';
 import { TEST_CONFIG } from '@test/support/env';
 import {
   BadParametersException,
+  GoneException,
   InternalServerErrorException,
 } from '@/exceptions';
 
@@ -145,6 +146,27 @@ describe('Voice Operations API (integration)', () => {
       name: 'ConflictException',
       code: 409,
     });
+  });
+
+  it('propagates 410 Gone error when call session has ended', async () => {
+    server.use(
+      http.post(`${TEST_CONFIG.baseUrl}/voice/calls/:id/transfer`, () =>
+        HttpResponse.json(
+          {
+            success: false,
+            message: 'The requested call session has ended or is gone.',
+          },
+          { status: 410 }
+        )
+      )
+    );
+    const client = createTestClient();
+    await expect(
+      client.voice.operations.transfer('cs_ended', {
+        target: { kind: 'pstn', number: '+18005550300' },
+        mode: 'cold',
+      })
+    ).rejects.toThrow(GoneException);
   });
 
   it('propagates 500 Internal Server Error', async () => {

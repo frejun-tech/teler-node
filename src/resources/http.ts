@@ -12,7 +12,8 @@ import {
   NotFoundException,
   RateLimitException,
   ConflictException,
-  NetworkException
+  NetworkException,
+  GoneException
 } from "../exceptions";
 
 interface RequestOptions {
@@ -230,6 +231,8 @@ export class HttpResourceManager {
             throw new NotFoundException(message, details);
           case 409:
             throw new ConflictException(message, details);
+          case 410:
+            throw new GoneException(message, details);
           case 422:
             throw new UnprocessableRequestException(
               message,

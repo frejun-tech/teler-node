@@ -77,6 +77,20 @@ export class ConflictException extends TelerException {
 
 /**
  *
+ *
+ */
+export class GoneException extends TelerException {
+  constructor(
+    message = "Resource is no longer available.",
+    details?: unknown,
+    code = 410
+  ) {
+    super(message, details, code);
+  }
+}
+
+/**
+ *
  * If the request body is invalid.
  */
 export class UnprocessableRequestException extends TelerException {

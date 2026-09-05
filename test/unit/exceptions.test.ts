@@ -7,6 +7,7 @@ import {
   ForbiddenException,
   NotFoundException,
   ConflictException,
+  GoneException,
   RateLimitException,
   InternalServerErrorException,
   NotImplementedException,
@@ -150,6 +151,23 @@ describe('TelerException hierarchy', () => {
     });
   });
 
+  describe('GoneException (410)', () => {
+    it('has name GoneException and code 410', () => {
+      const err = new GoneException('Resource is no longer available.');
+      expect(err.name).toBe('GoneException');
+      expect(err.code).toBe(410);
+      expect(err.message).toBe('Resource is no longer available.');
+    });
+
+    it('is an instance of TelerException', () => {
+      expect(new GoneException()).toBeInstanceOf(TelerException);
+    });
+
+    it('defaults to generic message when none provided', () => {
+      expect(new GoneException().message).toBe('Resource is no longer available.');
+    });
+  });
+
   describe('RateLimitException (429)', () => {
     it('has name RateLimitException and code 429', () => {
       const err = new RateLimitException('Rate limit exceeded. Retry after 60s.');
@@ -217,6 +235,7 @@ describe('TelerException hierarchy', () => {
       new ForbiddenException(),
       new NotFoundException(),
       new ConflictException(),
+      new GoneException(),
       new RateLimitException(),
       new InternalServerErrorException(),
       new NotImplementedException(),
