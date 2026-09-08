@@ -3,7 +3,12 @@ import type {
   RecordingType,
   RingbackMode
 } from "../types/common";
+import { toSnakeCase } from "./utils";
 
+/**
+ * Utility class for building call flow actions.
+ * Provides static methods to construct stream, play, hangup, and dial actions.
+ */
 export class CallFlow {
   /**
    * Build and return stream action flow.
@@ -15,7 +20,6 @@ export class CallFlow {
    *
    * @param wsUrl - Remote WebSocket URL
    * @param options - Options object
-   * @param options.flowUrl - Optional. Execute flow_url for the next flow. **(Beta)**
    * @param options.sampleRate - Sample rate of Teler audio (Default: "8k")
    * @param options.chunkSize - Chunk size of Teler audio (Default: 400)
    * @param options.record - Record the call (Default: true)
@@ -24,7 +28,6 @@ export class CallFlow {
   static stream(
     wsUrl: string,
     options: {
-      flowUrl?: string;
       sampleRate?: string;
       chunkSize?: number;
       record?: boolean;
@@ -33,7 +36,6 @@ export class CallFlow {
     return {
       action: "stream",
       ws_url: wsUrl,
-      ...(options.flowUrl !== undefined && { flow_url: options.flowUrl }),
       sample_rate: options.sampleRate ?? "8k",
       chunk_size: options.chunkSize ?? 400,
       record: options.record ?? true
@@ -43,9 +45,8 @@ export class CallFlow {
   /**
    * Build and return play action flow
    *
-   * Plays a single audio file into the call, then ends the flow
-   * (the call itself continues to whatever action comes next, or
-   * ends if this was the last step).
+   * Plays a single audio file into the call
+   * (the call itself continues to whatever action comes next).
    *
    * @param mediaUrl - URL of the audio to be played.
    * @param flowUrl - Optional. Execute flow_url for the next flow. **(Beta)**
@@ -81,11 +82,10 @@ export class CallFlow {
    *
    * @param to - E.164 phone number or SIP URI (e.g. "sip:user@host"). Single target only.
    * @param options - Options object
-   * @param options.flowUrl - Execute flow_url for the next flow. **(Beta)**
    * @param options.timeout - Seconds to wait for pickup before treating as no-answer. Range 1..600 (Default: 30)
    * @param options.record - Recording mode: `false`, `true`/"stereo", "mono", or "per_leg" (Default: false)
    * @param options.customHeaders - Extra SIP headers on the outbound INVITE. Keys must start with "X-". Max 16 headers, values <= 256 bytes.
-   * @param options.statusCallbackUrl - Override where lifecycle events for this dial land (defaults to the Voice App's webhook_url).
+   * @param options.statusCallbackUrl - Override where lifecycle events for this dial land (defaults to the Voice App's webhookUrl).
    * @param options.ringback - "passthrough" (caller hears target's ring) or "suppress" (silence until bridge) (Default: "passthrough")
    * @param options.dialMusic - Nested action (`play` or `hangup`) played to the caller while the target rings.
    * @param options.confirmSound - Nested action (`play` or `hangup`) played to the target immediately after pickup, before bridging.
@@ -98,7 +98,6 @@ export class CallFlow {
   static dial(
     to: string,
     options: {
-      flowUrl?: string;
       timeout?: number;
       record?: boolean | RecordingType;
       customHeaders?: Record<string, string>;
@@ -114,7 +113,6 @@ export class CallFlow {
     return {
       action: "dial",
       to,
-      ...(options.flowUrl !== undefined && { flow_url: options.flowUrl }),
       timeout: options.timeout ?? 30,
       record: options.record ?? false,
       ...(options.customHeaders !== undefined && {
@@ -124,15 +122,21 @@ export class CallFlow {
         status_callback_url: options.statusCallbackUrl
       }),
       ringback: options.ringback ?? "passthrough",
-      ...(options.dialMusic !== undefined && { dial_music: options.dialMusic }),
+      ...(options.dialMusic !== undefined && {
+        dial_music: toSnakeCase(options.dialMusic)
+      }),
       ...(options.confirmSound !== undefined && {
-        confirm_sound: options.confirmSound
+        confirm_sound: toSnakeCase(options.confirmSound)
       }),
       ...(options.onNoAnswer !== undefined && {
-        on_no_answer: options.onNoAnswer
+        on_no_answer: toSnakeCase(options.onNoAnswer)
       }),
-      ...(options.onBusy !== undefined && { on_busy: options.onBusy }),
-      ...(options.onFailure !== undefined && { on_failure: options.onFailure })
+      ...(options.onBusy !== undefined && {
+        on_busy: toSnakeCase(options.onBusy)
+      }),
+      ...(options.onFailure !== undefined && {
+        on_failure: toSnakeCase(options.onFailure)
+      })
     };
   }
 }

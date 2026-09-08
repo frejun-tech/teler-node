@@ -13,7 +13,7 @@ import type {
   SipTrunkFilters,
 } from '@/types/sip';
 import type { CursorResponse } from '@/types/common';
-import { Status } from '@/types/core';
+import { Status } from '@/types/common';
 
 // SIP Calls
 
@@ -21,18 +21,18 @@ export const sipCallFixture = (
   overrides: Partial<SipCallResponse> = {}
 ): SipCallResponse => ({
   id: 'cs_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-  account_id: 'acc_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-  sip_trunk_id: 'st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+  accountId: 'acc_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+  sipTrunkId: 'st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
   state: 'completed',
   direction: 'inbound',
-  from_number: '+18005550100',
-  to_number: '+18005550200',
-  created_at: '2026-08-14T00:00:00.000Z',
-  answered_at: '2026-08-14T00:00:02.000Z',
-  ended_at: '2026-08-14T00:01:00.000Z',
-  duration_seconds: 58,
+  fromNumber: '+18005550100',
+  toNumber: '+18005550200',
+  createdAt: '2026-08-14T00:00:00.000Z',
+  answeredAt: '2026-08-14T00:00:02.000Z',
+  endedAt: '2026-08-14T00:01:00.000Z',
+  durationSeconds: 58,
   reason: 'normal_clearing',
-  ended_by: 'caller',
+  endedBy: 'caller',
   recordings: ['rec_01J5ABCDEFGHJKMNPQRSTVWXYZ'],
   ...overrides,
 });
@@ -42,11 +42,11 @@ export const sipCallInProgressFixture = (
 ): SipCallResponse =>
   sipCallFixture({
     state: 'in_progress',
-    answered_at: '2026-08-14T00:00:02.000Z',
-    ended_at: null,
-    duration_seconds: null,
+    answeredAt: '2026-08-14T00:00:02.000Z',
+    endedAt: null,
+    durationSeconds: null,
     reason: null,
-    ended_by: null,
+    endedBy: null,
     recordings: [],
     ...overrides,
   });
@@ -56,11 +56,11 @@ export const sipCallUnansweredFixture = (
 ): SipCallResponse =>
   sipCallFixture({
     state: 'no_answer',
-    answered_at: null,
-    ended_at: '2026-08-14T00:00:30.000Z',
-    duration_seconds: null,
+    answeredAt: null,
+    endedAt: '2026-08-14T00:00:30.000Z',
+    durationSeconds: null,
     reason: 'no_answer',
-    ended_by: 'system',
+    endedBy: 'system',
     recordings: [],
     ...overrides,
   });
@@ -72,23 +72,23 @@ export const sipCallListFixture = (
     sipCallFixture({ id: 'cs_01J5AAAAAAAAAAAAAAAAAAAAAA' }),
     sipCallFixture({ id: 'cs_01J5BBBBBBBBBBBBBBBBBBBBBB', direction: 'outbound' }),
   ],
-  next_cursor: 'eyJpZCI6ImNzXzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
-  previous_cursor: null,
-  has_more: true,
+  nextCursor: 'eyJpZCI6ImNzXzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
+  previousCursor: null,
+  hasMore: true,
   ...overrides,
 });
 
 export const sipCallFiltersFixture = (
   overrides: Partial<SipCallFilters> = {}
 ): SipCallFilters => ({
-  trunk_id: 'st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-  from_number: '+18005550100',
-  to_number: '+18005550200',
-  created_after: '2026-08-01T00:00:00.000Z',
-  created_before: '2026-08-14T23:59:59.000Z',
+  trunkId: 'st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+  fromNumber: '+18005550100',
+  toNumber: '+18005550200',
+  createdAfter: '2026-08-01T00:00:00.000Z',
+  createdBefore: '2026-08-14T23:59:59.000Z',
   limit: 20,
-  cursor_after: 'eyJpZCI6ImNzXzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
-  cursor_before: 'eyJpZCI6ImNzXzAxSjVCQkJCQkJCQkJCQkJCQkJCQkJCQkJCIn0',
+  cursorAfter: 'eyJpZCI6ImNzXzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
+  cursorBefore: 'eyJpZCI6ImNzXzAxSjVCQkJCQkJCQkJCQkJCQkJCQkJCQkJCIn0',
   ...overrides,
 });
 
@@ -103,9 +103,9 @@ export const ipAclFixture = (
     { address: '192.168.1.0/24', description: 'Office HQ' },
     { address: '10.0.0.1/32', description: 'VPN Gateway' },
   ],
-  trunk_count: 1,
-  created_at: '2026-08-14T00:00:00.000Z',
-  updated_at: '2026-08-14T00:00:00.000Z',
+  trunkCount: 1,
+  createdAt: '2026-08-14T00:00:00.000Z',
+  updatedAt: '2026-08-14T00:00:00.000Z',
   ...overrides,
 });
 
@@ -113,7 +113,7 @@ export const ipAclUnusedFixture = (
   overrides: Partial<IpAclResponse> = {}
 ): IpAclResponse =>
   ipAclFixture({
-    trunk_count: 0,
+    trunkCount: 0,
     ...overrides,
   });
 
@@ -124,21 +124,21 @@ export const ipAclListFixture = (
     {
       id: 'acl_01J5AAAAAAAAAAAAAAAAAAAAAA',
       name: 'ACL 1',
-      address_count: 2,
-      trunk_count: 1,
-      created_at: '2026-08-14T00:00:00.000Z',
+      addressCount: 2,
+      trunkCount: 1,
+      createdAt: '2026-08-14T00:00:00.000Z',
     },
     {
       id: 'acl_01J5BBBBBBBBBBBBBBBBBBBBBB',
       name: 'ACL 2',
-      address_count: 1,
-      trunk_count: 0,
-      created_at: '2026-08-13T00:00:00.000Z',
+      addressCount: 1,
+      trunkCount: 0,
+      createdAt: '2026-08-13T00:00:00.000Z',
     },
   ],
-  next_cursor: 'eyJpZCI6ImFjbF8wMUo1QUFBQUFBQUFBQUFBQUFBQUFBQUFBQSJ9',
-  previous_cursor: null,
-  has_more: false,
+  nextCursor: 'eyJpZCI6ImFjbF8wMUo1QUFBQUFBQUFBQUFBQUFBQUFBQUFBQSJ9',
+  previousCursor: null,
+  hasMore: false,
   ...overrides,
 });
 
@@ -166,8 +166,8 @@ export const ipAclFiltersFixture = (
 ): IpAclFilters => ({
   search: 'Office',
   limit: 10,
-  cursor_after: 'eyJpZCI6ImFjbF8wMUo1QUFBQUFBQUFBQUFBQUFBQUFBQUFBQSJ9',
-  cursor_before: 'eyJpZCI6ImFjbF8wMUo1QkJCQkJCQkJCQkJCQkJCQkJCQkJCQkIifQ',
+  cursorAfter: 'eyJpZCI6ImFjbF8wMUo1QUFBQUFBQUFBQUFBQUFBQUFBQUFBQSJ9',
+  cursorBefore: 'eyJpZCI6ImFjbF8wMUo1QkJCQkJCQkJCQkJCQkJCQkJCQkJCQkIifQ',
   ...overrides,
 });
 
@@ -177,29 +177,29 @@ export const sipTrunkFixture = (
   overrides: Partial<SipTrunkResponse> = {}
 ): SipTrunkResponse => ({
   id: 'st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-  account_id: 'acc_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-  cps_limit: 10,
+  accountId: 'acc_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+  cpsLimit: 10,
   name: 'Primary Trunk',
-  domain_name: 'trunk1.pstn.teler.io',
-  recording_enabled: false,
-  channel_limit: 100,
+  domainName: 'trunk1.pstn.teler.io',
+  recordingEnabled: false,
+  channelLimit: 100,
   secure: true,
   transport: Transport.TLS,
-  is_active: true,
-  authentication_type: AuthenticationType.IP,
-  auth_ip_addresses: ['192.168.1.1'],
-  auth_credential_usernames: ['sipuser1'],
-  sip_route: {
+  isActive: true,
+  authenticationType: AuthenticationType.IP,
+  authIpAddresses: ['192.168.1.1'],
+  authCredentialUsernames: ['sipuser1'],
+  sipRoute: {
     name: 'Primary Route',
-    sip_url: 'sip:primary@example.com',
-    sip_user: 'primary_user',
+    sipUrl: 'sip:primary@example.com',
+    sipUser: 'primary_user',
   },
-  webhook_url: 'https://example.com/webhook',
-  created_at: '2026-08-14T00:00:00.000Z',
-  updated_at: '2026-08-14T00:00:00.000Z',
-  secret_id: 'sk_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-  secret_name: 'Trunk Secret',
-  webhook_api_version: '2026-06-01',
+  webhookUrl: 'https://example.com/webhook',
+  createdAt: '2026-08-14T00:00:00.000Z',
+  updatedAt: '2026-08-14T00:00:00.000Z',
+  secretId: 'sk_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+  secretName: 'Trunk Secret',
+  webhookApiVersion: '2026-06-01',
   ...overrides,
 });
 
@@ -207,7 +207,7 @@ export const sipTrunkInactiveFixture = (
   overrides: Partial<SipTrunkResponse> = {}
 ): SipTrunkResponse =>
   sipTrunkFixture({
-    is_active: false,
+    isActive: false,
     ...overrides,
   });
 
@@ -218,9 +218,9 @@ export const sipTrunkListFixture = (
     sipTrunkFixture({ id: 'st_01J5AAAAAAAAAAAAAAAAAAAAAA', name: 'Trunk One' }),
     sipTrunkFixture({ id: 'st_01J5BBBBBBBBBBBBBBBBBBBBBB', name: 'Trunk Two' }),
   ],
-  next_cursor: 'eyJpZCI6InN0XzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
-  previous_cursor: null,
-  has_more: true,
+  nextCursor: 'eyJpZCI6InN0XzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
+  previousCursor: null,
+  hasMore: true,
   ...overrides,
 });
 
@@ -241,20 +241,20 @@ export const createSipTrunkPayloadFixture = (
   mergeSipPayload(
     {
       name: 'Primary Trunk',
-      domain_name: 'trunk1.pstn.teler.io',
-      authentication_type: AuthenticationType.IP,
-      inbound_route: {
+      domainName: 'trunk1.pstn.teler.io',
+      authenticationType: AuthenticationType.IP,
+      inboundRoute: {
         name: 'Primary Route',
-        sip_url: 'sip:primary@example.com',
-        sip_user: 'primary_user',
+        sipUrl: 'sip:primary@example.com',
+        sipUser: 'primary_user',
       },
       secure: true,
-      secret_id: 'sk_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+      secretId: 'sk_01J5ABCDEFGHJKMNPQRSTVWXYZ',
       recording: false,
-      webhook_url: 'https://example.com/webhook',
-      channel_limit: 100,
-      auth_addresses: [{ name: 'Office Router', address: '192.168.1.1' }],
-      webhook_api_version: '2026-06-01',
+      webhookUrl: 'https://example.com/webhook',
+      channelLimit: 100,
+      authAddresses: [{ name: 'Office Router', address: '192.168.1.1' }],
+      webhookApiVersion: '2026-06-01',
     },
     overrides
   );
@@ -265,17 +265,17 @@ export const createSipTrunkIpAclPayloadFixture = (
   mergeSipPayload(
     {
       name: 'ACL-based Trunk',
-      domain_name: 'trunk3.pstn.teler.io',
-      authentication_type: AuthenticationType.IP,
-      inbound_route: {
+      domainName: 'trunk3.pstn.teler.io',
+      authenticationType: AuthenticationType.IP,
+      inboundRoute: {
         name: 'ACL Route',
-        sip_url: 'sip:acl@example.com',
-        sip_user: 'acl_user',
+        sipUrl: 'sip:acl@example.com',
+        sipUser: 'acl_user',
       },
       secure: true,
-      ip_acl_id: 'acl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-      channel_limit: 100,
-      webhook_api_version: '2026-06-01',
+      ipAclId: 'acl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+      channelLimit: 100,
+      webhookApiVersion: '2026-06-01',
     },
     overrides
   );
@@ -286,13 +286,13 @@ export const createSipTrunkCredentialPayloadFixture = (
   mergeSipPayload(
     {
       name: 'Credential Trunk',
-      domain_name: 'trunk2.pstn.teler.io',
-      authentication_type: AuthenticationType.CREDENTIAL,
-      inbound_route: {
+      domainName: 'trunk2.pstn.teler.io',
+      authenticationType: AuthenticationType.CREDENTIAL,
+      inboundRoute: {
         name: 'Credential Route',
-        sip_url: 'sip:cred@example.com',
+        sipUrl: 'sip:cred@example.com',
       },
-      auth_credential: {
+      authCredential: {
         username: 'sipuser1',
         password: 'str0ngP@ssw0rd',
       },
@@ -307,23 +307,23 @@ export const updateSipTrunkPayloadFixture = (
   mergeSipPayload(
     {
       name: 'Updated Trunk Name',
-      channel_limit: 200,
+      channelLimit: 200,
       recording: true,
       secure: true,
-      is_active: true,
-      webhook_url: 'https://example.com/webhook-updated',
-      authentication_type: AuthenticationType.CREDENTIAL,
-      auth_credential: {
+      isActive: true,
+      webhookUrl: 'https://example.com/webhook-updated',
+      authenticationType: AuthenticationType.CREDENTIAL,
+      authCredential: {
         username: 'sipuser_updated',
         password: 'n3wStr0ngP@ss',
       },
-      inbound_route: {
+      inboundRoute: {
         name: 'Updated Route',
-        sip_url: 'sip:updated@example.com',
-        sip_user: 'updated_user',
+        sipUrl: 'sip:updated@example.com',
+        sipUser: 'updated_user',
       },
-      secret_id: 'sk_01J5BBBBBBBBBBBBBBBBBBBBBB',
-      webhook_api_version: '2026-06-01',
+      secretId: 'sk_01J5BBBBBBBBBBBBBBBBBBBBBB',
+      webhookApiVersion: '2026-06-01',
     },
     overrides
   );
@@ -334,20 +334,20 @@ export const updateSipTrunkIpAclPayloadFixture = (
   mergeSipPayload(
     {
       name: 'Updated Trunk Name',
-      channel_limit: 200,
+      channelLimit: 200,
       recording: true,
       secure: true,
-      is_active: true,
-      webhook_url: 'https://example.com/webhook-updated',
-      authentication_type: AuthenticationType.IP,
-      ip_acl_id: 'acl_01J5BBBBBBBBBBBBBBBBBBBBBB',
-      inbound_route: {
+      isActive: true,
+      webhookUrl: 'https://example.com/webhook-updated',
+      authenticationType: AuthenticationType.IP,
+      ipAclId: 'acl_01J5BBBBBBBBBBBBBBBBBBBBBB',
+      inboundRoute: {
         name: 'Updated Route',
-        sip_url: 'sip:updated@example.com',
-        sip_user: 'updated_user',
+        sipUrl: 'sip:updated@example.com',
+        sipUser: 'updated_user',
       },
-      secret_id: 'sk_01J5BBBBBBBBBBBBBBBBBBBBBB',
-      webhook_api_version: '2026-06-01',
+      secretId: 'sk_01J5BBBBBBBBBBBBBBBBBBBBBB',
+      webhookApiVersion: '2026-06-01',
     },
     overrides
   );
@@ -358,7 +358,7 @@ export const sipTrunkFiltersFixture = (
   search: 'Primary',
   status: [Status.ACTIVE],
   limit: 10,
-  cursor_after: 'eyJpZCI6InN0XzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
-  cursor_before: 'eyJpZCI6InN0XzAxSjVCQkJCQkJCQkJCQkJCQkJCQkJCQkJCIn0',
+  cursorAfter: 'eyJpZCI6InN0XzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
+  cursorBefore: 'eyJpZCI6InN0XzAxSjVCQkJCQkJCQkJCQkJCQkJCQkJCQkJCIn0',
   ...overrides,
 });

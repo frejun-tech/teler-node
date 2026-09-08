@@ -12,12 +12,12 @@ export const secretFixture = (
 ): SecretResponse => ({
   id: 'sk_01J5ABCDEFGHJKMNPQRSTVWXYZ',
   name: 'Test Secret',
-  secret_value: 'tsk_live_xK9mN2pQ8rVwL4jH7cF',
-  rotated_at: null,
-  created_at: '2026-08-14T00:00:00.000Z',
-  needs_rotation: false,
-  voice_apps: [{ id: 'va_01J5ABCDEFGHJKMNPQRSTVWXYZ', name: 'Support Voice App' }],
-  sip_trunks: [{ id: 'st_01J5ABCDEFGHJKMNPQRSTVWXYZ', name: 'Primary Trunk' }],
+  secretValue: 'tsk_live_xK9mN2pQ8rVwL4jH7cF',
+  rotatedAt: null,
+  createdAt: '2026-08-14T00:00:00.000Z',
+  needsRotation: false,
+  voiceApps: [{ id: 'va_01J5ABCDEFGHJKMNPQRSTVWXYZ', name: 'Support Voice App' }],
+  sipTrunks: [{ id: 'st_01J5ABCDEFGHJKMNPQRSTVWXYZ', name: 'Primary Trunk' }],
   ...overrides,
 });
 
@@ -25,8 +25,8 @@ export const secretRotatedFixture = (
   overrides: Partial<SecretResponse> = {}
 ): SecretResponse =>
   secretFixture({
-    needs_rotation: true,
-    rotated_at: '2026-07-01T00:00:00.000Z',
+    needsRotation: true,
+    rotatedAt: '2026-07-01T00:00:00.000Z',
     ...overrides,
   });
 
@@ -37,9 +37,9 @@ export const secretListFixture = (
     { id: 'sk_01J5AAAAAAAAAAAAAAAAAAAAAA', name: 'Secret One' },
     { id: 'sk_01J5BBBBBBBBBBBBBBBBBBBBBB', name: 'Secret Two' },
   ],
-  next_cursor: 'eyJpZCI6InNrXzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
-  previous_cursor: null,
-  has_more: true,
+  nextCursor: 'eyJpZCI6InNrXzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
+  previousCursor: null,
+  hasMore: true,
   ...overrides,
 });
 
@@ -70,7 +70,7 @@ export const secretFiltersFixture = (
 ): SecretFilters => ({
   search: 'Test',
   limit: 10,
-  cursor_after: 'eyJpZCI6InNrXzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
-  cursor_before: 'eyJpZCI6InNrXzAxSjVCQkJCQkJCQkJCQkJCQkJCQkJCQkJCIn0',
+  cursorAfter: 'eyJpZCI6InNrXzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
+  cursorBefore: 'eyJpZCI6InNrXzAxSjVCQkJCQkJCQkJCQkJCQkJCQkJCQkJCIn0',
   ...overrides,
 });

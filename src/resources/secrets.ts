@@ -26,7 +26,7 @@ export class SecretResourceManager {
 
   /**
    * List all secrets.
-   * @param filters - Optional filters and cursor, which includes search, status, limit, cursor_after and cursor_before.
+   * @param filters - Optional filters and cursor, which includes search, limit, cursorAfter and cursorBefore.
    * @returns A list of secrets.
    */
   public async list(

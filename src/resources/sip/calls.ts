@@ -8,7 +8,7 @@ export class SipCallResourceManager {
 
   /**
    * List all sip calls.
-   * @param filters - Optional filters and cursor, which includes trunk_id, from_number, to_number, created_after, created_before, limit, cursor_after and cursor_before.
+   * @param filters - Optional filters and cursor, which includes trunkId, fromNumber, toNumber, createdAfter, createdBefore, limit, cursorAfter and cursorBefore.
    * @returns A list of sip calls.
    */
   public async list(

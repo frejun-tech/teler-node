@@ -11,18 +11,18 @@ export const virtualNumberFixture = (
   overrides: Partial<VirtualNumberResponse> = {}
 ): VirtualNumberResponse => ({
   id: 'vn_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-  account_id: 'acc_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+  accountId: 'acc_01J5ABCDEFGHJKMNPQRSTVWXYZ',
   name: 'Support Line',
   number: '+18005550199',
   location: {
     id: 'loc_01J5ABCDEFGHJKMNPQRSTVWXYZ',
     name: 'United States',
-    region_code: 'US-NY',
-    country_code: 'US',
-    country_name: 'United States',
+    regionCode: 'US-NY',
+    countryCode: 'US',
+    countryName: 'United States',
   },
-  voice_app: { id: 'va_01J5ABCDEFGHJKMNPQRSTVWXYZ', name: 'Support Voice App' },
-  sip_trunk: { id: 'st_01J5ABCDEFGHJKMNPQRSTVWXYZ', name: 'Primary Trunk' },
+  voiceApp: { id: 'va_01J5ABCDEFGHJKMNPQRSTVWXYZ', name: 'Support Voice App' },
+  sipTrunk: { id: 'st_01J5ABCDEFGHJKMNPQRSTVWXYZ', name: 'Primary Trunk' },
   ...overrides,
 });
 
@@ -30,8 +30,8 @@ export const virtualNumberUnassignedFixture = (
   overrides: Partial<VirtualNumberResponse> = {}
 ): VirtualNumberResponse =>
   virtualNumberFixture({
-    voice_app: undefined,
-    sip_trunk: undefined,
+    voiceApp: undefined,
+    sipTrunk: undefined,
     ...overrides,
   });
 
@@ -42,9 +42,9 @@ export const virtualNumberListFixture = (
     virtualNumberFixture({ id: 'vn_01J5AAAAAAAAAAAAAAAAAAAAAA', number: '+18005550101' }),
     virtualNumberFixture({ id: 'vn_01J5BBBBBBBBBBBBBBBBBBBBBB', number: '+18005550102' }),
   ],
-  next_cursor: 'eyJpZCI6InZuXzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
-  previous_cursor: null,
-  has_more: true,
+  nextCursor: 'eyJpZCI6InZuXzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
+  previousCursor: null,
+  hasMore: true,
   ...overrides,
 });
 
@@ -58,43 +58,43 @@ export const updateVirtualNumberPayloadFixture = (
 export const assignVirtualNumberPayloadFixture = (
   overrides: Partial<AssignVirtualNumberPayload> = {}
 ): AssignVirtualNumberPayload => ({
-  vn_ids: ['vn_01J5AAAAAAAAAAAAAAAAAAAAAA'],
-  apply_to_all: false,
-  voice_app_id: 'va_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-  sip_trunk_id: undefined,
+  vnIds: ['vn_01J5AAAAAAAAAAAAAAAAAAAAAA'],
+  applyToAll: false,
+  voiceAppId: 'va_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+  sipTrunkId: undefined,
   ...overrides,
 });
 
 export const assignToTrunkPayloadFixture = (
   overrides: Partial<AssignVirtualNumberPayload> = {}
 ): AssignVirtualNumberPayload => ({
-  vn_ids: ['vn_01J5AAAAAAAAAAAAAAAAAAAAAA'],
-  apply_to_all: false,
-  sip_trunk_id: 'st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-  voice_app_id: undefined,
+  vnIds: ['vn_01J5AAAAAAAAAAAAAAAAAAAAAA'],
+  applyToAll: false,
+  sipTrunkId: 'st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+  voiceAppId: undefined,
   ...overrides,
 });
 
 export const assignAllPayloadFixture = (
   overrides: Partial<AssignVirtualNumberPayload> = {}
 ): AssignVirtualNumberPayload => ({
-  apply_to_all: true,
-  voice_app_id: 'va_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+  applyToAll: true,
+  voiceAppId: 'va_01J5ABCDEFGHJKMNPQRSTVWXYZ',
   ...overrides,
 });
 
 export const unassignVirtualNumberPayloadFixture = (
   overrides: Partial<UnassignVirtualNumberPayload> = {}
 ): UnassignVirtualNumberPayload => ({
-  vn_ids: ['vn_01J5AAAAAAAAAAAAAAAAAAAAAA'],
-  apply_to_all: false,
+  vnIds: ['vn_01J5AAAAAAAAAAAAAAAAAAAAAA'],
+  applyToAll: false,
   ...overrides,
 });
 
 export const unassignAllPayloadFixture = (
   overrides: Partial<UnassignVirtualNumberPayload> = {}
 ): UnassignVirtualNumberPayload => ({
-  apply_to_all: true,
+  applyToAll: true,
   ...overrides,
 });
 
@@ -104,7 +104,7 @@ export const virtualNumberFiltersFixture = (
   search: 'Support',
   location: ['US'],
   limit: 15,
-  cursor_after: 'eyJpZCI6InZuXzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
-  cursor_before: 'eyJpZCI6InZuXzAxSjVCQkJCQkJCQkJCQkJCQkJCQkJCQkJCIn0',
+  cursorAfter: 'eyJpZCI6InZuXzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
+  cursorBefore: 'eyJpZCI6InZuXzAxSjVCQkJCQkJCQkJCQkJCQkJCQkJCQkJCIn0',
   ...overrides,
 });

@@ -76,8 +76,7 @@ export class ConflictException extends TelerException {
 }
 
 /**
- *
- *
+ * If the resource is no longer available.
  */
 export class GoneException extends TelerException {
   constructor(

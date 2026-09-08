@@ -16,6 +16,6 @@ export const eventHandlers = [
   http.get(url('/events'), () => HttpResponse.json(eventListFixture())),
 
   http.post(url('/events/:id/redeliver'), ({ params }) =>
-    HttpResponse.json(eventRedeliverFixture({ event_id: params.id as string }))
+    HttpResponse.json(eventRedeliverFixture({ eventId: params.id as string }))
   ),
 ];

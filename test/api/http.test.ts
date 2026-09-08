@@ -160,9 +160,9 @@ describe('HttpResourceManager (integration)', () => {
     );
     const httpClient = createHttp();
 
-    await httpClient.get('/test-endpoint', { call_id: undefined, limit: 10 } as any);
+    await httpClient.get('/test-endpoint', { callId: undefined, limit: 10 } as any);
 
-    expect(captured.url?.searchParams.has('call_id')).toBe(false);
+    expect(captured.url?.searchParams.has('callId')).toBe(false);
     expect(captured.url?.searchParams.get('limit')).toBe('10');
   });
 

@@ -3,6 +3,9 @@ import { HttpResourceManager } from "../http";
 import { SipCallResourceManager } from "./calls";
 import { IpAclResourceManager } from "./ipAcls";
 
+/**
+ * SIP resource manager for managing trunks, calls, and IP ACLs.
+ */
 export class SipResourceManager {
   public readonly trunks: TrunkResourceManager;
   public readonly calls: SipCallResourceManager;

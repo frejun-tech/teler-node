@@ -26,7 +26,7 @@ describe('SIP Trunks API (integration)', () => {
     expect(result.name).toBe(payload.name);
     expect(result.secure).toBe(true);
     expect(result.transport).toBe(Transport.TLS);
-    expect(result.is_active).toBe(true);
+    expect(result.isActive).toBe(true);
   });
 
   it('creates a credential-authenticated sip trunk', async () => {
@@ -54,9 +54,9 @@ describe('SIP Trunks API (integration)', () => {
 
   it('handles transport when passed explicitly in create', async () => {
     const client = createTestClient();
-    const payload = createSipTrunkCredentialPayloadFixture({ transport: Transport.UDP });
+    const payload = createSipTrunkCredentialPayloadFixture({ transport: Transport.TCP });
     const result = await client.sip.trunks.create(payload);
-    expect(result.transport).toBe(Transport.UDP);
+    expect(result.transport).toBe(Transport.TCP);
   });
 
   it('rejects payload when both secure and transport are passed', async () => {
@@ -71,7 +71,7 @@ describe('SIP Trunks API (integration)', () => {
     const client = createTestClient();
     const payload = createSipTrunkPayloadFixture({
       transport: Transport.UDP,
-      authentication_type: AuthenticationType.IP,
+      authenticationType: AuthenticationType.IP,
     });
     await expect(client.sip.trunks.create(payload)).rejects.toThrow(
       'UDP transport requires credential (digest) authentication. IP/ACL-based authentication over UDP is not permitted.'
@@ -84,9 +84,9 @@ describe('SIP Trunks API (integration)', () => {
     expect(result.data).toBeInstanceOf(Array);
     expect(result.data.length).toBeGreaterThan(0);
     expect(result.data[0].id).toMatch(/^st_/);
-    expect(result).toHaveProperty('has_more');
-    expect(result).toHaveProperty('next_cursor');
-    expect(result).toHaveProperty('previous_cursor');
+    expect(result).toHaveProperty('hasMore');
+    expect(result).toHaveProperty('nextCursor');
+    expect(result).toHaveProperty('previousCursor');
   });
 
   it('sends query params correctly on list', async () => {
@@ -108,7 +108,7 @@ describe('SIP Trunks API (integration)', () => {
     const client = createTestClient();
     const trunk = await client.sip.trunks.retrieve('st_01J5ABCDEFGHJKMNPQRSTVWXYZ');
     expect(trunk.id).toBe('st_01J5ABCDEFGHJKMNPQRSTVWXYZ');
-    expect(trunk.webhook_api_version).toBeDefined();
+    expect(trunk.webhookApiVersion).toBeDefined();
   });
 
   it('updates a sip trunk through the real http stack', async () => {
@@ -138,7 +138,7 @@ describe('SIP Trunks API (integration)', () => {
     const client = createTestClient();
     const result = await client.sip.trunks.listVirtualNumbers('st_01J5ABCDEFGHJKMNPQRSTVWXYZ');
     expect(result.data).toBeInstanceOf(Array);
-    expect(result).toHaveProperty('has_more');
+    expect(result).toHaveProperty('hasMore');
   });
 
   // --- Error Contract Tests ---
@@ -154,7 +154,7 @@ describe('SIP Trunks API (integration)', () => {
     );
     const client = createTestClient();
     await expect(
-      client.sip.trunks.list({ cursor_after: 'bad_cursor' })
+      client.sip.trunks.list({ cursorAfter: 'bad_cursor' })
     ).rejects.toThrow(BadParametersException);
   });
 
@@ -196,7 +196,7 @@ describe('SIP Trunks API (integration)', () => {
     server.use(
       http.post(`${TEST_CONFIG.baseUrl}/sip/trunks`, () =>
         HttpResponse.json(
-          { detail: [{ loc: ['body', 'domain_name'], msg: 'field required' }] },
+          { detail: [{ loc: ['body', 'domainName'], msg: 'field required' }] },
           { status: 422 }
         )
       )
@@ -205,9 +205,9 @@ describe('SIP Trunks API (integration)', () => {
     await expect(
       client.sip.trunks.create({
         name: 'Incomplete Trunk',
-        authentication_type: AuthenticationType.IP,
-        domain_name: '',
-        inbound_route: { name: '', sip_url: '' },
+        authenticationType: AuthenticationType.IP,
+        domainName: '',
+        inboundRoute: { name: '', sipUrl: '' },
       })
     ).rejects.toThrow(UnprocessableRequestException);
   });

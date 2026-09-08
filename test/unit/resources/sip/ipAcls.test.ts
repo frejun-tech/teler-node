@@ -96,15 +96,15 @@ describe('IpAclResourceManager (unit)', () => {
       expect(result).toBe(response);
     });
 
-    it('returns a page with data, cursors, and has_more', async () => {
+    it('returns a page with data, cursors, and hasMore', async () => {
       http.get.mockResolvedValue(ipAclListFixture());
 
       const result = await ipAcls.list();
 
       expect(result.data).toBeInstanceOf(Array);
-      expect(result).toHaveProperty('has_more');
-      expect(result).toHaveProperty('next_cursor');
-      expect(result).toHaveProperty('previous_cursor');
+      expect(result).toHaveProperty('hasMore');
+      expect(result).toHaveProperty('nextCursor');
+      expect(result).toHaveProperty('previousCursor');
     });
 
     it('propagates errors from the http layer', async () => {
@@ -125,7 +125,7 @@ describe('IpAclResourceManager (unit)', () => {
       expect(result).toEqual(fixture);
     });
 
-    it('returns an ACL with addresses and trunk_count', async () => {
+    it('returns an ACL with addresses and trunkCount', async () => {
       const fixture = ipAclFixture();
       http.get.mockResolvedValue(fixture);
 
@@ -133,7 +133,7 @@ describe('IpAclResourceManager (unit)', () => {
 
       expect(result.addresses).toBeInstanceOf(Array);
       expect(result.addresses.length).toBeGreaterThan(0);
-      expect(result).toHaveProperty('trunk_count');
+      expect(result).toHaveProperty('trunkCount');
     });
 
     it('returns the response object reference unchanged', async () => {

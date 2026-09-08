@@ -26,7 +26,7 @@ export class IpAclResourceManager {
 
   /**
    * List the IP access control lists in your account, newest first.
-   * @param filters - Optional filters and cursor, which includes search, limit, cursor_after and cursor_before.
+   * @param filters - Optional filters and cursor, which includes search, limit, cursorAfter and cursorBefore.
    * @returns A list of IP access control lists.
    */
   public async list(

@@ -11,8 +11,8 @@ describe('CallResourceManager (unit) [deprecated]', () => {
     calls = new CallResourceManager(asHttp(http));
   });
 
-  it('posts to /voice/calls/initiate with mapped payload', async () => {
-    const fixture = { call_id: 'cs_123', status: 'initiated' };
+  it('posts to /voice/calls/initiate with payload', async () => {
+    const fixture = { callId: 'cs_123', status: 'initiated' };
     http.post.mockResolvedValue(fixture);
 
     const result = await calls.create({
@@ -21,13 +21,12 @@ describe('CallResourceManager (unit) [deprecated]', () => {
       flowUrl: 'https://example.com/flow',
       statusCallbackUrl: "https://example.com/webhook"
     });
-    
+
     expect(http.post).toHaveBeenCalledWith('/voice/calls/initiate', {
-        from_number: '+18005550100',
-        to_number: '+18005550200',
-        flow_url: 'https://example.com/flow',
-        status_callback_url: "https://example.com/webhook",
-        record: true,
+        fromNumber: '+18005550100',
+        toNumber: '+18005550200',
+        flowUrl: 'https://example.com/flow',
+        statusCallbackUrl: "https://example.com/webhook",
     });
     expect(result).toEqual(fixture);
 });

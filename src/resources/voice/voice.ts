@@ -4,6 +4,9 @@ import { CallResourceManager } from "./calls";
 import { MutationResourceManager } from "./mutations";
 import { OperationResourceManager } from "./operations";
 
+/**
+ * Voice resource manager for managing voice apps, calls, mutations, and operations.
+ */
 export class VoiceResourceManager {
   public readonly apps: AppResourceManager;
   public readonly calls: CallResourceManager;

@@ -14,7 +14,7 @@ export class VirtualNumberResourceManager {
 
   /**
    * List all virtual numbers.
-   * @param filters - Optional filters and cursor, which includes search, status, limit, cursor_after and cursor_before.
+   * @param filters - Optional filters and cursor, which includes search, location, limit, cursorAfter and cursorBefore.
    * @returns A list of virtual numbers.
    */
   public async list(

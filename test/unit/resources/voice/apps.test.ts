@@ -9,7 +9,7 @@ import {
   voiceAppFiltersFixture,
 } from '@test/support/fixtures/voice';
 import { virtualNumberListFixture, virtualNumberFiltersFixture } from '@test/support/fixtures/vns';
-import { Status } from '@/types/core';
+import { Status } from '@/types/common';
 
 describe('AppResourceManager (unit)', () => {
   let http: MockHttp;

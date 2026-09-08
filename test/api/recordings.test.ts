@@ -9,7 +9,7 @@ describe('Recordings API (integration)', () => {
   it('returns a Readable stream, not JSON-parsed data', async () => {
     const client = createTestClient();
     const result = await client.recordings.retrieve({
-      recording_id: 'rec_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+      recordingId: 'rec_01J5ABCDEFGHJKMNPQRSTVWXYZ',
     });
 
     expect(typeof (result as any).pipe).toBe('function');
@@ -30,13 +30,13 @@ describe('Recordings API (integration)', () => {
     );
     const client = createTestClient();
     const result = await client.recordings.retrieve({
-      recording_id: 'rec_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+      recordingId: 'rec_01J5ABCDEFGHJKMNPQRSTVWXYZ',
     });
 
     expect(typeof (result as any).pipe).toBe('function');
   });
 
-  it('sends recording_id and expires_in query params correctly', async () => {
+  it('sends recordingId and expiresIn query params correctly', async () => {
     const captured: { url: URL | null } = { url: null };
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/recordings`, ({ request }) => {
@@ -49,8 +49,8 @@ describe('Recordings API (integration)', () => {
     );
     const client = createTestClient();
     await client.recordings.retrieve({
-      recording_id: 'rec_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-      expires_in: 1800,
+      recordingId: 'rec_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+      expiresIn: 1800,
     });
     expect(captured.url?.searchParams.get('recording_id')).toBe('rec_01J5ABCDEFGHJKMNPQRSTVWXYZ');
     expect(captured.url?.searchParams.get('expires_in')).toBe('1800');
@@ -77,7 +77,7 @@ describe('Recordings API (integration)', () => {
     );
     const client = createTestClient();
     await expect(
-      client.recordings.retrieve({ recording_id: 'rec_other_account' })
+      client.recordings.retrieve({ recordingId: 'rec_other_account' })
     ).rejects.toMatchObject({
       name: 'ForbiddenException',
       code: 403,
@@ -99,7 +99,7 @@ describe('Recordings API (integration)', () => {
     );
     const client = createTestClient();
     await expect(
-      client.recordings.retrieve({ recording_id: 'rec_broken' })
+      client.recordings.retrieve({ recordingId: 'rec_broken' })
     ).rejects.toThrow(InternalServerErrorException);
   });
 });

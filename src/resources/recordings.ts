@@ -12,7 +12,7 @@ export class RecordingResourceManager {
    * Follows the API's redirect to the signed recording URL and streams
    * the raw audio (WAV) response body.
    *
-   * @param params - The recording parameters including recording_id and optional expires_in duration.
+   * @param params - The recording parameters including recordingId and optional expiresIn duration.
    * @returns A Readable stream of the recording's audio data.
    */
   public async retrieve(params: RecordingParams): Promise<Readable> {

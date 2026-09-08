@@ -14,7 +14,7 @@ describe('SIP Calls API (integration)', () => {
     const client = createTestClient();
     const call = await client.sip.calls.retrieve('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ');
     expect(call.id).toMatch(/^cs_/);
-    expect(call.sip_trunk_id).toMatch(/^st_/);
+    expect(call.sipTrunkId).toMatch(/^st_/);
     expect(call.state).toBe('completed');
   });
 
@@ -24,9 +24,9 @@ describe('SIP Calls API (integration)', () => {
     expect(result.data).toBeInstanceOf(Array);
     expect(result.data.length).toBeGreaterThan(0);
     expect(result.data[0].id).toMatch(/^cs_/);
-    expect(result).toHaveProperty('has_more');
-    expect(result).toHaveProperty('next_cursor');
-    expect(result).toHaveProperty('previous_cursor');
+    expect(result).toHaveProperty('hasMore');
+    expect(result).toHaveProperty('nextCursor');
+    expect(result).toHaveProperty('previousCursor');
   });
 
   it('sends query params correctly on list', async () => {
@@ -39,9 +39,9 @@ describe('SIP Calls API (integration)', () => {
     );
     const client = createTestClient();
     await client.sip.calls.list({
-      trunk_id: 'st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-      from_number: '+18005550100',
-      to_number: '+18005550200',
+      trunkId: 'st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+      fromNumber: '+18005550100',
+      toNumber: '+18005550200',
       limit: 10,
     });
     expect(captured.url?.searchParams.get('trunk_id')).toBe('st_01J5ABCDEFGHJKMNPQRSTVWXYZ');
@@ -63,7 +63,7 @@ describe('SIP Calls API (integration)', () => {
     );
     const client = createTestClient();
     await expect(
-      client.sip.calls.list({ cursor_after: 'expired_cursor' })
+      client.sip.calls.list({ cursorAfter: 'expired_cursor' })
     ).rejects.toThrow(BadParametersException);
   });
 

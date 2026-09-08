@@ -93,15 +93,15 @@ describe('SecretResourceManager (unit)', () => {
       expect(result).toBe(response);
     });
 
-    it('returns a page with data, cursors, and has_more', async () => {
+    it('returns a page with data, cursors, and hasMore', async () => {
       http.get.mockResolvedValue(secretListFixture());
 
       const result = await secrets.list();
 
       expect(result.data).toBeInstanceOf(Array);
-      expect(result).toHaveProperty('has_more');
-      expect(result).toHaveProperty('next_cursor');
-      expect(result).toHaveProperty('previous_cursor');
+      expect(result).toHaveProperty('hasMore');
+      expect(result).toHaveProperty('nextCursor');
+      expect(result).toHaveProperty('previousCursor');
     });
 
     it('propagates errors from the http layer', async () => {
@@ -166,7 +166,7 @@ describe('SecretResourceManager (unit)', () => {
         '/secrets/sk_01J5ABCDEFGHJKMNPQRSTVWXYZ',
         payload
       );
-      expect(result.needs_rotation).toBe(true);
+      expect(result.needsRotation).toBe(true);
     });
 
     it('returns the response object reference unchanged', async () => {

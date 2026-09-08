@@ -11,32 +11,32 @@ export enum DeliveryStatus {
 }
 
 export interface EventFilters extends CursorFilters {
-  call_id?: string;
+  callId?: string;
   type?: string;
-  occurred_after?: string;
-  delivery_status?: DeliveryStatus;
+  occurredAfter?: string;
+  deliveryStatus?: DeliveryStatus;
 }
 
 export interface EventResponse {
   id: string;
-  account_id: string;
-  call_id: string;
-  sip_trunk_id: string;
-  leg_id: string;
+  accountId: string;
+  callId: string;
+  sipTrunkId: string;
+  legId: string;
   type: string;
-  api_version: string;
-  occurred_at: string;
+  apiVersion: string;
+  occurredAt: string;
   payload: Record<string, unknown>;
-  delivery_status: string;
-  attempt_count: number;
-  last_attempt_at: string;
-  last_status_code: number;
-  last_error: string;
-  delivered_at: string;
-  created_at: string;
+  deliveryStatus: string;
+  attemptCount: number;
+  lastAttemptAt: string;
+  lastStatusCode: number;
+  lastError: string;
+  deliveredAt: string;
+  createdAt: string;
 }
 
 export interface EventRedeliverResponse {
-  event_id: string;
-  redelivered_at: string;
+  eventId: string;
+  redeliveredAt: string;
 }

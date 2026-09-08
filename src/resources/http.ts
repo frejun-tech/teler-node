@@ -1,6 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import { config as CONFIG } from "../config";
 import type { HttpMethod } from "../types/common";
+import { toSnakeCase, toCamelCase } from "../lib/utils";
 import {
   TelerException,
   BadParametersException,
@@ -195,20 +196,30 @@ export class HttpResourceManager {
     baseRetryDelayMs = 5000
   ): Promise<T> {
     try {
+      const transformedData =
+        data !== undefined ? toSnakeCase<P>(data) : undefined;
+      const transformedParams =
+        params !== undefined
+          ? toSnakeCase<Record<string, unknown>>(params)
+          : undefined;
+
       const response = await this.executeWithRetry(
         () =>
           this.httpClient.request<T>({
             method,
             url: path,
-            data,
-            params,
+            data: transformedData,
+            params: transformedParams,
             headers,
             ...config
           }),
         retry ? CONFIG.RETRY_COUNT : 0,
         baseRetryDelayMs
       );
-      return response.data;
+      if (config?.responseType === "stream") {
+        return response.data;
+      }
+      return toCamelCase<T>(response.data);
     } catch (err) {
       if (axios.isAxiosError<TelerErrorResponseBody>(err)) {
         if (!err.response) {

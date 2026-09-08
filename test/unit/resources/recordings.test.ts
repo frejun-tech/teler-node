@@ -26,8 +26,8 @@ describe('RecordingResourceManager (unit)', () => {
       expect(result).toBe(fakeStream);
     });
 
-    it('handles rec_ prefix in recording_id', async () => {
-      const params = recordingParamsFixture({ recording_id: 'rec_01J5ABCDEFGHJKMNPQRSTVWXYZ' });
+    it('handles rec_ prefix in recordingId', async () => {
+      const params = recordingParamsFixture({ recordingId: 'rec_01J5ABCDEFGHJKMNPQRSTVWXYZ' });
       http.get.mockResolvedValue({});
 
       await recordings.retrieve(params);
@@ -35,7 +35,7 @@ describe('RecordingResourceManager (unit)', () => {
       expect(http.get).toHaveBeenCalledWith(
         '/recordings',
         expect.objectContaining({
-          recording_id: 'rec_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+          recordingId: 'rec_01J5ABCDEFGHJKMNPQRSTVWXYZ',
         }),
         { responseType: 'stream' }
       );

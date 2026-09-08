@@ -2,7 +2,6 @@ import type { CursorResponse } from "../../types/common";
 import type {
   CreateCallPayload,
   CallResponse,
-  CreateCallParams,
   VoiceCallFilters,
   VoiceCallResponse,
   VoiceCallLegResponse
@@ -16,27 +15,23 @@ export class CallResourceManager {
   /**
    * Initiate Call API
    *
-   * @param params - The parameters to create a call
+   * @param payload - The parameters to create a call
    * @returns Response of the call
    */
-  public async create(params: CreateCallParams): Promise<CallResponse> {
-    const data: CreateCallPayload = {
-      from_number: params.fromNumber,
-      to_number: params.toNumber,
-      flow_url: params.flowUrl,
-      status_callback_url: params?.statusCallbackUrl,
-      record: params?.record ?? true
+  public async create(payload: CreateCallPayload): Promise<CallResponse> {
+    const normalizedPayload = {
+      ...payload,
+      record: payload.record ?? true
     };
-
     return this.http.post<CallResponse, CreateCallPayload>(
       `${this.basePath}/initiate`,
-      data
+      normalizedPayload
     );
   }
 
   /**
    * List all voice calls.
-   * @param filters - Optional filters and cursor, which includes state, from_number, to_number, created_after, created_before, limit, cursor_after and cursor_before.
+   * @param filters - Optional filters and cursor, which includes state, fromNumber, toNumber, createdAfter, createdBefore, limit, cursorAfter and cursorBefore.
    * @returns A list of voice calls.
    */
   public async list(
@@ -62,7 +57,7 @@ export class CallResourceManager {
    * @param callId - The call ID's legs to fetch
    * @returns Details of the voice call legs.
    */
-  public async getLegs(
+  public async listLegs(
     callId: string
   ): Promise<CursorResponse<VoiceCallLegResponse>> {
     return this.http.get<CursorResponse<VoiceCallLegResponse>>(

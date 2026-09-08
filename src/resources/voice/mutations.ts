@@ -13,7 +13,7 @@ export class MutationResourceManager {
   constructor(private readonly http: HttpResourceManager) {}
 
   /**
-   * End a call, or a single leg of it. Omit `leg_id` to hang up the entire.
+   * End a call, or a single leg of it. Omit `legId` to hang up the entire.
    *
    * @param callId         - The active call ID
    * @param payload        - The hangup payload
@@ -100,7 +100,7 @@ export class MutationResourceManager {
   }
 
   /**
-   * Play an audio file into the call. The response includes a `playback_id`
+   * Play an audio file into the call. The response includes a `playbackId`
    *
    * @param callId         - The active call ID
    * @param payload        - The play payload

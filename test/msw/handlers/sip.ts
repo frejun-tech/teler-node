@@ -81,7 +81,7 @@ export const sipHandlers = [
       transport = Transport.TLS;
     }
 
-    const authType = body.authentication_type || AuthenticationType.IP;
+    const authType = body.authenticationType || AuthenticationType.IP;
     if (transport === Transport.UDP && authType !== AuthenticationType.CREDENTIAL) {
       return HttpResponse.json(
         {
@@ -98,7 +98,7 @@ export const sipHandlers = [
         name: body.name || 'Primary Trunk',
         secure,
         transport,
-        authentication_type: authType,
+        authenticationType: authType,
       }),
       { status: 201 }
     );
@@ -147,8 +147,8 @@ export const sipHandlers = [
 
     if (
       targetTransport === Transport.UDP &&
-      body.authentication_type &&
-      body.authentication_type !== AuthenticationType.CREDENTIAL
+      body.authenticationType &&
+      body.authenticationType !== AuthenticationType.CREDENTIAL
     ) {
       return HttpResponse.json(
         {

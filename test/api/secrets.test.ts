@@ -16,8 +16,8 @@ describe('Secrets API (integration)', () => {
     const result = await client.secrets.create({ name: 'My Production Secret' });
     expect(result.id).toMatch(/^sk_/);
     expect(result.name).toBe('My Production Secret');
-    expect(result.voice_apps).toBeInstanceOf(Array);
-    expect(result.sip_trunks).toBeInstanceOf(Array);
+    expect(result.voiceApps).toBeInstanceOf(Array);
+    expect(result.sipTrunks).toBeInstanceOf(Array);
   });
 
   it('lists secrets', async () => {
@@ -26,9 +26,9 @@ describe('Secrets API (integration)', () => {
     expect(result.data).toBeInstanceOf(Array);
     expect(result.data.length).toBeGreaterThan(0);
     expect(result.data[0].id).toMatch(/^sk_/);
-    expect(result).toHaveProperty('has_more');
-    expect(result).toHaveProperty('next_cursor');
-    expect(result).toHaveProperty('previous_cursor');
+    expect(result).toHaveProperty('hasMore');
+    expect(result).toHaveProperty('nextCursor');
+    expect(result).toHaveProperty('previousCursor');
   });
 
   it('sends query params correctly on list', async () => {
@@ -43,7 +43,7 @@ describe('Secrets API (integration)', () => {
     await client.secrets.list({
       search: 'prod_key',
       limit: 5,
-      cursor_after: 'eyJpZCI6InNrXzEifQ',
+      cursorAfter: 'eyJpZCI6InNrXzEifQ',
     });
     expect(captured.url?.searchParams.get('search')).toBe('prod_key');
     expect(captured.url?.searchParams.get('limit')).toBe('5');
@@ -54,7 +54,7 @@ describe('Secrets API (integration)', () => {
     const client = createTestClient();
     const secret = await client.secrets.retrieve('sk_01J5ABCDEFGHJKMNPQRSTVWXYZ');
     expect(secret.id).toBe('sk_01J5ABCDEFGHJKMNPQRSTVWXYZ');
-    expect(secret.needs_rotation).toBe(false);
+    expect(secret.needsRotation).toBe(false);
   });
 
   it('updates a secret through the real http stack', async () => {
@@ -92,7 +92,7 @@ describe('Secrets API (integration)', () => {
       )
     );
     const client = createTestClient();
-    await expect(client.secrets.list({ cursor_after: 'invalid' })).rejects.toThrow(
+    await expect(client.secrets.list({ cursorAfter: 'invalid' })).rejects.toThrow(
       BadParametersException
     );
   });

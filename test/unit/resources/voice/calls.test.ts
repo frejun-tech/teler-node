@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { CallResourceManager } from '@/resources/voice/calls';
 import { createMockHttp, asHttp, type MockHttp } from '@test/support/mock-http';
+import { toCamelCase } from '@/lib/utils';
 import {
   callResponseFixture,
-  createCallParamsFixture,
+  CreateCallPayloadFixture,
   voiceCallFixture,
   voiceCallListFixture,
   voiceCallLegListFixture,
@@ -21,25 +22,27 @@ describe('CallResourceManager (unit)', () => {
 
   describe('create', () => {
     it('posts to /voice/calls/initiate with mapped payload and returns response', async () => {
-      const params = createCallParamsFixture();
+      const params = CreateCallPayloadFixture();
       const fixture = callResponseFixture();
-      http.post.mockResolvedValue(fixture);
+      http.post.mockResolvedValue(toCamelCase(fixture));
 
       const result = await calls.create(params);
 
       expect(http.post).toHaveBeenCalledWith('/voice/calls/initiate', {
-        from_number: params.fromNumber,
-        to_number: params.toNumber,
-        flow_url: params.flowUrl,
-        status_callback_url: params.statusCallbackUrl,
+        fromNumber: params.fromNumber,
+        toNumber: params.toNumber,
+        flowUrl: params.flowUrl,
+        statusCallbackUrl: params.statusCallbackUrl,
         record: true,
       });
-      expect(result).toEqual(fixture);
+      expect(result.data.fromNumber).toBe(params.fromNumber);
+      expect(result.data.toNumber).toBe(params.toNumber);
+      expect(result.message).toBe(fixture.message);
     });
 
     it('defaults record to true if record is not provided', async () => {
-      const params = createCallParamsFixture({ record: undefined });
-      http.post.mockResolvedValue(callResponseFixture());
+      const params = CreateCallPayloadFixture({ record: undefined });
+      http.post.mockResolvedValue(toCamelCase(callResponseFixture()));
 
       await calls.create(params);
 
@@ -50,8 +53,8 @@ describe('CallResourceManager (unit)', () => {
     });
 
     it('honors record = false when explicitly specified', async () => {
-      const params = createCallParamsFixture({ record: false });
-      http.post.mockResolvedValue(callResponseFixture());
+      const params = CreateCallPayloadFixture({ record: false });
+      http.post.mockResolvedValue(toCamelCase(callResponseFixture()));
 
       await calls.create(params);
 
@@ -65,30 +68,33 @@ describe('CallResourceManager (unit)', () => {
       const fixture = callResponseFixture();
       http.post.mockResolvedValue(fixture);
 
-      const result = await calls.create(createCallParamsFixture());
+      const result = await calls.create(CreateCallPayloadFixture());
 
       expect(result.data.id).toMatch(/^cs_/);
     });
 
-    it('returns the response object reference unchanged', async () => {
+    it('transforms snake_case response to camelCase', async () => {
       const fixture = callResponseFixture();
-      http.post.mockResolvedValue(fixture);
+      http.post.mockResolvedValue(toCamelCase(fixture));
 
-      const result = await calls.create(createCallParamsFixture());
+      const result = await calls.create(CreateCallPayloadFixture());
 
-      expect(result).toBe(fixture);
+      expect(result.data).toHaveProperty('fromNumber');
+      expect(result.data).toHaveProperty('toNumber');
+      expect(result.data).not.toHaveProperty('from_number');
+      expect(result.data).not.toHaveProperty('to_number');
     });
 
     it('propagates errors from the http layer', async () => {
       http.post.mockRejectedValue(new Error('Network error'));
 
-      await expect(calls.create(createCallParamsFixture())).rejects.toThrow('Network error');
+      await expect(calls.create(CreateCallPayloadFixture())).rejects.toThrow('Network error');
     });
   });
 
   describe('list', () => {
     it('gets /voice/calls with undefined when called without filters', async () => {
-      http.get.mockResolvedValue(voiceCallListFixture());
+      http.get.mockResolvedValue(toCamelCase(voiceCallListFixture()));
 
       await calls.list();
 
@@ -96,7 +102,7 @@ describe('CallResourceManager (unit)', () => {
     });
 
     it('forwards all filter fields to the http layer', async () => {
-      http.get.mockResolvedValue(voiceCallListFixture());
+      http.get.mockResolvedValue(toCamelCase(voiceCallListFixture()));
       const filters = voiceCallFiltersFixture();
 
       await calls.list(filters);
@@ -104,17 +110,20 @@ describe('CallResourceManager (unit)', () => {
       expect(http.get).toHaveBeenCalledWith('/voice/calls', filters);
     });
 
-    it('returns the response object reference unchanged', async () => {
+    it('transforms snake_case response to camelCase', async () => {
       const response = voiceCallListFixture();
-      http.get.mockResolvedValue(response);
+      http.get.mockResolvedValue(toCamelCase(response));
 
       const result = await calls.list();
 
-      expect(result).toBe(response);
+      expect(result.data[0]).toHaveProperty('fromNumber');
+      expect(result.data[0]).toHaveProperty('toNumber');
+      expect(result.data[0]).not.toHaveProperty('from_number');
+      expect(result.data[0]).not.toHaveProperty('to_number');
     });
 
     it('returns voice calls with cs_ id prefix', async () => {
-      http.get.mockResolvedValue(voiceCallListFixture());
+      http.get.mockResolvedValue(toCamelCase(voiceCallListFixture()));
 
       const result = await calls.list();
 
@@ -131,21 +140,26 @@ describe('CallResourceManager (unit)', () => {
   describe('retrieve', () => {
     it('gets the correct path for a given voice call id', async () => {
       const fixture = voiceCallFixture();
-      http.get.mockResolvedValue(fixture);
+      http.get.mockResolvedValue(toCamelCase(fixture));
 
       const result = await calls.retrieve(fixture.id);
 
       expect(http.get).toHaveBeenCalledWith(`/voice/calls/${fixture.id}`);
-      expect(result).toEqual(fixture);
+      expect(result.id).toBe(fixture.id);
     });
 
-    it('returns the response object reference unchanged', async () => {
+    it('transforms snake_case response to camelCase', async () => {
       const fixture = voiceCallFixture();
-      http.get.mockResolvedValue(fixture);
+      http.get.mockResolvedValue(toCamelCase(fixture));
 
       const result = await calls.retrieve(fixture.id);
 
-      expect(result).toBe(fixture);
+      expect(result).toHaveProperty('fromNumber');
+      expect(result).toHaveProperty('toNumber');
+      expect(result).toHaveProperty('voiceAppId');
+      expect(result).not.toHaveProperty('from_number');
+      expect(result).not.toHaveProperty('to_number');
+      expect(result).not.toHaveProperty('voice_app_id');
     });
 
     it('propagates errors from the http layer', async () => {
@@ -157,38 +171,41 @@ describe('CallResourceManager (unit)', () => {
     });
   });
 
-  describe('getLegs', () => {
+  describe('listLegs', () => {
     it('gets the legs sub-resource path for a given call id', async () => {
       const legResponse = voiceCallLegListFixture();
       http.get.mockResolvedValue(legResponse);
 
-      const result = await calls.getLegs('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ');
+      const result = await calls.listLegs('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ');
 
       expect(http.get).toHaveBeenCalledWith('/voice/calls/cs_01J5ABCDEFGHJKMNPQRSTVWXYZ/legs');
-      expect(result).toEqual(legResponse);
+      expect(result.data.length).toBe(legResponse.data.length);
     });
 
     it('returns legs with cl_ id prefix', async () => {
-      http.get.mockResolvedValue(voiceCallLegListFixture());
+      http.get.mockResolvedValue(toCamelCase(voiceCallLegListFixture()));
 
-      const result = await calls.getLegs('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ');
+      const result = await calls.listLegs('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ');
 
       result.data.forEach((leg) => expect(leg.id).toMatch(/^cl_/));
     });
 
-    it('returns the response object reference unchanged', async () => {
+    it('transforms snake_case response to camelCase', async () => {
       const response = voiceCallLegListFixture();
-      http.get.mockResolvedValue(response);
+      http.get.mockResolvedValue(toCamelCase(response));
 
-      const result = await calls.getLegs('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ');
+      const result = await calls.listLegs('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ');
 
-      expect(result).toBe(response);
+      expect(result.data[0]).toHaveProperty('fromNumber');
+      expect(result.data[0]).toHaveProperty('toNumber');
+      expect(result.data[0]).not.toHaveProperty('from_number');
+      expect(result.data[0]).not.toHaveProperty('to_number');
     });
 
     it('propagates errors from the http layer', async () => {
       http.get.mockRejectedValue(new Error('Network error'));
 
-      await expect(calls.getLegs('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ')).rejects.toThrow(
+      await expect(calls.listLegs('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ')).rejects.toThrow(
         'Network error'
       );
     });

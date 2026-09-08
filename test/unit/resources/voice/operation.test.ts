@@ -79,7 +79,7 @@ describe('OperationResourceManager (unit)', () => {
       );
     });
 
-    it('returns a transfer response containing req_ request_id', async () => {
+    it('returns a transfer response containing req_ requestId', async () => {
       const fixture = transferResponseFixture();
       http.post.mockResolvedValue(fixture);
 
@@ -88,7 +88,7 @@ describe('OperationResourceManager (unit)', () => {
         transferPayloadFixture()
       );
 
-      expect(result.request_id).toMatch(/^req_/);
+      expect(result.requestId).toMatch(/^req_/);
     });
 
     it('returns the response object reference unchanged', async () => {

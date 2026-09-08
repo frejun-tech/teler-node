@@ -21,7 +21,7 @@ describe('Voice Calls API (integration)', () => {
     });
     expect(result.data.id).toMatch(/^cs_/);
     expect(result.message).toBeDefined();
-    expect(result.data.from_number).toBe('+18005550100');
+    expect(result.data.fromNumber).toBe('+18005550100');
   });
 
   it('lists voice calls', async () => {
@@ -30,9 +30,9 @@ describe('Voice Calls API (integration)', () => {
     expect(result.data).toBeInstanceOf(Array);
     expect(result.data.length).toBeGreaterThan(0);
     expect(result.data[0].id).toMatch(/^cs_/);
-    expect(result).toHaveProperty('has_more');
-    expect(result).toHaveProperty('next_cursor');
-    expect(result).toHaveProperty('previous_cursor');
+    expect(result).toHaveProperty('hasMore');
+    expect(result).toHaveProperty('nextCursor');
+    expect(result).toHaveProperty('previousCursor');
   });
 
   it('sends query params correctly on list', async () => {
@@ -46,8 +46,8 @@ describe('Voice Calls API (integration)', () => {
     const client = createTestClient();
     await client.voice.calls.list({
       state: 'completed',
-      from_number: '+18005550100',
-      to_number: '+18005550200',
+      fromNumber: '+18005550100',
+      toNumber: '+18005550200',
       limit: 10,
     });
     expect(captured.url?.searchParams.get('state')).toBe('completed');
@@ -65,7 +65,7 @@ describe('Voice Calls API (integration)', () => {
 
   it('fetches voice call legs through the real http stack', async () => {
     const client = createTestClient();
-    const legs = await client.voice.calls.getLegs('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ');
+    const legs = await client.voice.calls.listLegs('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ');
     expect(legs.data).toBeInstanceOf(Array);
     expect(legs.data[0].id).toMatch(/^cl_/);
   });
@@ -83,7 +83,7 @@ describe('Voice Calls API (integration)', () => {
     );
     const client = createTestClient();
     await expect(
-      client.voice.calls.list({ cursor_after: 'bad_cursor' })
+      client.voice.calls.list({ cursorAfter: 'bad_cursor' })
     ).rejects.toThrow(BadParametersException);
   });
 

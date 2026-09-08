@@ -40,7 +40,7 @@ export class TrunkResourceManager {
 
   /**
    * List all sip trunks.
-   * @param filters - Optional filters and cursor, which includes search, status, limit, cursor_after and cursor_before.
+   * @param filters - Optional filters and cursor, which includes search, status, limit, cursorAfter and cursorBefore.
    * @returns A list of sip trunks.
    */
   public async list(
@@ -80,6 +80,7 @@ export class TrunkResourceManager {
   /**
    * Get virtual numbers assigned to a sip trunk.
    * @param sipTrunkId - sipTrunkID to fetch vns.
+   * @param params - Optional filters and cursor for pagination.
    * @returns Details of the vns assigned to the sip trunk.
    */
   public async listVirtualNumbers(

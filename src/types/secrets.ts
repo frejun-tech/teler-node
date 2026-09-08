@@ -24,12 +24,12 @@ export interface SecretFilters extends CursorFilters {
 export interface SecretResponse {
   id: string;
   name: string;
-  secret_value: string;
-  rotated_at?: string | null;
-  created_at: string;
-  needs_rotation: boolean;
-  voice_apps: VoiceAppListResponse[];
-  sip_trunks: SipTrunkListResponse[];
+  secretValue: string;
+  rotatedAt?: string | null;
+  createdAt: string;
+  needsRotation: boolean;
+  voiceApps: VoiceAppListResponse[];
+  sipTrunks: SipTrunkListResponse[];
 }
 
 export interface SecretListResponse {

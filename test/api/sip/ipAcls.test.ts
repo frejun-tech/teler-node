@@ -20,7 +20,7 @@ describe('SIP IP ACLs API (integration)', () => {
     expect(result.id).toBeDefined();
     expect(result.name).toBe('Office ACL');
     expect(result.addresses).toBeInstanceOf(Array);
-    expect(result.trunk_count).toBeGreaterThanOrEqual(0);
+    expect(result.trunkCount).toBeGreaterThanOrEqual(0);
   });
 
   it('lists IP ACLs', async () => {
@@ -28,9 +28,9 @@ describe('SIP IP ACLs API (integration)', () => {
     const result = await client.sip.ipAcls.list();
     expect(result.data).toBeInstanceOf(Array);
     expect(result.data.length).toBeGreaterThan(0);
-    expect(result).toHaveProperty('has_more');
-    expect(result).toHaveProperty('next_cursor');
-    expect(result).toHaveProperty('previous_cursor');
+    expect(result).toHaveProperty('hasMore');
+    expect(result).toHaveProperty('nextCursor');
+    expect(result).toHaveProperty('previousCursor');
   });
 
   it('sends query params correctly on list', async () => {
@@ -82,7 +82,7 @@ describe('SIP IP ACLs API (integration)', () => {
     );
     const client = createTestClient();
     await expect(
-      client.sip.ipAcls.list({ cursor_after: 'bad_cursor' })
+      client.sip.ipAcls.list({ cursorAfter: 'bad_cursor' })
     ).rejects.toThrow(BadParametersException);
   });
 

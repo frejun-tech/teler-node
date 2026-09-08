@@ -65,15 +65,15 @@ describe('VirtualNumberResourceManager (unit)', () => {
       expect(result).toBe(response);
     });
 
-    it('returns a page with data, cursors, and has_more', async () => {
+    it('returns a page with data, cursors, and hasMore', async () => {
       http.get.mockResolvedValue(virtualNumberListFixture());
 
       const result = await virtualNumbers.list();
 
       expect(result.data).toBeInstanceOf(Array);
-      expect(result).toHaveProperty('has_more');
-      expect(result).toHaveProperty('next_cursor');
-      expect(result).toHaveProperty('previous_cursor');
+      expect(result).toHaveProperty('hasMore');
+      expect(result).toHaveProperty('nextCursor');
+      expect(result).toHaveProperty('previousCursor');
     });
 
     it('returns virtual numbers with vn_ id prefix', async () => {

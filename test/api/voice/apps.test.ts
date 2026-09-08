@@ -4,7 +4,7 @@ import { createTestClient } from '@test/support/client';
 import { server } from '@test/msw/server';
 import { TEST_CONFIG } from '@test/support/env';
 import { voiceAppListFixture } from '@test/support/fixtures/voice';
-import { Status } from '@/types/core';
+import { Status } from '@/types/common';
 import {
   BadParametersException,
   UnprocessableRequestException,
@@ -16,8 +16,8 @@ describe('Voice Apps API (integration)', () => {
     const client = createTestClient();
     const result = await client.voice.apps.create({
       name: 'Customer Support App',
-      flow_url: 'https://example.com/flow',
-      webhook_url: 'https://example.com/webhook',
+      flowUrl: 'https://example.com/flow',
+      webhookUrl: 'https://example.com/webhook',
     });
     expect(result.id).toMatch(/^va_/);
     expect(result.name).toBe('Customer Support App');
@@ -30,9 +30,9 @@ describe('Voice Apps API (integration)', () => {
     expect(result.data).toBeInstanceOf(Array);
     expect(result.data.length).toBeGreaterThan(0);
     expect(result.data[0].id).toMatch(/^va_/);
-    expect(result).toHaveProperty('has_more');
-    expect(result).toHaveProperty('next_cursor');
-    expect(result).toHaveProperty('previous_cursor');
+    expect(result).toHaveProperty('hasMore');
+    expect(result).toHaveProperty('nextCursor');
+    expect(result).toHaveProperty('previousCursor');
   });
 
   it('sends query params correctly on list', async () => {
@@ -58,7 +58,7 @@ describe('Voice Apps API (integration)', () => {
     const client = createTestClient();
     const app = await client.voice.apps.retrieve('va_01J5ABCDEFGHJKMNPQRSTVWXYZ');
     expect(app.id).toBe('va_01J5ABCDEFGHJKMNPQRSTVWXYZ');
-    expect(app.webhook_api_version).toBeDefined();
+    expect(app.webhookApiVersion).toBeDefined();
   });
 
   it('updates a voice app through the real http stack', async () => {
@@ -80,7 +80,7 @@ describe('Voice Apps API (integration)', () => {
     const client = createTestClient();
     const result = await client.voice.apps.listVirtualNumbers('va_01J5ABCDEFGHJKMNPQRSTVWXYZ');
     expect(result.data).toBeInstanceOf(Array);
-    expect(result).toHaveProperty('has_more');
+    expect(result).toHaveProperty('hasMore');
   });
 
   // --- Error Contract Tests ---
@@ -96,7 +96,7 @@ describe('Voice Apps API (integration)', () => {
     );
     const client = createTestClient();
     await expect(
-      client.voice.apps.list({ cursor_after: 'bad_cursor' })
+      client.voice.apps.list({ cursorAfter: 'bad_cursor' })
     ).rejects.toThrow(BadParametersException);
   });
 
@@ -138,7 +138,7 @@ describe('Voice Apps API (integration)', () => {
     server.use(
       http.post(`${TEST_CONFIG.baseUrl}/voice/apps`, () =>
         HttpResponse.json(
-          { detail: [{ loc: ['body', 'flow_url'], msg: 'field required' }] },
+          { detail: [{ loc: ['body', 'flowUrl'], msg: 'field required' }] },
           { status: 422 }
         )
       )
@@ -147,8 +147,8 @@ describe('Voice Apps API (integration)', () => {
     await expect(
       client.voice.apps.create({
         name: 'Incomplete App',
-        flow_url: '',
-        webhook_url: '',
+        flowUrl: '',
+        webhookUrl: '',
       })
     ).rejects.toThrow(UnprocessableRequestException);
   });

@@ -17,9 +17,9 @@ describe('Virtual Numbers API (integration)', () => {
     expect(result.data).toBeInstanceOf(Array);
     expect(result.data.length).toBeGreaterThan(0);
     expect(result.data[0].id).toMatch(/^vn_/);
-    expect(result).toHaveProperty('has_more');
-    expect(result).toHaveProperty('next_cursor');
-    expect(result).toHaveProperty('previous_cursor');
+    expect(result).toHaveProperty('hasMore');
+    expect(result).toHaveProperty('nextCursor');
+    expect(result).toHaveProperty('previousCursor');
   });
 
   it('sends query params correctly on list', async () => {
@@ -53,8 +53,8 @@ describe('Virtual Numbers API (integration)', () => {
   it('assigns virtual numbers to a voice app', async () => {
     const client = createTestClient();
     const result = await client.virtualNumbers.assign({
-      vn_ids: ['vn_01J5ABCDEFGHJKMNPQRSTVWXYZ'],
-      voice_app_id: 'va_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+      vnIds: ['vn_01J5ABCDEFGHJKMNPQRSTVWXYZ'],
+      voiceAppId: 'va_01J5ABCDEFGHJKMNPQRSTVWXYZ',
     });
     expect(result.success).toBe(true);
   });
@@ -62,8 +62,8 @@ describe('Virtual Numbers API (integration)', () => {
   it('assigns virtual numbers to a sip trunk', async () => {
     const client = createTestClient();
     const result = await client.virtualNumbers.assign({
-      vn_ids: ['vn_01J5ABCDEFGHJKMNPQRSTVWXYZ'],
-      sip_trunk_id: 'st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+      vnIds: ['vn_01J5ABCDEFGHJKMNPQRSTVWXYZ'],
+      sipTrunkId: 'st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
     });
     expect(result.success).toBe(true);
   });
@@ -71,7 +71,7 @@ describe('Virtual Numbers API (integration)', () => {
   it('unassigns virtual numbers through the real http stack', async () => {
     const client = createTestClient();
     const result = await client.virtualNumbers.unassign({
-      vn_ids: ['vn_01J5ABCDEFGHJKMNPQRSTVWXYZ'],
+      vnIds: ['vn_01J5ABCDEFGHJKMNPQRSTVWXYZ'],
     });
     expect(result.success).toBe(true);
   });
@@ -89,7 +89,7 @@ describe('Virtual Numbers API (integration)', () => {
     );
     const client = createTestClient();
     await expect(
-      client.virtualNumbers.list({ cursor_after: 'bad_cursor' })
+      client.virtualNumbers.list({ cursorAfter: 'bad_cursor' })
     ).rejects.toThrow(BadParametersException);
   });
 
@@ -133,7 +133,7 @@ describe('Virtual Numbers API (integration)', () => {
     server.use(
       http.post(`${TEST_CONFIG.baseUrl}/virtual-numbers/assign`, () =>
         HttpResponse.json(
-          { detail: [{ loc: ['body', 'vn_ids'], msg: 'At least one VN ID required' }] },
+          { detail: [{ loc: ['body', 'vnIds'], msg: 'At least one VN ID required' }] },
           { status: 422 }
         )
       )

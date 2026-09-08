@@ -57,7 +57,7 @@ const call = await client.voice.calls.create({
 
 ## Call Flows
 
-When a call connects, Teler fetches instructions from your `flow_url`. You can construct responses using the `CallFlow` helper class or raw JSON action payloads:
+When a call connects, Teler fetches instructions from your `flowUrl`. You can construct responses using the `CallFlow` helper class or raw JSON action payloads:
 
 ### Stream
 
@@ -272,4 +272,4 @@ When an exception is serialized (e.g. in logs or an API error response), it is w
     "details": "Request failed with status code 403"
   }
 }
-```
+```

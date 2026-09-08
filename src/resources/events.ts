@@ -12,7 +12,7 @@ export class EventResourceManager {
 
   /**
    * List all webhook events.
-   * @param filters - Optional filters and cursor, which includes call_id, type, occurred_after, delivery_status, limit, cursor_after and cursor_before.
+   * @param filters - Optional filters and cursor, which includes callId, type, occurredAfter, deliveryStatus, limit, cursorAfter and cursorBefore.
    * @returns A list of webhook events.
    */
   public async list(

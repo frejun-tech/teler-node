@@ -11,39 +11,39 @@ describe('Voice Mutations API (integration)', () => {
   it('hangs up a call through the real http stack', async () => {
     const client = createTestClient();
     const result = await client.voice.mutations.hangup('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ', {
-      leg_id: 'cl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+      legId: 'cl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
       reason: 'normal_clearing',
     });
-    expect(result.request_id).toMatch(/^req_/);
-    expect(result.playback_id).toBeDefined();
+    expect(result.requestId).toMatch(/^req_/);
+    expect(result.playbackId).toBeDefined();
   });
 
   it('mutes a call leg through the real http stack', async () => {
     const client = createTestClient();
     const result = await client.voice.mutations.mute('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ', {
-      leg_id: 'cl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+      legId: 'cl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
       on: true,
     });
-    expect(result.request_id).toMatch(/^req_/);
+    expect(result.requestId).toMatch(/^req_/);
   });
 
   it('sends DTMF tones through the real http stack', async () => {
     const client = createTestClient();
     const result = await client.voice.mutations.dtmf('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ', {
-      leg_id: 'cl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+      legId: 'cl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
       digits: '1234#',
-      duration_ms: 200,
+      durationMs: 200,
     });
-    expect(result.request_id).toMatch(/^req_/);
+    expect(result.requestId).toMatch(/^req_/);
   });
 
   it('plays audio through the real http stack', async () => {
     const client = createTestClient();
     const result = await client.voice.mutations.play('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ', {
-      leg_id: 'cl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-      media_url: 'https://example.com/audio.mp3' as any,
+      legId: 'cl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+      mediaUrl: 'https://example.com/audio.mp3',
     });
-    expect(result.request_id).toMatch(/^req_/);
+    expect(result.requestId).toMatch(/^req_/);
   });
 
   it('sends custom Idempotency-Key header when provided', async () => {
@@ -51,7 +51,7 @@ describe('Voice Mutations API (integration)', () => {
     server.use(
       http.post(`${TEST_CONFIG.baseUrl}/voice/calls/:id/hangup`, ({ request }) => {
         captured.headers = request.headers;
-        return HttpResponse.json({ request_id: 'req_123', playback_id: 'pb_123' }, { status: 202 });
+        return HttpResponse.json({ requestId: 'req_123', playbackId: 'pb_123' }, { status: 202 });
       })
     );
     const client = createTestClient();
@@ -93,7 +93,7 @@ describe('Voice Mutations API (integration)', () => {
     );
     const client = createTestClient();
     await expect(
-      client.voice.mutations.mute('cs_missing', { leg_id: 'cl_123', on: true })
+      client.voice.mutations.mute('cs_missing', { legId: 'cl_123', on: true })
     ).rejects.toMatchObject({
       name: 'NotFoundException',
       code: 404,

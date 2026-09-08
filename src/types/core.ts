@@ -6,17 +6,12 @@ import type { SipTrunkListResponse } from "./sip";
  * Core Types
  */
 
-export enum Status {
-  ACTIVE = "active",
-  INACTIVE = "inactive"
-}
-
 type LocationResponse = {
   id: string;
   name: string;
-  region_code: string;
-  country_code: string;
-  country_name?: string | null;
+  regionCode: string;
+  countryCode: string;
+  countryName?: string | null;
 };
 
 export interface VirtualNumberFilters extends CursorFilters {
@@ -26,12 +21,12 @@ export interface VirtualNumberFilters extends CursorFilters {
 
 export interface VirtualNumberResponse {
   id: string;
-  account_id: string;
+  accountId: string;
   name: string;
   number: string;
   location: LocationResponse;
-  voice_app?: VoiceAppListResponse;
-  sip_trunk?: SipTrunkListResponse;
+  voiceApp?: VoiceAppListResponse;
+  sipTrunk?: SipTrunkListResponse;
 }
 
 export interface UpdateVirtualNumberPayload {
@@ -39,18 +34,18 @@ export interface UpdateVirtualNumberPayload {
 }
 
 export interface AssignVirtualNumberPayload {
-  vn_ids?: string[];
-  apply_to_all?: boolean;
-  voice_app_id?: string;
-  sip_trunk_id?: string;
+  vnIds?: string[];
+  applyToAll?: boolean;
+  voiceAppId?: string;
+  sipTrunkId?: string;
 }
 
 export interface UnassignVirtualNumberPayload {
-  vn_ids?: string[];
-  apply_to_all?: boolean;
+  vnIds?: string[];
+  applyToAll?: boolean;
 }
 
 export interface RecordingParams {
-  recording_id: string;
-  expires_in?: number;
+  recordingId: string;
+  expiresIn?: number;
 }

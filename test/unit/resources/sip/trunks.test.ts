@@ -14,7 +14,7 @@ import {
   virtualNumberListFixture,
   virtualNumberFiltersFixture,
 } from '@test/support/fixtures/vns';
-import { Status } from '@/types/core';
+import { Status } from '@/types/common';
 import { Transport } from '@/types/sip';
 
 describe('TrunkResourceManager (unit)', () => {
@@ -120,12 +120,12 @@ describe('TrunkResourceManager (unit)', () => {
     });
 
     it('returns an active trunk', async () => {
-      const fixture = sipTrunkFixture({ is_active: true });
+      const fixture = sipTrunkFixture({ isActive: true });
       http.get.mockResolvedValue(fixture);
 
       const result = await trunks.retrieve(fixture.id);
 
-      expect(result.is_active).toBe(true);
+      expect(result.isActive).toBe(true);
     });
 
     it('returns an inactive trunk', async () => {
@@ -134,7 +134,7 @@ describe('TrunkResourceManager (unit)', () => {
 
       const result = await trunks.retrieve(fixture.id);
 
-      expect(result.is_active).toBe(false);
+      expect(result.isActive).toBe(false);
     });
 
     it('returns the response object reference unchanged', async () => {
@@ -222,8 +222,8 @@ describe('TrunkResourceManager (unit)', () => {
       expect(result).toEqual(fixture);
     });
 
-    it('deactivates a trunk by setting is_active to false', async () => {
-      const payload = updateSipTrunkPayloadFixture({ is_active: false });
+    it('deactivates a trunk by setting isActive to false', async () => {
+      const payload = updateSipTrunkPayloadFixture({ isActive: false });
       http.patch.mockResolvedValue(sipTrunkInactiveFixture());
 
       await trunks.update('st_01J5ABCDEFGHJKMNPQRSTVWXYZ', payload);

@@ -1,0 +1,130 @@
+import { describe, it, expect } from "vitest";
+import { toSnakeCase, toCamelCase } from "@/lib/utils";
+
+describe("toSnakeCase", () => {
+  it("converts simple camelCase object keys to snake_case", () => {
+    const input = {
+      fromNumber: "+123456789",
+      toNumber: "+987654321",
+      flowUrl: "https://example.com/flow",
+      statusCallbackUrl: "https://example.com/callback",
+      record: true
+    };
+
+    const output = toSnakeCase(input);
+    expect(output).toEqual({
+      from_number: "+123456789",
+      to_number: "+987654321",
+      flow_url: "https://example.com/flow",
+      status_callback_url: "https://example.com/callback",
+      record: true
+    });
+  });
+
+  it("handles nested objects and arrays", () => {
+    const input = {
+      voiceAppId: "app_123",
+      vnIds: ["vn_1", "vn_2"],
+      authCredential: {
+        username: "user",
+        password: "pwd"
+      },
+      authAddresses: [{ name: "primary", address: "192.168.1.1" }]
+    };
+
+    const output = toSnakeCase(input);
+    expect(output).toEqual({
+      voice_app_id: "app_123",
+      vn_ids: ["vn_1", "vn_2"],
+      auth_credential: {
+        username: "user",
+        password: "pwd"
+      },
+      auth_addresses: [{ name: "primary", address: "192.168.1.1" }]
+    });
+  });
+
+  it("preserves null, undefined, primitive values, and Date", () => {
+    const date = new Date();
+    const input = {
+      nullVal: null,
+      undefVal: undefined,
+      numVal: 42,
+      boolVal: false,
+      dateVal: date
+    };
+
+    const output = toSnakeCase(input);
+    expect(output).toEqual({
+      null_val: null,
+      undef_val: undefined,
+      num_val: 42,
+      bool_val: false,
+      date_val: date
+    });
+  });
+});
+
+describe("toCamelCase", () => {
+  it("converts simple snake_case object keys to camelCase", () => {
+    const input = {
+      from_number: "+123456789",
+      to_number: "+987654321",
+      flow_url: "https://example.com/flow",
+      status_callback_url: "https://example.com/callback",
+      record: true
+    };
+
+    const output = toCamelCase(input);
+    expect(output).toEqual({
+      fromNumber: "+123456789",
+      toNumber: "+987654321",
+      flowUrl: "https://example.com/flow",
+      statusCallbackUrl: "https://example.com/callback",
+      record: true
+    });
+  });
+
+  it("handles nested objects and arrays", () => {
+    const input = {
+      voice_app_id: "app_123",
+      vn_ids: ["vn_1", "vn_2"],
+      auth_credential: {
+        username: "user",
+        password: "pwd"
+      },
+      auth_addresses: [{ name: "primary", address: "192.168.1.1" }]
+    };
+
+    const output = toCamelCase(input);
+    expect(output).toEqual({
+      voiceAppId: "app_123",
+      vnIds: ["vn_1", "vn_2"],
+      authCredential: {
+        username: "user",
+        password: "pwd"
+      },
+      authAddresses: [{ name: "primary", address: "192.168.1.1" }]
+    });
+  });
+
+  it("preserves null, undefined, primitive values, and Date", () => {
+    const date = new Date();
+    const input = {
+      null_val: null,
+      undef_val: undefined,
+      num_val: 42,
+      bool_val: false,
+      date_val: date
+    };
+
+    const output = toCamelCase(input);
+    expect(output).toEqual({
+      nullVal: null,
+      undefVal: undefined,
+      numVal: 42,
+      boolVal: false,
+      dateVal: date
+    });
+  });
+});

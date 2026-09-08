@@ -1,11 +1,11 @@
 import type { CallDirection, CursorFilters, WebhookApiVersion } from "./common";
-import { Status } from "./core";
+import { Status } from "./common";
 
 /**
  * Voice Call Types
  */
 
-export type CreateCallParams = {
+export type CreateCallPayload = {
   fromNumber: string;
   toNumber: string;
   flowUrl: string;
@@ -15,23 +15,15 @@ export type CreateCallParams = {
 
 export type CallDetails = {
   id: string;
-  from_number: string;
-  to_number: string;
-  status_callback_url: string;
+  fromNumber: string;
+  toNumber: string;
+  statusCallbackUrl: string;
   record: boolean;
 };
 
 export type CallResponse = {
   message: string;
   data: CallDetails;
-};
-
-export type CreateCallPayload = {
-  from_number: string;
-  to_number: string;
-  flow_url: string;
-  status_callback_url: string;
-  record?: boolean;
 };
 
 /**
@@ -62,39 +54,40 @@ export type StreamHandler = (
  *
  */
 
-interface VoiceAppBase {
+export interface CreateVoiceAppPayload {
   name: string;
-  flow_url: string;
-  webhook_url: string;
-  fallback_url?: string | null;
-}
-
-export interface CreateVoiceAppPayload extends VoiceAppBase {
-  vn_ids?: string[];
-  secret_id?: string | null;
-  webhook_api_version?: WebhookApiVersion;
+  flowUrl: string;
+  webhookUrl: string;
+  fallbackUrl?: string | null;
+  vnIds?: string[];
+  secretId?: string | null;
+  webhookApiVersion?: WebhookApiVersion;
 }
 
 export interface UpdateVoiceAppPayload {
   name?: string;
   status?: Status;
-  flow_url?: string;
-  webhook_url?: string;
-  fallback_url?: string | null;
-  channel_limit?: number | null;
-  secret_id?: string | null;
-  webhook_api_version?: WebhookApiVersion;
+  flowUrl?: string;
+  webhookUrl?: string;
+  fallbackUrl?: string | null;
+  channelLimit?: number | null;
+  secretId?: string | null;
+  webhookApiVersion?: WebhookApiVersion;
 }
 
-export interface VoiceAppResponse extends VoiceAppBase {
+export interface VoiceAppResponse {
   id: string;
+  name: string;
+  flowUrl: string;
+  webhookUrl: string;
+  fallbackUrl?: string | null;
   status: Status;
-  channel_limit: number | null;
-  vn_count: number;
-  secret_id?: string | null;
-  secret_name?: string | null;
-  webhook_api_version: WebhookApiVersion;
-  account_id: string;
+  channelLimit: number | null;
+  vnCount: number;
+  secretId?: string | null;
+  secretName?: string | null;
+  webhookApiVersion: WebhookApiVersion;
+  accountId: string;
 }
 
 export interface VoiceAppFilters extends CursorFilters {
@@ -135,43 +128,43 @@ export type CallLegState =
 
 export interface VoiceCallFilters extends CursorFilters {
   state?: CallSessionStates;
-  from_number?: string;
-  to_number?: string;
-  created_after?: string;
-  created_before?: string;
+  fromNumber?: string;
+  toNumber?: string;
+  createdAfter?: string;
+  createdBefore?: string;
 }
 
 export interface VoiceCallResponse {
   id: string;
-  account_id: string;
-  voice_app_id: string;
+  accountId: string;
+  voiceAppId: string;
   state: CallSessionStates;
   direction: CallDirection;
-  from_number: string;
-  to_number: string;
+  fromNumber: string;
+  toNumber: string;
   properties: Record<string, unknown>;
-  created_at: string;
-  answered_at: string;
-  ended_at: string;
+  createdAt: string;
+  answeredAt?: string;
+  endedAt?: string;
   reason: string;
   legs: VoiceCallLegResponse[];
 }
 
 export interface VoiceCallLegResponse {
   id: string;
-  call_session_id: string;
+  callSessionId: string;
   direction: CallDirection;
   role: CallLegRole;
   state: CallLegState;
-  from_number: string;
-  to_number: string;
-  parent_leg_id: string;
+  fromNumber: string;
+  toNumber: string;
+  parentLegId: string;
   recordings: string[];
-  created_at: string;
-  answered_at: string;
-  ended_at: string;
+  createdAt: string;
+  answeredAt?: string;
+  endedAt?: string;
   reason: string;
-  ended_by: string;
+  endedBy: string;
 }
 
 /**
@@ -180,7 +173,7 @@ export interface VoiceCallLegResponse {
  */
 
 export interface MutationBase {
-  leg_id?: string;
+  legId?: string;
 }
 
 export interface HangupPayload extends MutationBase {
@@ -188,24 +181,24 @@ export interface HangupPayload extends MutationBase {
 }
 
 export interface MutePayload {
-  leg_id: string;
+  legId?: string;
   on: boolean;
 }
 
 export interface DTMFPayload extends MutationBase {
   digits: string;
-  duration_ms?: number;
+  durationMs?: number;
 }
 
 export interface PlayPayload extends MutationBase {
-  media_url: string;
+  mediaUrl: string;
   loop?: number;
-  on_dtmf?: "stop" | "ignore";
+  onDtmf?: "stop" | "ignore";
 }
 
 export interface MutationResponse {
-  request_id: string;
-  playback_id?: string;
+  requestId: string;
+  playbackId?: string;
 }
 
 /**
@@ -219,13 +212,13 @@ export interface DialTarget {
   kind: "pstn" | "sip" | "leg";
   number: string;
   uri?: string;
-  leg_id?: string;
-  custom_headers?: Record<string, string>;
+  legId?: string;
+  customHeaders?: Record<string, string>;
 }
 
 export interface TransferAction {
   action: "play" | "say" | "hangup";
-  media_url?: string;
+  mediaUrl?: string;
   text?: string;
   voice?: string;
   language?: string;
@@ -239,16 +232,16 @@ export interface TransferPayload {
   timeout?: number;
   record?: boolean;
   ringback?: "suppress" | "passthrough";
-  dial_music?: TransferAction;
-  confirm_sound?: TransferAction;
-  on_failure?: TransferAction;
+  dialMusic?: TransferAction;
+  confirmSound?: TransferAction;
+  onFailure?: TransferAction;
 }
 
 export interface TransferResponse {
   id: string;
-  call_id: string;
+  callId: string;
   status: CallSessionStates;
-  target_leg_id: string;
+  targetLegId: string;
   mode: CallTransferMode;
-  request_id: string;
+  requestId: string;
 }

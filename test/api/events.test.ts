@@ -16,9 +16,9 @@ describe('Events API (integration)', () => {
     const client = createTestClient();
     const result = await client.events.list();
     expect(result.data).toBeInstanceOf(Array);
-    expect(result).toHaveProperty('has_more');
-    expect(result).toHaveProperty('next_cursor');
-    expect(result).toHaveProperty('previous_cursor');
+    expect(result).toHaveProperty('hasMore');
+    expect(result).toHaveProperty('nextCursor');
+    expect(result).toHaveProperty('previousCursor');
   });
 
   it('sends query params correctly on list', async () => {
@@ -30,7 +30,7 @@ describe('Events API (integration)', () => {
       })
     );
     const client = createTestClient();
-    await client.events.list({ call_id: 'call_1' });
+    await client.events.list({ callId: 'call_1' });
     expect(captured.url?.searchParams.get('call_id')).toBe('call_1');
   });
 
@@ -62,6 +62,6 @@ describe('Events API (integration)', () => {
   it('redelivers an event through the real http stack', async () => {
     const client = createTestClient();
     const result = await client.events.redeliver('evt_123');
-    expect(result.event_id).toBe('evt_123');
+    expect(result.eventId).toBe('evt_123');
   });
 });

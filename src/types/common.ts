@@ -3,6 +3,11 @@
  *
  */
 
+export enum Status {
+  ACTIVE = "active",
+  INACTIVE = "inactive"
+}
+
 export type DefaultResponse = {
   success: boolean;
   message: string;
@@ -16,15 +21,15 @@ export type CallDirection = "inbound" | "outbound";
 
 export interface CursorFilters {
   limit?: number;
-  cursor_after?: string;
-  cursor_before?: string;
+  cursorAfter?: string;
+  cursorBefore?: string;
 }
 
 export interface CursorResponse<T> {
   data: T[];
-  next_cursor: string | null;
-  previous_cursor: string | null;
-  has_more: boolean;
+  nextCursor: string | null;
+  previousCursor: string | null;
+  hasMore: boolean;
 }
 
 export type RingbackMode = "suppress" | "passthrough";
@@ -35,7 +40,7 @@ export type DialNestedAction = PlayAction | HangupAction;
 
 interface PlayAction {
   action: "play";
-  media_url: string;
+  mediaUrl: string;
   loop?: boolean;
 }
 

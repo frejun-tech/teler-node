@@ -67,7 +67,7 @@ describe('EventResourceManager (unit)', () => {
 
   describe('redeliver', () => {
     it('redelivers an event', async () => {
-      const fixture = eventRedeliverFixture({ event_id: 'evt_123' });
+      const fixture = eventRedeliverFixture({ eventId: 'evt_123' });
       http.post.mockResolvedValue(fixture);
 
       const result = await events.redeliver('evt_123');

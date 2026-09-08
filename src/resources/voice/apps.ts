@@ -31,7 +31,7 @@ export class AppResourceManager {
 
   /**
    * List all voice apps.
-   * @param filters - Optional filters and cursor, which includes search, status, limit, cursor_after and cursor_before.
+   * @param filters - Optional filters and cursor, which includes search, status, limit, cursorAfter and cursorBefore.
    * @returns A list of voice apps.
    */
   public async list(
@@ -80,6 +80,7 @@ export class AppResourceManager {
   /**
    * Get virtual numbers assigned to a voice app.
    * @param voiceAppId - voice app ID to fetch vns.
+   * @param params - Optional filters and cursor for pagination.
    * @returns Details of the vns assigned to the voice app.
    */
   public async listVirtualNumbers(

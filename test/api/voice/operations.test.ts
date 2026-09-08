@@ -20,8 +20,8 @@ describe('Voice Operations API (integration)', () => {
       mode: 'cold',
     });
     expect(result.id).toBeDefined();
-    expect(result.call_id).toBe('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ');
-    expect(result.request_id).toMatch(/^req_/);
+    expect(result.callId).toBe('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ');
+    expect(result.requestId).toMatch(/^req_/);
   });
 
   it('sends custom Idempotency-Key header on transfer', async () => {
@@ -32,11 +32,11 @@ describe('Voice Operations API (integration)', () => {
         return HttpResponse.json(
           {
             id: 'tr_123',
-            call_id: 'cs_123',
+            callId: 'cs_123',
             status: 'completed',
-            target_leg_id: 'cl_123',
+            targetLegId: 'cl_123',
             mode: 'cold',
-            request_id: 'req_123',
+            requestId: 'req_123',
           },
           { status: 202 }
         );
