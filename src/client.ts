@@ -43,8 +43,10 @@ export class Client {
   constructor(apiKey: string, options?: ClientOptions) {
     if (!apiKey)
       throw new BadParametersException(
-        "API Key",
-        "Missing Teler API Key. Please provide one when initializing the client."
+        "Missing Teler API Key.",
+        "Please provide the API Key when initializing the client.",
+        400,
+        "apiKey"
       );
     this.apiKey = apiKey;
 

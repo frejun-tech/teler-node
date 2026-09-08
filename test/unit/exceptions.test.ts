@@ -38,7 +38,7 @@ describe('TelerException hierarchy', () => {
 
   describe('BadParametersException (400)', () => {
     it('has name BadParametersException and code 400', () => {
-      const err = new BadParametersException('param_name', 'Invalid value');
+      const err = new BadParametersException('Invalid value', undefined, 400, 'param_name');
       expect(err.name).toBe('BadParametersException');
       expect(err.code).toBe(400);
       expect(err.param).toBe('param_name');
@@ -58,7 +58,6 @@ describe('TelerException hierarchy', () => {
 
     it('carries the invalid cursor message from API', () => {
       const err = new BadParametersException(
-        '',
         'The pagination cursor is invalid or has expired.'
       );
       expect(err.message).toBe('The pagination cursor is invalid or has expired.');

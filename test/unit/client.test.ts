@@ -17,7 +17,7 @@ describe('Client (unit)', () => {
   it('throws BadParametersException when initialized without an API key', () => {
     expect(() => new Client('')).toThrow(BadParametersException);
     expect(() => new Client('')).toThrow(
-      'Missing Teler API Key. Please provide one when initializing the client.'
+      'Missing Teler API Key.',
     );
   });
 

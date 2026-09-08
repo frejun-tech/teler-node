@@ -42,16 +42,20 @@ export class StreamConnector {
 
     if (!this.remoteUrl?.trim()) {
       throw new BadParametersException(
-        "remoteUrl",
-        "remoteUrl is a required parameter."
+        "remoteUrl is a required parameter.",
+        "Please provide the remote websocket url to connect.",
+        400,
+        "remoteUrl"
       );
     }
     try {
       new URL(this.remoteUrl);
     } catch {
       throw new BadParametersException(
-        "remoteUrl",
-        "remoteUrl must be a valid URL."
+        "remoteUrl must be a valid URL.",
+        "Please provide a valid remote websocket url.",
+        400,
+        "remoteUrl"
       );
     }
   }

@@ -26,10 +26,10 @@ export class TelerException extends Error {
  */
 export class BadParametersException extends TelerException {
   constructor(
-    public param = "",
     message = "Bad Parameter(s).",
     details?: unknown,
-    code = 400
+    code = 400,
+    param = ""
   ) {
     super(message, details, code, param);
   }

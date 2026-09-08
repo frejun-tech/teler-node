@@ -233,7 +233,7 @@ export class HttpResourceManager {
 
         switch (status) {
           case 400:
-            throw new BadParametersException(param, message, details);
+            throw new BadParametersException(message, details, 400, param);
           case 401:
             throw new UnauthorizedException(message, details);
           case 403:
