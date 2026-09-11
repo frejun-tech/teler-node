@@ -13,7 +13,8 @@ import { config } from "./config";
 export interface ClientOptions {
   baseURL?: string;
   logLevel?: "info" | "warn" | "error" | "debug";
-  timeout?: number;
+  baseTimeout?: number;
+  recordingTimeout?: number;
 }
 
 /**
@@ -24,6 +25,8 @@ export interface ClientOptions {
 export class Client {
   private readonly apiKey: string;
   private readonly baseURL: string = config.BASE_URL;
+  private readonly recordingTimeout: number =
+    config.RECORDING_DOWNLOAD_TIMEOUT_MS;
 
   private readonly http: HttpResourceManager;
   public readonly calls: CallResourceManager;
@@ -56,18 +59,24 @@ export class Client {
     if (options?.baseURL) {
       this.baseURL = options.baseURL;
     }
+    if (options?.recordingTimeout) {
+      this.recordingTimeout = options.recordingTimeout;
+    }
 
     this.http = new HttpResourceManager(
       this.apiKey,
       this.baseURL,
-      options?.timeout
+      options?.baseTimeout
     );
     this.calls = new CallResourceManager(this.http);
     this.voice = new VoiceResourceManager(this.http);
     this.sip = new SipResourceManager(this.http);
     this.virtualNumbers = new VirtualNumberResourceManager(this.http);
     this.events = new EventResourceManager(this.http);
-    this.recordings = new RecordingResourceManager(this.http);
+    this.recordings = new RecordingResourceManager(
+      this.http,
+      this.recordingTimeout
+    );
     this.secrets = new SecretResourceManager(this.http);
   }
 }

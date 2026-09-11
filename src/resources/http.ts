@@ -24,7 +24,7 @@ interface RequestOptions {
   config?: AxiosRequestConfig;
 }
 
-interface TelerErrorResponseBody {
+export interface TelerErrorResponseBody {
   success?: boolean;
   type?: string;
   code?: string;
@@ -33,12 +33,12 @@ interface TelerErrorResponseBody {
 }
 
 export class HttpResourceManager {
-  private readonly httpClient: AxiosInstance;
+  public readonly httpClient: AxiosInstance;
 
-  constructor(apiKey: string, baseURL: string, timeOut?: number) {
+  constructor(apiKey: string, baseURL: string, baseTimeout?: number) {
     this.httpClient = axios.create({
       baseURL: baseURL,
-      timeout: timeOut ?? CONFIG.TIMEOUT,
+      timeout: baseTimeout ?? CONFIG.BASE_TIMEOUT_MS,
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -71,7 +71,7 @@ export class HttpResourceManager {
    *
    * @param path - API endpoint path.
    * @param params - Optional. Query parameters to include in the request.
-   * @param config - Optional. Additional axios request config (e.g. responseType, maxRedirects).
+   * @param config - Optional. Additional axios request config (e.g. responseType, timeout, maxRedirects).
    * @returns The response data of type T.
    */
   public async get<T, P = unknown>(
@@ -173,6 +173,65 @@ export class HttpResourceManager {
   }
 
   /**
+   * Maps an HTTP status + error body to a typed exception and throws it.
+   * Single source of truth for status → exception mapping.
+   */
+  public throwForStatus(
+    status: number,
+    data?: TelerErrorResponseBody,
+    fallbackMessage?: string
+  ): never {
+    const message =
+      data?.message ??
+      fallbackMessage ??
+      `Request failed with status ${status}`;
+    const details = data?.errors ?? message;
+    const param = data?.code ?? "";
+
+    switch (status) {
+      case 400:
+        throw new BadParametersException(message, details, 400, param);
+      case 401:
+        throw new UnauthorizedException(message, details);
+      case 403:
+        throw new ForbiddenException(message, details);
+      case 404:
+        throw new NotFoundException(message, details);
+      case 409:
+        throw new ConflictException(message, details);
+      case 410:
+        throw new GoneException(message, details);
+      case 422:
+        throw new UnprocessableRequestException(message, details, 422, param);
+      case 429:
+        throw new RateLimitException(message, details);
+      default:
+        if (status === 501) {
+          throw new NotImplementedException(message, details, status);
+        } else if (status >= 500) {
+          throw new InternalServerErrorException(message, details, status);
+        }
+        throw new TelerException(`API Error: ${message}`, details, status);
+    }
+  }
+
+  /**
+   * Maps a caught Axios error to a typed exception and throws it.
+   * No response → NetworkException. Otherwise delegates to throwForStatus.
+   */
+  public handleAxiosError(err: unknown): never {
+    if (axios.isAxiosError<TelerErrorResponseBody>(err)) {
+      if (!err.response) {
+        throw new NetworkException(err.message, undefined, undefined);
+      }
+      this.throwForStatus(err.response.status, err.response.data, err.message);
+    }
+    throw new TelerException(
+      "An unknown error occurred while calling the API."
+    );
+  }
+
+  /**
    * Initiates an HTTPS request to the FreJun Teler.
    *
    * @param method - HTTP method to use (e.g., GET, POST).
@@ -221,50 +280,7 @@ export class HttpResourceManager {
       }
       return toCamelCase<T>(response.data);
     } catch (err) {
-      if (axios.isAxiosError<TelerErrorResponseBody>(err)) {
-        if (!err.response) {
-          throw new NetworkException(err.message, undefined, undefined);
-        }
-
-        const status = err.response.status;
-        const message = err.response?.data?.message ?? err?.message;
-        const details = err.response?.data?.errors ?? err?.message;
-        const param = err.response?.data?.code ?? "";
-
-        switch (status) {
-          case 400:
-            throw new BadParametersException(message, details, 400, param);
-          case 401:
-            throw new UnauthorizedException(message, details);
-          case 403:
-            throw new ForbiddenException(message, details);
-          case 404:
-            throw new NotFoundException(message, details);
-          case 409:
-            throw new ConflictException(message, details);
-          case 410:
-            throw new GoneException(message, details);
-          case 422:
-            throw new UnprocessableRequestException(
-              message,
-              details,
-              422,
-              param
-            );
-          case 429:
-            throw new RateLimitException(message, details);
-          default:
-            if (status === 501) {
-              throw new NotImplementedException(message, details, status);
-            } else if (status >= 500) {
-              throw new InternalServerErrorException(message, details, status);
-            }
-            throw new TelerException(`API Error: ${message}`, details, status);
-        }
-      }
-      throw new TelerException(
-        "An unknown error occurred while calling the API."
-      );
+      this.handleAxiosError(err);
     }
   }
 }

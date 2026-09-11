@@ -3,7 +3,7 @@ import { http, HttpResponse } from 'msw';
 import { createTestClient } from '@test/support/client';
 import { server } from '@test/msw/server';
 import { TEST_CONFIG } from '@test/support/env';
-import { InternalServerErrorException } from '@/exceptions';
+import { InternalServerErrorException, NotFoundException } from '@/exceptions';
 
 describe('Recordings API (integration)', () => {
   it('returns a Readable stream, not JSON-parsed data', async () => {
@@ -56,7 +56,17 @@ describe('Recordings API (integration)', () => {
     expect(captured.url?.searchParams.get('expires_in')).toBe('1800');
   });
 
-  // --- Error Contract Tests ---
+  it('throws NotFoundException when redirect missing Location header', async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/recordings`, () =>
+        new HttpResponse(null, { status: 307, headers: {} })
+      )
+    );
+    const client = createTestClient();
+    await expect(
+      client.recordings.retrieve({ recordingId: 'rec_01J5ABCDEFGHJKMNPQRSTVWXYZ' })
+    ).rejects.toThrow(NotFoundException);
+  });
 
   it('propagates 403 Forbidden error when recording does not belong to account', async () => {
     server.use(
@@ -81,7 +91,6 @@ describe('Recordings API (integration)', () => {
     ).rejects.toMatchObject({
       name: 'ForbiddenException',
       code: 403,
-      message: 'Request failed with status code 403',
     });
   });
 

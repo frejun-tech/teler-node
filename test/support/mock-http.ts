@@ -7,6 +7,11 @@ export function createMockHttp() {
     post: vi.fn(),
     patch: vi.fn(),
     delete: vi.fn(),
+    httpClient: {
+      get: vi.fn(),
+    },
+    handleAxiosError: vi.fn(),
+    throwForStatus: vi.fn(),
   };
 }
 
