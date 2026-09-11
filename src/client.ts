@@ -49,6 +49,7 @@ export class Client {
         "Missing Teler API Key.",
         "Please provide the API Key when initializing the client.",
         400,
+        undefined,
         "apiKey"
       );
     this.apiKey = apiKey;

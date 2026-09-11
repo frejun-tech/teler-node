@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { createTestClient } from '@test/support/client';
 import { server } from '@test/msw/server';
@@ -105,7 +105,7 @@ describe('Virtual Numbers API (integration)', () => {
     const client = createTestClient();
     await expect(client.virtualNumbers.list()).rejects.toMatchObject({
       name: 'ForbiddenException',
-      code: 403,
+      status: 403,
       message: 'Invalid API Key.',
     });
   });
@@ -124,7 +124,7 @@ describe('Virtual Numbers API (integration)', () => {
       client.virtualNumbers.update('vn_missing', { name: 'Test' })
     ).rejects.toMatchObject({
       name: 'NotFoundException',
-      code: 404,
+      status: 404,
       message: 'The requested virtual number was not found.',
     });
   });
@@ -133,15 +133,21 @@ describe('Virtual Numbers API (integration)', () => {
     server.use(
       http.post(`${TEST_CONFIG.baseUrl}/virtual-numbers/assign`, () =>
         HttpResponse.json(
-          { detail: [{ loc: ['body', 'vnIds'], msg: 'At least one VN ID required' }] },
+          {
+            success: false,
+            message: 'Validation Error',
+            errors: [{ loc: ['body', 'vnIds'], msg: 'At least one VN ID required', type: 'value_error' }],
+          },
           { status: 422 }
         )
       )
     );
     const client = createTestClient();
-    await expect(client.virtualNumbers.assign({})).rejects.toThrow(
-      UnprocessableRequestException
-    );
+    await expect(client.virtualNumbers.assign({})).rejects.toMatchObject({
+      name: 'UnprocessableRequestException',
+      status: 422,
+      param: 'body.vnIds',
+    });
   });
 
   it('propagates 500 Internal Server Error', async () => {
@@ -156,3 +162,4 @@ describe('Virtual Numbers API (integration)', () => {
     );
   });
 });
+

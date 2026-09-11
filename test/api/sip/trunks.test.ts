@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { createTestClient } from '@test/support/client';
 import { server } from '@test/msw/server';
@@ -170,7 +170,7 @@ describe('SIP Trunks API (integration)', () => {
     const client = createTestClient();
     await expect(client.sip.trunks.list()).rejects.toMatchObject({
       name: 'ForbiddenException',
-      code: 403,
+      status: 403,
       message: 'Invalid API Key.',
     });
   });
@@ -187,7 +187,7 @@ describe('SIP Trunks API (integration)', () => {
     const client = createTestClient();
     await expect(client.sip.trunks.retrieve('st_missing')).rejects.toMatchObject({
       name: 'NotFoundException',
-      code: 404,
+      status: 404,
       message: 'The requested SIP trunk was not found.',
     });
   });
@@ -196,7 +196,11 @@ describe('SIP Trunks API (integration)', () => {
     server.use(
       http.post(`${TEST_CONFIG.baseUrl}/sip/trunks`, () =>
         HttpResponse.json(
-          { detail: [{ loc: ['body', 'domainName'], msg: 'field required' }] },
+          {
+            success: false,
+            message: 'Validation Error',
+            errors: [{ loc: ['body', 'domainName'], msg: 'field required', type: 'value_error' }],
+          },
           { status: 422 }
         )
       )
@@ -209,7 +213,11 @@ describe('SIP Trunks API (integration)', () => {
         domainName: '',
         inboundRoute: { name: '', sipUrl: '' },
       })
-    ).rejects.toThrow(UnprocessableRequestException);
+    ).rejects.toMatchObject({
+      name: 'UnprocessableRequestException',
+      status: 422,
+      param: 'body.domainName',
+    });
   });
 
   it('propagates 500 Internal Server Error', async () => {
@@ -224,3 +232,4 @@ describe('SIP Trunks API (integration)', () => {
     );
   });
 });
+

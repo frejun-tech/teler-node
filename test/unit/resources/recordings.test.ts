@@ -90,16 +90,16 @@ describe('RecordingResourceManager (unit)', () => {
       await expect(recordings.retrieve(recordingParamsFixture())).rejects.toThrow(NetworkException);
     });
 
-    it('propagates API errors via throwForStatus', async () => {
-      const errorBody = { message: 'Not found', errors: 'Recording not found' };
+    it('propagates API errors via handleAxiosError', async () => {
+      const errorBody = { success: false, message: 'Not found', code: 'RECORDING_NOT_FOUND' };
 
       http.httpClient.get.mockResolvedValue({
         status: 404,
         data: errorBody,
         headers: {}
       });
-      http.throwForStatus.mockImplementation(() => {
-        throw new NotFoundException('Not found', 'Recording not found');
+      http.handleAxiosError.mockImplementation(() => {
+        throw new NotFoundException('Not found', errorBody, 404, 'RECORDING_NOT_FOUND');
       });
 
       await expect(recordings.retrieve(recordingParamsFixture())).rejects.toThrow(NotFoundException);

@@ -16,6 +16,7 @@ export function resolveIdempotencyKey(key?: string): string {
       "Idempotency-Key must not be empty. A UUID is recommended.",
       "Idempotency-Key is required",
       422,
+      "",
       "Idempotency-Key"
     );
   }

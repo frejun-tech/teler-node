@@ -1,4 +1,8 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
+import axios, {
+  type AxiosInstance,
+  type AxiosRequestConfig,
+  type AxiosError
+} from "axios";
 import { config as CONFIG } from "../config";
 import type { HttpMethod } from "../types/common";
 import { toSnakeCase, toCamelCase } from "../lib/utils";
@@ -26,10 +30,16 @@ interface RequestOptions {
 
 export interface TelerErrorResponseBody {
   success?: boolean;
-  type?: string;
-  code?: string;
   message?: string;
-  errors?: unknown;
+  code?: string;
+  type?: string;
+  errors?: Array<{
+    loc?: (string | number)[];
+    msg?: string;
+    type?: string;
+    input?: unknown;
+    ctx?: unknown;
+  }>;
 }
 
 export class HttpResourceManager {
@@ -176,42 +186,127 @@ export class HttpResourceManager {
    * Maps an HTTP status + error body to a typed exception and throws it.
    * Single source of truth for status → exception mapping.
    */
-  public throwForStatus(
-    status: number,
-    data?: TelerErrorResponseBody,
-    fallbackMessage?: string
-  ): never {
-    const message =
-      data?.message ??
-      fallbackMessage ??
-      `Request failed with status ${status}`;
-    const details = data?.errors ?? message;
-    const param = data?.code ?? "";
+  public throwForStatus(err: AxiosError<TelerErrorResponseBody>): never {
+    const status = err.response!.status;
+    const message = err.response?.data?.message ?? err?.message;
+    const errorCode = err.response?.data?.code;
+    const type = err.response?.data?.type;
+    const body = err.response?.data;
+
+    if (status === 422) {
+      const errors = Array.isArray(body?.errors) ? body.errors : undefined;
+      let param: string | undefined;
+      if (
+        errors &&
+        errors.length > 0 &&
+        Array.isArray(errors[0].loc) &&
+        errors[0].loc.length > 0
+      ) {
+        param = errors[0].loc.join(".");
+      }
+      throw new UnprocessableRequestException(
+        message,
+        body,
+        status,
+        errorCode,
+        param
+      );
+    }
+
+    const details = body;
 
     switch (status) {
       case 400:
-        throw new BadParametersException(message, details, 400, param);
+        throw new BadParametersException(
+          message,
+          details,
+          status,
+          errorCode,
+          undefined,
+          type
+        );
       case 401:
-        throw new UnauthorizedException(message, details);
+        throw new UnauthorizedException(
+          message,
+          details,
+          status,
+          errorCode,
+          undefined,
+          type
+        );
       case 403:
-        throw new ForbiddenException(message, details);
+        throw new ForbiddenException(
+          message,
+          details,
+          status,
+          errorCode,
+          undefined,
+          type
+        );
       case 404:
-        throw new NotFoundException(message, details);
+        throw new NotFoundException(
+          message,
+          details,
+          status,
+          errorCode,
+          undefined,
+          type
+        );
       case 409:
-        throw new ConflictException(message, details);
+        throw new ConflictException(
+          message,
+          details,
+          status,
+          errorCode,
+          undefined,
+          type
+        );
       case 410:
-        throw new GoneException(message, details);
-      case 422:
-        throw new UnprocessableRequestException(message, details, 422, param);
+        throw new GoneException(
+          message,
+          details,
+          status,
+          errorCode,
+          undefined,
+          type
+        );
       case 429:
-        throw new RateLimitException(message, details);
+        throw new RateLimitException(
+          message,
+          details,
+          status,
+          errorCode,
+          undefined,
+          type
+        );
       default:
         if (status === 501) {
-          throw new NotImplementedException(message, details, status);
+          throw new NotImplementedException(
+            message,
+            details,
+            status,
+            errorCode,
+            undefined,
+            type
+          );
         } else if (status >= 500) {
-          throw new InternalServerErrorException(message, details, status);
+          throw new InternalServerErrorException(
+            message,
+            details,
+            status,
+            errorCode,
+            undefined,
+            type
+          );
         }
-        throw new TelerException(`API Error: ${message}`, details, status);
+        throw new TelerException(
+          `API Error: ${message}`,
+          details,
+          status,
+          errorCode,
+          undefined,
+          type
+        );
     }
   }
 
@@ -222,9 +317,9 @@ export class HttpResourceManager {
   public handleAxiosError(err: unknown): never {
     if (axios.isAxiosError<TelerErrorResponseBody>(err)) {
       if (!err.response) {
-        throw new NetworkException(err.message, undefined, undefined);
+        throw new NetworkException(err.message, undefined, err.code);
       }
-      this.throwForStatus(err.response.status, err.response.data, err.message);
+      this.throwForStatus(err);
     }
     throw new TelerException(
       "An unknown error occurred while calling the API."

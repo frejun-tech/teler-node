@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { createTestClient } from '@test/support/client';
 import { server } from '@test/msw/server';
@@ -109,7 +109,7 @@ describe('Secrets API (integration)', () => {
     const client = createTestClient();
     await expect(client.secrets.list()).rejects.toMatchObject({
       name: 'ForbiddenException',
-      code: 403,
+      status: 403,
       message: 'Invalid API Key.',
     });
   });
@@ -126,7 +126,7 @@ describe('Secrets API (integration)', () => {
     const client = createTestClient();
     await expect(client.secrets.retrieve('sk_missing')).rejects.toMatchObject({
       name: 'NotFoundException',
-      code: 404,
+      status: 404,
       message: 'The requested secret was not found.',
     });
   });
@@ -136,16 +136,20 @@ describe('Secrets API (integration)', () => {
       http.post(`${TEST_CONFIG.baseUrl}/secrets`, () =>
         HttpResponse.json(
           {
-            detail: [{ loc: ['body', 'name'], msg: 'field required', type: 'value_error.missing' }],
+            success: false,
+            message: 'Validation Error',
+            errors: [{ loc: ['body', 'name'], msg: 'field required', type: 'value_error' }],
           },
           { status: 422 }
         )
       )
     );
     const client = createTestClient();
-    await expect(client.secrets.create({ name: '' })).rejects.toThrow(
-      UnprocessableRequestException
-    );
+    await expect(client.secrets.create({ name: '' })).rejects.toMatchObject({
+      name: 'UnprocessableRequestException',
+      status: 422,
+      param: 'body.name',
+    });
   });
 
   it('propagates 500 Internal Server Error', async () => {
@@ -160,3 +164,4 @@ describe('Secrets API (integration)', () => {
     );
   });
 });
+

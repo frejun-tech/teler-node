@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { createTestClient } from '@test/support/client';
 import { server } from '@test/msw/server';
@@ -95,7 +95,7 @@ describe('Voice Operations API (integration)', () => {
       })
     ).rejects.toMatchObject({
       name: 'ForbiddenException',
-      code: 403,
+      status: 403,
       message: 'Invalid API Key.',
     });
   });
@@ -117,7 +117,7 @@ describe('Voice Operations API (integration)', () => {
       })
     ).rejects.toMatchObject({
       name: 'NotFoundException',
-      code: 404,
+      status: 404,
       message: 'The requested call was not found.',
     });
   });
@@ -144,7 +144,7 @@ describe('Voice Operations API (integration)', () => {
       })
     ).rejects.toMatchObject({
       name: 'ConflictException',
-      code: 409,
+      status: 409,
     });
   });
 
@@ -184,3 +184,4 @@ describe('Voice Operations API (integration)', () => {
     ).rejects.toThrow(InternalServerErrorException);
   });
 });
+

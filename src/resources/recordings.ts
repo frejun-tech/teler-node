@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosResponse, AxiosError } from "axios";
 import type { RecordingParams } from "../types/core";
 import type { HttpResourceManager, TelerErrorResponseBody } from "./http";
 import type { Readable } from "node:stream";
@@ -80,11 +80,14 @@ export class RecordingResourceManager {
     }
 
     if (response.status >= 400) {
-      const errorBody: TelerErrorResponseBody | undefined =
-        response.data && typeof response.data === "object"
-          ? (response.data as unknown as TelerErrorResponseBody)
-          : undefined;
-      this.http.throwForStatus(response.status, errorBody);
+      const err = new AxiosError<TelerErrorResponseBody>(
+        "Recording API Error",
+        undefined,
+        undefined,
+        undefined,
+        response as AxiosResponse<TelerErrorResponseBody>
+      );
+      this.http.handleAxiosError(err);
     }
 
     return response.data;

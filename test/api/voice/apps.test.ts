@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { createTestClient } from '@test/support/client';
 import { server } from '@test/msw/server';
@@ -112,7 +112,7 @@ describe('Voice Apps API (integration)', () => {
     const client = createTestClient();
     await expect(client.voice.apps.list()).rejects.toMatchObject({
       name: 'ForbiddenException',
-      code: 403,
+      status: 403,
       message: 'Invalid API Key.',
     });
   });
@@ -129,7 +129,7 @@ describe('Voice Apps API (integration)', () => {
     const client = createTestClient();
     await expect(client.voice.apps.retrieve('va_missing')).rejects.toMatchObject({
       name: 'NotFoundException',
-      code: 404,
+      status: 404,
       message: 'The requested voice app was not found.',
     });
   });
@@ -138,7 +138,11 @@ describe('Voice Apps API (integration)', () => {
     server.use(
       http.post(`${TEST_CONFIG.baseUrl}/voice/apps`, () =>
         HttpResponse.json(
-          { detail: [{ loc: ['body', 'flowUrl'], msg: 'field required' }] },
+          {
+            success: false,
+            message: 'Validation Error',
+            errors: [{ loc: ['body', 'flowUrl'], msg: 'field required', type: 'value_error' }],
+          },
           { status: 422 }
         )
       )
@@ -150,7 +154,11 @@ describe('Voice Apps API (integration)', () => {
         flowUrl: '',
         webhookUrl: '',
       })
-    ).rejects.toThrow(UnprocessableRequestException);
+    ).rejects.toMatchObject({
+      name: 'UnprocessableRequestException',
+      status: 422,
+      param: 'body.flowUrl',
+    });
   });
 
   it('propagates 500 Internal Server Error', async () => {
@@ -165,3 +173,4 @@ describe('Voice Apps API (integration)', () => {
     );
   });
 });
+

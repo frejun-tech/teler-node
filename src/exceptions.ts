@@ -2,19 +2,25 @@
  * Teler Base Exception model.
  */
 export class TelerException extends Error {
-  public code: number | string | undefined;
+  public status?: number;
+  public errorCode?: string;
+  public type?: string;
   public param?: string;
   public details?: unknown;
 
   constructor(
     message = "",
     details?: unknown,
-    code?: number | string,
-    param: string = ""
+    status?: number,
+    errorCode?: string,
+    param?: string,
+    type?: string
   ) {
     super(message);
     this.name = this.constructor.name;
-    this.code = code;
+    this.status = status;
+    this.errorCode = errorCode;
+    this.type = type;
     this.param = param;
     this.details = details;
   }
@@ -28,10 +34,12 @@ export class BadParametersException extends TelerException {
   constructor(
     message = "Bad Parameter(s).",
     details?: unknown,
-    code = 400,
-    param = ""
+    status = 400,
+    errorCode?: string,
+    param?: string,
+    type?: string
   ) {
-    super(message, details, code, param);
+    super(message, details, status, errorCode, param, type);
   }
 }
 
@@ -40,8 +48,15 @@ export class BadParametersException extends TelerException {
  * If user is unauthorized to make request.
  */
 export class UnauthorizedException extends TelerException {
-  constructor(message = "Unauthorized.", details?: unknown, code = 401) {
-    super(message, details, code);
+  constructor(
+    message = "Unauthorized.",
+    details?: unknown,
+    status = 401,
+    errorCode?: string,
+    param?: string,
+    type?: string
+  ) {
+    super(message, details, status, errorCode, param, type);
   }
 }
 
@@ -50,8 +65,15 @@ export class UnauthorizedException extends TelerException {
  * If user makes forbidden request.
  */
 export class ForbiddenException extends TelerException {
-  constructor(message = "Forbidden.", details?: unknown, code = 403) {
-    super(message, details, code);
+  constructor(
+    message = "Forbidden.",
+    details?: unknown,
+    status = 403,
+    errorCode?: string,
+    param?: string,
+    type?: string
+  ) {
+    super(message, details, status, errorCode, param, type);
   }
 }
 
@@ -60,8 +82,15 @@ export class ForbiddenException extends TelerException {
  * If the requested resource does not exist.
  */
 export class NotFoundException extends TelerException {
-  constructor(message = "Not Found.", details?: unknown, code = 404) {
-    super(message, details, code);
+  constructor(
+    message = "Not Found.",
+    details?: unknown,
+    status = 404,
+    errorCode?: string,
+    param?: string,
+    type?: string
+  ) {
+    super(message, details, status, errorCode, param, type);
   }
 }
 
@@ -70,8 +99,15 @@ export class NotFoundException extends TelerException {
  * If the requested resource conflicts with the current state.
  */
 export class ConflictException extends TelerException {
-  constructor(message = "Resource conflict.", details?: unknown, code = 409) {
-    super(message, details, code);
+  constructor(
+    message = "Resource conflict.",
+    details?: unknown,
+    status = 409,
+    errorCode?: string,
+    param?: string,
+    type?: string
+  ) {
+    super(message, details, status, errorCode, param, type);
   }
 }
 
@@ -82,9 +118,12 @@ export class GoneException extends TelerException {
   constructor(
     message = "Resource is no longer available.",
     details?: unknown,
-    code = 410
+    status = 410,
+    errorCode?: string,
+    param?: string,
+    type?: string
   ) {
-    super(message, details, code);
+    super(message, details, status, errorCode, param, type);
   }
 }
 
@@ -96,10 +135,11 @@ export class UnprocessableRequestException extends TelerException {
   constructor(
     message = "Unprocessable Request.",
     details?: unknown,
-    code = 422,
-    param = ""
+    status = 422,
+    errorCode?: string,
+    param?: string
   ) {
-    super(message, details, code, param);
+    super(message, details, status, errorCode, param);
   }
 }
 
@@ -108,8 +148,15 @@ export class UnprocessableRequestException extends TelerException {
  * If the rate limit is exceeded.
  */
 export class RateLimitException extends TelerException {
-  constructor(message = "Rate Limit.", details?: unknown, code = 429) {
-    super(message, details, code);
+  constructor(
+    message = "Rate Limit.",
+    details?: unknown,
+    status = 429,
+    errorCode?: string,
+    param?: string,
+    type?: string
+  ) {
+    super(message, details, status, errorCode, param, type);
   }
 }
 
@@ -121,9 +168,12 @@ export class InternalServerErrorException extends TelerException {
   constructor(
     message = "Internal Server Error.",
     details?: unknown,
-    code = 500
+    status = 500,
+    errorCode?: string,
+    param?: string,
+    type?: string
   ) {
-    super(message, details, code);
+    super(message, details, status, errorCode, param, type);
   }
 }
 
@@ -132,8 +182,15 @@ export class InternalServerErrorException extends TelerException {
  * If the requested feature is not implemented.
  */
 export class NotImplementedException extends TelerException {
-  constructor(message = "Not implemented.", details?: unknown, code = 501) {
-    super(message, details, code);
+  constructor(
+    message = "Not implemented.",
+    details?: unknown,
+    status = 501,
+    errorCode?: string,
+    param?: string,
+    type?: string
+  ) {
+    super(message, details, status, errorCode, param, type);
   }
 }
 
@@ -144,7 +201,7 @@ export class NotImplementedException extends TelerException {
  * responses (4xx/5xx), since no response was ever received.
  */
 export class NetworkException extends TelerException {
-  constructor(message: string, details?: unknown, code?: string) {
-    super(message, details, code);
+  constructor(message: string, details?: unknown, errorCode?: string) {
+    super(message, details, undefined, errorCode);
   }
 }

@@ -234,8 +234,8 @@ TelerException (base)
 
 ### Exception Reference
 
-| Exception | Code | Description |
-|-----------|------|-------------|
+| Exception | Status | Description |
+|-----------|--------|-------------|
 | `TelerException` | `500` | Base exception, all SDK errors extend this |
 | `BadParametersException` | `400` | One or more request parameters are invalid |
 | `UnprocessableRequestException` | `422` | The request body failed validation |
@@ -252,12 +252,13 @@ TelerException (base)
 
 All exceptions expose:
 - `message` — human-readable error description
-- `code` — HTTP-style status code or error code
+- `status` — HTTP status code (undefined for `NetworkException` since no response was received)
+- `errorCode` — machine-readable error code from the API response body or network layer (e.g. `ECONNREFUSED`)
 - `name` — exception class name (e.g. `"BadParametersException"`)
 - `details` — optional additional context about the error (e.g. raw response body)
 
-`BadParametersException` additionally exposes:
-- `param` — the name of the invalid parameter
+`BadParametersException` and `UnprocessableRequestException` additionally expose:
+- `param` — the name of the invalid parameter or field
 
 ### Serialized Form
 
@@ -265,11 +266,12 @@ When an exception is serialized (e.g. in logs or an API error response), it is w
 
 ```json
 {
-  "message": "Invalid API Key.",
+  "message": "Forbidden.",
   "error": {
     "name": "ForbiddenException",
-    "code": 403,
-    "details": "Request failed with status code 403"
+    "status": 403,
+    "errorCode": "AUTH_INSUFFICIENT_PERMISSIONS",
+    "details": "Access denied"
   }
 }
 ```

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { createTestClient } from '@test/support/client';
 import { server } from '@test/msw/server';
@@ -37,20 +37,20 @@ describe('Events API (integration)', () => {
   it('propagates 404 errors from the backend', async () => {
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/events/:id`, () =>
-        HttpResponse.json({ error: 'not found' }, { status: 404 })
+        HttpResponse.json({ success: false, message: 'Event not found' }, { status: 404 })
       )
     );
     const client = createTestClient();
     await expect(client.events.retrieve('evt_missing')).rejects.toMatchObject({
       name: 'NotFoundException',
-      code: 404,
+      status: 404,
     });
   });
 
   it('propagates 500 errors from the backend', async () => {
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/events/:id`, () =>
-        HttpResponse.json({ error: 'internal error' }, { status: 500 })
+        HttpResponse.json({ success: false, message: 'Internal server error' }, { status: 500 })
       )
     );
     const client = createTestClient();

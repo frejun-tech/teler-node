@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { createTestClient } from '@test/support/client';
 import { server } from '@test/msw/server';
@@ -98,7 +98,7 @@ describe('SIP IP ACLs API (integration)', () => {
     const client = createTestClient();
     await expect(client.sip.ipAcls.list()).rejects.toMatchObject({
       name: 'ForbiddenException',
-      code: 403,
+      status: 403,
       message: 'Invalid API Key.',
     });
   });
@@ -115,7 +115,7 @@ describe('SIP IP ACLs API (integration)', () => {
     const client = createTestClient();
     await expect(client.sip.ipAcls.retrieve('acl_missing')).rejects.toMatchObject({
       name: 'NotFoundException',
-      code: 404,
+      status: 404,
       message: 'The requested IP ACL was not found.',
     });
   });
@@ -135,7 +135,7 @@ describe('SIP IP ACLs API (integration)', () => {
     const client = createTestClient();
     await expect(client.sip.ipAcls.delete('acl_in_use')).rejects.toMatchObject({
       name: 'ConflictException',
-      code: 409,
+      status: 409,
     });
   });
 
@@ -143,7 +143,11 @@ describe('SIP IP ACLs API (integration)', () => {
     server.use(
       http.post(`${TEST_CONFIG.baseUrl}/sip/ip-acls`, () =>
         HttpResponse.json(
-          { detail: [{ loc: ['body', 'addresses', 0, 'address'], msg: 'invalid CIDR format' }] },
+          {
+            success: false,
+            message: 'Validation Error',
+            errors: [{ loc: ['body', 'addresses', 0, 'address'], msg: 'invalid CIDR format', type: 'value_error' }],
+          },
           { status: 422 }
         )
       )
@@ -154,7 +158,11 @@ describe('SIP IP ACLs API (integration)', () => {
         name: 'Bad ACL',
         addresses: [{ address: 'not-an-ip' }],
       })
-    ).rejects.toThrow(UnprocessableRequestException);
+    ).rejects.toMatchObject({
+      name: 'UnprocessableRequestException',
+      status: 422,
+      param: 'body.addresses.0.address',
+    });
   });
 
   it('propagates 500 Internal Server Error', async () => {
@@ -169,3 +177,4 @@ describe('SIP IP ACLs API (integration)', () => {
     );
   });
 });
+

@@ -73,13 +73,9 @@ describe('Recordings API (integration)', () => {
       http.get(`${TEST_CONFIG.baseUrl}/recordings`, () =>
         HttpResponse.json(
           {
-            message: 'Request failed with status code 403',
-            error: {
-              name: 'ForbiddenException',
-              code: 403,
-              param: '',
-              details: 'Request failed with status code 403',
-            },
+            success: false,
+            message: 'Recording does not belong to account',
+            code: 'ACCESS_FORBIDDEN',
           },
           { status: 403 }
         )
@@ -90,7 +86,7 @@ describe('Recordings API (integration)', () => {
       client.recordings.retrieve({ recordingId: 'rec_other_account' })
     ).rejects.toMatchObject({
       name: 'ForbiddenException',
-      code: 403,
+      status: 403,
     });
   });
 
@@ -99,8 +95,9 @@ describe('Recordings API (integration)', () => {
       http.get(`${TEST_CONFIG.baseUrl}/recordings`, () =>
         HttpResponse.json(
           {
-            message: 'Internal error',
-            error: { name: 'InternalServerErrorException', code: 500, param: '', details: 'Internal error' },
+            success: false,
+            message: 'Internal server error',
+            code: 'INTERNAL_ERROR',
           },
           { status: 500 }
         )
@@ -109,6 +106,9 @@ describe('Recordings API (integration)', () => {
     const client = createTestClient();
     await expect(
       client.recordings.retrieve({ recordingId: 'rec_broken' })
-    ).rejects.toThrow(InternalServerErrorException);
+    ).rejects.toMatchObject({
+      name: 'InternalServerErrorException',
+      status: 500,
+    });
   });
 });

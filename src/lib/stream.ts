@@ -45,6 +45,7 @@ export class StreamConnector {
         "remoteUrl is a required parameter.",
         "Please provide the remote websocket url to connect.",
         400,
+        "",
         "remoteUrl"
       );
     }

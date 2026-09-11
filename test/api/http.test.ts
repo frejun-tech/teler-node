@@ -41,17 +41,21 @@ describe('HttpResourceManager (integration)', () => {
 
   errorCases.forEach(({ status, name }) => {
     it(`throws ${name} for a ${status} response`, async () => {
+      const response = status === 422
+        ? { success: false, message: 'Validation Error', errors: [{ loc: ['body'], msg: 'required', type: 'value_error' }] }
+        : { success: false, message: `error ${status}` };
+
       server.use(
         http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () =>
-          HttpResponse.json({ message: `error ${status}`, errors: ['detail'] }, { status })
+          HttpResponse.json(response, { status })
         )
       );
       const httpClient = createHttp();
 
       await expect(httpClient.get('/test-endpoint')).rejects.toMatchObject({
         name,
-        code: status,
-        message: `error ${status}`,
+        status,
+        message: status === 422 ? 'Validation Error' : `error ${status}`,
       });
     });
   });
@@ -78,6 +82,83 @@ describe('HttpResourceManager (integration)', () => {
     await expect(httpClient.get('/test-endpoint')).rejects.toMatchObject({
       name: 'NetworkException',
       message: expect.any(String),
+    });
+  });
+
+  it('surfaces the API response errorCode and type for error responses', async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () =>
+        HttpResponse.json(
+          { success: false, message: 'Access denied', code: 'AUTH_INSUFFICIENT_PERMISSIONS', type: 'permission_error' },
+          { status: 403 }
+        )
+      )
+    );
+    const httpClient = createHttp();
+
+    await expect(httpClient.get('/test-endpoint')).rejects.toMatchObject({
+      name: 'ForbiddenException',
+      status: 403,
+      errorCode: 'AUTH_INSUFFICIENT_PERMISSIONS',
+      type: 'permission_error',
+    });
+  });
+
+  it('derives param from 422 validation error loc and preserves full error response', async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () =>
+        HttpResponse.json(
+          {
+            success: false,
+            message: 'Validation Error',
+            errors: [
+              {
+                type: 'string_pattern_mismatch',
+                loc: ['body', 'from_number'],
+                msg: "String should match pattern '^\\+\\d{7,15}$'",
+                input: '918065200756',
+                ctx: { pattern: '^\\+\\d{7,15}$' },
+              },
+            ],
+          },
+          { status: 422 }
+        )
+      )
+    );
+    const httpClient = createHttp();
+
+    await expect(httpClient.get('/test-endpoint')).rejects.toMatchObject({
+      name: 'UnprocessableRequestException',
+      status: 422,
+      param: 'body.from_number',
+      message: 'Validation Error',
+    });
+
+    try {
+      await httpClient.get('/test-endpoint');
+    } catch (err) {
+      const e = err as any;
+      expect(e.details?.errors[0]?.input).toBe('918065200756');
+      expect(e.details?.errors[0]?.ctx).toEqual({ pattern: '^\\+\\d{7,15}$' });
+    }
+  });
+
+  it('handles 422 business-rule validation errors without field-level details', async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () =>
+        HttpResponse.json(
+          { success: false, message: 'Value error, cursor_after and cursor_before are mutually exclusive' },
+          { status: 422 }
+        )
+      )
+    );
+    const httpClient = createHttp();
+
+    await expect(httpClient.get('/test-endpoint')).rejects.toMatchObject({
+      name: 'UnprocessableRequestException',
+      status: 422,
+      param: undefined,
+      message: 'Value error, cursor_after and cursor_before are mutually exclusive',
     });
   });
 

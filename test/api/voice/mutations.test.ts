@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { createTestClient } from '@test/support/client';
 import { server } from '@test/msw/server';
@@ -77,7 +77,7 @@ describe('Voice Mutations API (integration)', () => {
     const client = createTestClient();
     await expect(client.voice.mutations.hangup('cs_123', {})).rejects.toMatchObject({
       name: 'ForbiddenException',
-      code: 403,
+      status: 403,
       message: 'Invalid API Key.',
     });
   });
@@ -96,7 +96,7 @@ describe('Voice Mutations API (integration)', () => {
       client.voice.mutations.mute('cs_missing', { legId: 'cl_123', on: true })
     ).rejects.toMatchObject({
       name: 'NotFoundException',
-      code: 404,
+      status: 404,
       message: 'The requested call was not found.',
     });
   });
@@ -118,7 +118,7 @@ describe('Voice Mutations API (integration)', () => {
     const client = createTestClient();
     await expect(client.voice.mutations.hangup('cs_ended', {})).rejects.toMatchObject({
       name: 'ConflictException',
-      code: 409,
+      status: 409,
     });
   });
 
@@ -134,3 +134,4 @@ describe('Voice Mutations API (integration)', () => {
     ).rejects.toThrow(InternalServerErrorException);
   });
 });
+
