@@ -1,8 +1,13 @@
 import { vi } from 'vitest';
 
-
-vi.mock('pino', () => {
-  const noop = vi.fn();
-  const logger = { info: noop, warn: noop, error: noop, debug: noop, trace: noop, fatal: noop };
-  return { default: vi.fn(() => logger), __mockLogger: logger };
-});
+vi.mock('pino', () => ({
+  default: vi.fn(() => ({
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    trace: vi.fn(),
+    fatal: vi.fn(),
+    level: 'info'
+  }))
+}));

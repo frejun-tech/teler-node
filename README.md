@@ -112,6 +112,29 @@ Equivalent JSON:
 }
 ```
 
+### Dial
+
+Originates an outbound leg and bridges it once the target answers.
+
+```typescript
+import { CallFlow } from "@frejun/teler";
+
+const flow = CallFlow.dial("+919967xxxx", {
+  timeout: 30,
+  record: true
+});
+```
+
+Equivalent JSON:
+```json
+{
+    "action": "dial",
+    "to": "+919967xxxx",
+    "timeout": 30,
+    "record": true,
+}
+```
+
 ### Hangup
 
 Ends the call immediately.
@@ -127,19 +150,6 @@ Equivalent JSON:
 {
     "action": "hangup"
 }
-```
-
-### Dial
-
-Originates an outbound leg and bridges it once the target answers.
-
-```typescript
-import { CallFlow } from "@frejun/teler";
-
-const flow = CallFlow.dial("+919967xxxx", {
-  timeout: 30,
-  record: true
-});
 ```
 
 
@@ -222,6 +232,25 @@ wss.on("connection", async (callWs: WebSocket) => {
 ```
 
 
+## Logging
+
+By default, `Client` is silent. To enable logging, pass a `Logger` instance:
+
+```typescript
+import { Client, type Logger } from "@frejun/teler";
+import pino from "pino"; // Optional: bring your own logger
+
+// Using pino (or any pino-compatible logger)
+const pinoLogger = pino();
+
+const client = new Client("YOUR_API_KEY", {
+  logger: pinoLogger  // Logs from the client go to your pino instance
+});
+```
+
+A logger must implement the `Logger` interface: `{ info(obj, msg?), warn(obj, msg?), error(obj, msg?) }`. Any pino instance satisfies this interface structurally. `StreamConnector` emits internal logs (connection events, errors) that are not configurable per-instance.
+
+
 ## Error Handling
 
 `@frejun/teler` throws typed exceptions that extend the base `TelerException` class, allowing you to handle errors precisely.
@@ -246,7 +275,7 @@ TelerException (base)
 
 | Exception | Status | Description |
 |-----------|--------|-------------|
-| `TelerException` | `500` | Base exception, all SDK errors extend this |
+| `TelerException` | — | Base exception, all SDK errors extend this |
 | `BadParametersException` | `400` | One or more request parameters are invalid |
 | `UnprocessableRequestException` | `422` | The request body failed validation |
 | `UnauthorizedException` | `401` | Invalid or missing API key |

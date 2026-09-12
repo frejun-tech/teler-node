@@ -7,5 +7,6 @@ export * from "./types/events";
 export * from "./types/secrets";
 export * from "./exceptions";
 export type { TelerErrorResponseBody } from "./resources/http";
+export type { Logger } from "./logger";
 export * from "./lib/flows";
 export * from "./lib/stream";

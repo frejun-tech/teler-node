@@ -3,7 +3,7 @@ import { CallResourceManager } from "./resources/calls";
 import { VoiceResourceManager } from "./resources/voice/voice";
 import { SipResourceManager } from "./resources/sip/sip";
 import { HttpResourceManager } from "./resources/http";
-import { setLogLevel } from "./logger";
+import { noopLogger, type Logger } from "./logger";
 import { VirtualNumberResourceManager } from "./resources/vns";
 import { EventResourceManager } from "./resources/events";
 import { RecordingResourceManager } from "./resources/recordings";
@@ -12,7 +12,7 @@ import { config } from "./config";
 
 export interface ClientOptions {
   baseURL?: string;
-  logLevel?: "info" | "warn" | "error" | "debug";
+  logger?: Logger;
   baseTimeout?: number;
   recordingTimeout?: number;
 }
@@ -24,6 +24,7 @@ export interface ClientOptions {
  */
 export class Client {
   private readonly apiKey: string;
+  public readonly logger: Logger;
   private readonly baseURL: string = config.BASE_URL;
   private readonly recordingTimeout: number =
     config.RECORDING_DOWNLOAD_TIMEOUT_MS;
@@ -53,10 +54,8 @@ export class Client {
         "apiKey"
       );
     this.apiKey = apiKey;
+    this.logger = options?.logger ?? noopLogger;
 
-    if (options?.logLevel) {
-      setLogLevel(options.logLevel);
-    }
     if (options?.baseURL) {
       this.baseURL = options.baseURL;
     }

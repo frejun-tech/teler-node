@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { Client } from '@/client';
 import { BadParametersException } from '@/exceptions';
 
@@ -25,8 +25,21 @@ describe('Client (unit)', () => {
     expect(() => new Client('valid_key_123', { baseURL: 'https://sandbox.frejun.ai/api/v1' })).not.toThrow();
   });
 
-  it('accepts optional client options such as logLevel', () => {
-    const client = new Client('valid_key_123', { logLevel: 'debug' });
-    expect(client).toBeDefined();
+  it('defaults to a silent logger when none is provided', () => {
+    const client = new Client('valid_key_123');
+    expect(client.logger).toBeDefined();
+    expect(client.logger.info).toBeDefined();
+    expect(client.logger.warn).toBeDefined();
+    expect(client.logger.error).toBeDefined();
+  });
+
+  it('accepts a custom logger option', () => {
+    const customLogger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    };
+    const client = new Client('valid_key_123', { logger: customLogger });
+    expect(client.logger).toBe(customLogger);
   });
 });
