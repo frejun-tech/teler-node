@@ -7,6 +7,7 @@ import type {
 } from "../../types/voice";
 import type { HttpResourceManager } from "../http";
 import { resolveIdempotencyKey } from "../../lib/idempotency";
+import { config } from "../../config";
 
 export class MutationResourceManager {
   private readonly basePath = "/voice/calls";
@@ -19,7 +20,7 @@ export class MutationResourceManager {
    * @param payload        - The hangup payload
    * @param idempotencyKey - Optional. Unique key (≤ 255 chars). Defaults to a SDK-generated UUID v4.
    * @param retry - Optional. Whether to retry on network errors/503s. (Default: false)
-   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff. (Default: 5000)
+   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff with jitter. (Default: 300, capped at 2000ms, per-request timeout: 5000ms)
    * @returns Response of the hangup
    */
   public async hangup(
@@ -36,7 +37,10 @@ export class MutationResourceManager {
       {
         headers: { "Idempotency-Key": key },
         retry: retry,
-        baseRetryDelayMs: baseRetryDelayMs
+        baseRetryDelayMs:
+          baseRetryDelayMs ?? config.CALL_CONTROL_RETRY_BASE_DELAY_MS,
+        maxRetryDelayMs: config.MAX_RETRY_DELAY_MS,
+        config: { timeout: config.CALL_CONTROL_TIMEOUT_MS }
       }
     );
   }
@@ -48,7 +52,7 @@ export class MutationResourceManager {
    * @param payload        - The mute/unmute payload
    * @param idempotencyKey - Optional. Unique key (≤ 255 chars). Defaults to a SDK-generated UUID v4.
    * @param retry - Optional. Whether to retry on network errors/503s. (Default: false)
-   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff. (Default: 5000)
+   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff with jitter. (Default: 300, capped at 2000ms, per-request timeout: 5000ms)
    * @returns Response of the action
    */
   public async mute(
@@ -65,7 +69,10 @@ export class MutationResourceManager {
       {
         headers: { "Idempotency-Key": key },
         retry: retry,
-        baseRetryDelayMs: baseRetryDelayMs
+        baseRetryDelayMs:
+          baseRetryDelayMs ?? config.CALL_CONTROL_RETRY_BASE_DELAY_MS,
+        maxRetryDelayMs: config.MAX_RETRY_DELAY_MS,
+        config: { timeout: config.CALL_CONTROL_TIMEOUT_MS }
       }
     );
   }
@@ -77,7 +84,7 @@ export class MutationResourceManager {
    * @param payload        - The DTMF payload
    * @param idempotencyKey - Optional. Unique key (≤ 255 chars). Defaults to a SDK-generated UUID v4.
    * @param retry - Optional. Whether to retry on network errors/503s. (Default: false)
-   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff. (Default: 5000)
+   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff with jitter. (Default: 300, capped at 2000ms, per-request timeout: 5000ms)
    * @returns Response of the DTMF action
    */
   public async dtmf(
@@ -94,7 +101,10 @@ export class MutationResourceManager {
       {
         headers: { "Idempotency-Key": key },
         retry: retry,
-        baseRetryDelayMs: baseRetryDelayMs
+        baseRetryDelayMs:
+          baseRetryDelayMs ?? config.CALL_CONTROL_RETRY_BASE_DELAY_MS,
+        maxRetryDelayMs: config.MAX_RETRY_DELAY_MS,
+        config: { timeout: config.CALL_CONTROL_TIMEOUT_MS }
       }
     );
   }
@@ -106,7 +116,7 @@ export class MutationResourceManager {
    * @param payload        - The play payload
    * @param idempotencyKey - Optional. Unique key (≤ 255 chars). Defaults to a SDK-generated UUID v4.
    * @param retry - Optional. Whether to retry on network errors/503s. (Default: false)
-   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff. (Default: 5000)
+   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff with jitter. (Default: 300, capped at 2000ms, per-request timeout: 5000ms)
    * @returns Response of the play action
    */
   public async play(
@@ -123,7 +133,10 @@ export class MutationResourceManager {
       {
         headers: { "Idempotency-Key": key },
         retry: retry,
-        baseRetryDelayMs: baseRetryDelayMs
+        baseRetryDelayMs:
+          baseRetryDelayMs ?? config.CALL_CONTROL_RETRY_BASE_DELAY_MS,
+        maxRetryDelayMs: config.MAX_RETRY_DELAY_MS,
+        config: { timeout: config.CALL_CONTROL_TIMEOUT_MS }
       }
     );
   }

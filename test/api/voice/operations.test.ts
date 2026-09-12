@@ -225,5 +225,42 @@ describe('Voice Operations API (integration)', () => {
       })
     ).rejects.toThrow(InternalServerErrorException);
   });
+
+  it('call-control operations retry with 300ms base delay and jitter on 503', async () => {
+    let attempts = 0;
+    const startTime = Date.now();
+    server.use(
+      http.post(`${TEST_CONFIG.baseUrl}/voice/calls/:id/transfer`, () => {
+        attempts++;
+        if (attempts < 2) {
+          return HttpResponse.json({ message: 'unavailable' }, { status: 503 });
+        }
+        return HttpResponse.json(
+          {
+            id: 'tr_123',
+            callId: 'cs_123',
+            status: 'completed',
+            targetLegId: 'cl_123',
+            mode: 'cold',
+            requestId: 'req_123',
+          },
+          { status: 202 }
+        );
+      })
+    );
+    const client = createTestClient();
+
+    const result = await client.voice.operations.transfer(
+      'cs_123',
+      { target: { kind: 'pstn', number: '+18005550300' }, mode: 'cold' },
+      undefined,
+      true
+    );
+    const duration = Date.now() - startTime;
+
+    expect(attempts).toBe(2);
+    expect(result.id).toBe('tr_123');
+    expect(duration).toBeLessThan(500);
+  });
 });
 

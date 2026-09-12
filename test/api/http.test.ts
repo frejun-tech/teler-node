@@ -366,4 +366,51 @@ describe('HttpResourceManager (integration)', () => {
     expect(result).toEqual({ ok: true });
     expect(duration).toBeLessThan(100);
   });
+
+  it('applies full jitter: delay = random(0, min(cap, base * 2^attempt))', async () => {
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const startTime = Date.now();
+    let callCount = 0;
+
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () => {
+        callCount++;
+        if (callCount === 1) {
+          return HttpResponse.json({ message: 'unavailable' }, { status: 503 });
+        }
+        return HttpResponse.json({ ok: true });
+      })
+    );
+    const httpClient = createHttp();
+
+    await httpClient.get('/test-endpoint', undefined, { baseRetryDelayMs: 100, maxRetryDelayMs: 2000 });
+    const elapsed = Date.now() - startTime;
+
+    randomSpy.mockRestore();
+
+    expect(callCount).toBe(2);
+    expect(elapsed).toBeGreaterThanOrEqual(40);
+    expect(elapsed).toBeLessThan(100);
+  });
+
+  it('caps the retry delay at maxRetryDelayMs', async () => {
+    let attempts = 0;
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () => {
+        attempts++;
+        if (attempts < 2) {
+          return HttpResponse.json({ message: 'unavailable' }, { status: 503 });
+        }
+        return HttpResponse.json({ ok: true });
+      })
+    );
+    const httpClient = createHttp();
+
+    const startTime = Date.now();
+    await httpClient.get('/test-endpoint', undefined, { baseRetryDelayMs: 100000, maxRetryDelayMs: 50 });
+    const duration = Date.now() - startTime;
+
+    expect(attempts).toBe(2);
+    expect(duration).toBeLessThan(200);
+  });
 });

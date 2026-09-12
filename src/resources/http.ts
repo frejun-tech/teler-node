@@ -25,6 +25,7 @@ interface RequestOptions {
   headers?: Record<string, string>;
   retry?: boolean;
   baseRetryDelayMs?: number;
+  maxRetryDelayMs?: number;
   config?: AxiosRequestConfig;
 }
 
@@ -97,7 +98,8 @@ export class HttpResourceManager {
       options?.headers,
       options?.config,
       options?.retry ?? true,
-      options?.baseRetryDelayMs ?? 100
+      options?.baseRetryDelayMs ?? 100,
+      options?.maxRetryDelayMs ?? CONFIG.MAX_RETRY_DELAY_MS
     );
   }
 
@@ -122,7 +124,8 @@ export class HttpResourceManager {
       options?.headers,
       options?.config,
       options?.retry ?? false,
-      options?.baseRetryDelayMs ?? 5000
+      options?.baseRetryDelayMs ?? 5000,
+      options?.maxRetryDelayMs ?? CONFIG.MAX_RETRY_DELAY_MS
     );
   }
 
@@ -158,14 +161,17 @@ export class HttpResourceManager {
   }
 
   /**
-   * Retries the given request with exponential backoff on retryable
-   * errors, reusing the same request (and headers, e.g. Idempotency-Key)
-   * on every attempt.
+   * Retries the given request with exponential backoff + full jitter on retryable
+   * errors, reusing the same request (and headers, e.g. Idempotency-Key) on every
+   * attempt. Delay for attempt N: random(0, min(maxRetryDelayMs, baseRetryDelayMs * 2^N)).
+   * Jitter desynchronizes retries across clients (prevents thundering herd on 503s);
+   * cap prevents excessive delays (e.g. 20s wait on 3rd retry).
    */
   private async executeWithRetry<T>(
     request: () => Promise<T>,
     maxRetries = 3,
-    baseRetryDelayMs = 5000
+    baseRetryDelayMs = 5000,
+    maxRetryDelayMs = CONFIG.MAX_RETRY_DELAY_MS
   ): Promise<T> {
     let lastError: unknown;
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -176,9 +182,12 @@ export class HttpResourceManager {
         if (!this.isRetryableAxiosError(err) || attempt === maxRetries) {
           throw err;
         }
-        await new Promise((r) =>
-          setTimeout(r, 2 ** attempt * baseRetryDelayMs)
+        const exponentialDelay = Math.min(
+          maxRetryDelayMs,
+          baseRetryDelayMs * 2 ** attempt
         );
+        const jitteredDelay = Math.random() * exponentialDelay;
+        await new Promise((r) => setTimeout(r, jitteredDelay));
       }
     }
     throw lastError;
@@ -338,7 +347,8 @@ export class HttpResourceManager {
    * @param headers - Additional HTTP headers to include with the request.
    * @param config - Additional axios request config (e.g. responseType).
    * @param retry - Whether to retry on network errors/503s, reusing the same request each attempt.
-   * @param baseRetryDelayMs - Base delay unit (ms) for exponential backoff between retries. (Default: 5000)
+   * @param baseRetryDelayMs - Base delay (ms) for exponential backoff between retries. (Default: 5000)
+   * @param maxRetryDelayMs - Maximum cap (ms) on the calculated retry delay with jitter. (Default: 2000)
    * @returns The response data of type T.
    */
   private async request<T, P = unknown>(
@@ -349,7 +359,8 @@ export class HttpResourceManager {
     headers?: Record<string, string>,
     config?: AxiosRequestConfig,
     retry = false,
-    baseRetryDelayMs = 5000
+    baseRetryDelayMs = 5000,
+    maxRetryDelayMs = CONFIG.MAX_RETRY_DELAY_MS
   ): Promise<T> {
     try {
       const transformedData =
@@ -370,7 +381,8 @@ export class HttpResourceManager {
             ...config
           }),
         retry ? CONFIG.RETRY_COUNT : 0,
-        baseRetryDelayMs
+        baseRetryDelayMs,
+        maxRetryDelayMs
       );
       if (config?.responseType === "stream") {
         return response.data;

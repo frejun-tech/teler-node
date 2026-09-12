@@ -133,5 +133,27 @@ describe('Voice Mutations API (integration)', () => {
       client.voice.mutations.dtmf('cs_broken', { digits: '1' })
     ).rejects.toThrow(InternalServerErrorException);
   });
+
+  it('call-control mutations retry with 300ms base delay and jitter on 503', async () => {
+    let attempts = 0;
+    const startTime = Date.now();
+    server.use(
+      http.post(`${TEST_CONFIG.baseUrl}/voice/calls/:id/hangup`, () => {
+        attempts++;
+        if (attempts < 2) {
+          return HttpResponse.json({ message: 'unavailable' }, { status: 503 });
+        }
+        return HttpResponse.json({ requestId: 'req_123', playbackId: 'pb_123' }, { status: 202 });
+      })
+    );
+    const client = createTestClient();
+
+    const result = await client.voice.mutations.hangup('cs_123', {}, undefined, true);
+    const duration = Date.now() - startTime;
+
+    expect(attempts).toBe(2);
+    expect(result.requestId).toBe('req_123');
+    expect(duration).toBeLessThan(500);
+  });
 });
 
