@@ -49,7 +49,7 @@ export class CallFlow {
    * (the call itself continues to whatever action comes next).
    *
    * @param mediaUrl - URL of the audio to be played.
-   * @param flowUrl - Optional. Execute flow_url for the next flow. **(Beta)**
+   * @param flowUrl - Optional. Execute flow_url for the next flow.
    * @returns JSON response containing the play details
    */
   static play(mediaUrl: string, flowUrl?: string) {

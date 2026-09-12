@@ -55,6 +55,15 @@ const call = await client.voice.calls.create({
 ```
 
 
+## Field Naming
+
+The SDK uses **camelCase** for everything you write in TypeScript — REST API requests/responses (e.g. `client.voice.calls.create`) are automatically converted to/from the API's snake_case wire format.
+
+**Exception:** `CallFlow` action JSON (`stream`, `play`, `hangup`, `dial`) is returned as **snake_case**, matching the webhook response contract Teler reads directly from your `flowUrl` — it isn't parsed back by the SDK, so no conversion happens.
+
+In both cases, user- or server-defined key/value bags (e.g. `customHeaders` SIP header names) are passed through untouched — their keys are never case-converted.
+
+
 ## Call Flows
 
 When a call connects, Teler fetches instructions from your `flowUrl`. You can construct responses using the `CallFlow` helper class or raw JSON action payloads:
@@ -91,14 +100,15 @@ Plays an audio file to the caller.
 ```typescript
 import { CallFlow } from "@frejun/teler";
 
-const flow = CallFlow.play("https://example.com/audio.mp3");
+const flow = CallFlow.play("https://example.com/audio.mp3", "https://example.com/hangup");
 ```
 
 Equivalent JSON:
 ```json
 {
     "action": "play",
-    "media_url": "https://example.com/audio.mp3"
+    "media_url": "https://example.com/audio.mp3",
+    "flow_url": "https://example.com/hangup"
 }
 ```
 
@@ -253,25 +263,112 @@ TelerException (base)
 All exceptions expose:
 - `message` — human-readable error description
 - `status` — HTTP status code (undefined for `NetworkException` since no response was received)
-- `errorCode` — machine-readable error code from the API response body or network layer (e.g. `ECONNREFUSED`)
+- `errorCode` — machine-readable error code from the API response body or network layer (e.g. `call_not_live`, `ECONNREFUSED`)
+- `type` — machine-readable error category from the API (e.g. `"invalid_state"`); omitted for 422 validation errors
 - `name` — exception class name (e.g. `"BadParametersException"`)
-- `details` — optional additional context about the error (e.g. raw response body)
+- `details` — the full parsed API response body, typed as `TelerErrorResponseBody` (see shape below); omitted for `NetworkException`
 
-`BadParametersException` and `UnprocessableRequestException` additionally expose:
-- `param` — the name of the invalid parameter or field
+`UnprocessableRequestException` additionally exposes:
+- `param` — the dot-joined path to the invalid field, taken verbatim from the API's validation error (e.g. `"body.auth_credential.username"`). Not populated for `BadParametersException` or any other exception today, even though the property exists on the base class.
+
+> **Note:** `details` and `param` reflect the raw API response exactly as received — unlike successful responses, they are **not** converted to camelCase. The API's own error messages may also reference fields by their snake_case wire name (e.g. `"cursor_after and cursor_before are mutually exclusive"`), even when you passed `cursorAfter`/`cursorBefore` in your SDK call.
+
+### API Response Body Shape
+
+The `details` field holds the full API response body, with the following structure:
+
+```typescript
+interface TelerErrorResponseBody {
+  success?: boolean;
+  message?: string;
+  code?: string;                // (same as the exception's errorCode)
+  type?: string;                // (same as the exception's type)
+  errors?: Array<{
+    loc?: (string | number)[];  // path to the invalid field (e.g. ["body", "auth_credential", "username"])
+    msg?: string;               // validation error message
+    type?: string;              // error type (e.g. "string_too_short")
+    input?: unknown;            // the invalid input value
+    ctx?: unknown;              // error context (e.g. { min_length: 5 })
+  }>;
+}
+```
 
 ### Serialized Form
 
-When an exception is serialized (e.g. in logs or an API error response), it is wrapped into the following shape:
+When an exception is serialized (e.g. in logs or an API error response), it is wrapped with this TypeScript shape:
+
+```typescript
+interface SerializedTelerException {
+  message: string;
+  error: {
+    name: string;                              // exception class name
+    status: number;                            // HTTP status code
+    errorCode?: string;                        // machine-readable error code
+    type?: string;                             // error category (omitted for 422)
+    param?: string;                            // invalid param path, raw wire field names, not camelCased (UnprocessableRequestException only)
+    details?: TelerErrorResponseBody;          // full API response body
+  };
+}
+```
+
+**Example 1** — Simple resource not found (404):
 
 ```json
 {
-  "message": "Forbidden.",
+  "message": "The requested call was not found.",
   "error": {
-    "name": "ForbiddenException",
-    "status": 403,
-    "errorCode": "AUTH_INSUFFICIENT_PERMISSIONS",
-    "details": "Access denied"
+    "name": "NotFoundException",
+    "status": 404,
+    "details": {
+      "success": false,
+      "message": "The requested call was not found."
+    }
+  }
+}
+```
+
+**Example 2** — Validation error (422):
+
+```json
+{
+  "message": "Validation Error",
+  "error": {
+    "name": "UnprocessableRequestException",
+    "status": 422,
+    "param": "body.auth_credential.username",
+    "details": {
+      "success": false,
+      "message": "Validation Error",
+      "errors": [
+        {
+          "type": "string_too_short",
+          "loc": ["body", "auth_credential", "username"],
+          "msg": "String should have at least 5 characters",
+          "input": "usr",
+          "ctx": { "min_length": 5 }
+        }
+      ]
+    }
+  }
+}
+```
+
+**Example 3** — Call control failed with error code and type (409):
+
+```json
+{
+  "message": "The call is not in a state that accepts controls.",
+  "error": {
+    "name": "ConflictException",
+    "status": 409,
+    "errorCode": "call_not_live",
+    "type": "invalid_state",
+    "details": {
+      "success": false,
+      "message": "The call is not in a state that accepts controls.",
+      "code": "call_not_live",
+      "type": "invalid_state"
+    }
   }
 }
 ```
