@@ -3,7 +3,7 @@ import { http, HttpResponse } from 'msw';
 import { createTestClient } from '@test/support/client';
 import { server } from '@test/msw/server';
 import { TEST_CONFIG } from '@test/support/env';
-import { voiceCallListFixture } from '@test/support/fixtures/voice';
+import { voiceCallListFixture, voiceCallFixture } from '@test/support/fixtures/voice';
 import {
   BadParametersException,
   InternalServerErrorException,
@@ -61,6 +61,30 @@ describe('Voice Calls API (integration)', () => {
     const call = await client.voice.calls.retrieve('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ');
     expect(call.id).toBe('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ');
     expect(call.legs).toBeInstanceOf(Array);
+  });
+
+  it('preserves arbitrary keys inside properties without case conversion', async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/voice/calls/:id`, ({ params }) =>
+        HttpResponse.json(
+          voiceCallFixture({
+            id: params.id as string,
+            properties: {
+              call_sid: 'abc123',
+              'Some-Weird-Key': 'value',
+              user_data: 'stays',
+            },
+          })
+        )
+      )
+    );
+    const client = createTestClient();
+    const call = await client.voice.calls.retrieve('cs_01J5ABCDEFGHJKMNPQRSTVWXYZ');
+    expect(call.properties).toEqual({
+      call_sid: 'abc123',
+      'Some-Weird-Key': 'value',
+      user_data: 'stays',
+    });
   });
 
   it('fetches voice call legs through the real http stack', async () => {

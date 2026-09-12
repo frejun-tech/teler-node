@@ -162,6 +162,15 @@ describe('CallResourceManager (unit)', () => {
       expect(result).not.toHaveProperty('voice_app_id');
     });
 
+    it('preserves properties keys without case conversion', async () => {
+      const fixture = voiceCallFixture();
+      http.get.mockResolvedValue(toCamelCase(fixture));
+
+      const result = await calls.retrieve(fixture.id);
+
+      expect(result.properties).toEqual(fixture.properties);
+    });
+
     it('propagates errors from the http layer', async () => {
       http.get.mockRejectedValue(new Error('Network error'));
 

@@ -63,6 +63,31 @@ describe("toSnakeCase", () => {
       date_val: date
     });
   });
+
+  it("does not mangle keys inside customHeaders (opaque field)", () => {
+    const input = {
+      target: {
+        kind: "pstn",
+        number: "+18005550300",
+        customHeaders: {
+          "X-Trace-Id": "abc123",
+          "X-Call-Reason": "sales"
+        }
+      }
+    };
+
+    const output = toSnakeCase(input);
+    expect(output).toEqual({
+      target: {
+        kind: "pstn",
+        number: "+18005550300",
+        custom_headers: {
+          "X-Trace-Id": "abc123",
+          "X-Call-Reason": "sales"
+        }
+      }
+    });
+  });
 });
 
 describe("toCamelCase", () => {
@@ -125,6 +150,73 @@ describe("toCamelCase", () => {
       numVal: 42,
       boolVal: false,
       dateVal: date
+    });
+  });
+
+  it("does not mangle keys inside properties (opaque field)", () => {
+    const input = {
+      id: "call_123",
+      properties: {
+        call_sid: "abc",
+        "Weird-Key": "value",
+        nested_field: "stays"
+      }
+    };
+
+    const output = toCamelCase(input);
+    expect(output).toEqual({
+      id: "call_123",
+      properties: {
+        call_sid: "abc",
+        "Weird-Key": "value",
+        nested_field: "stays"
+      }
+    });
+  });
+
+  it("does not mangle keys inside payload (opaque field)", () => {
+    const input = {
+      id: "evt_123",
+      payload: {
+        call_sid: "abc",
+        "Some-Weird-Key": "value",
+        user_data: "stays"
+      }
+    };
+
+    const output = toCamelCase(input);
+    expect(output).toEqual({
+      id: "evt_123",
+      payload: {
+        call_sid: "abc",
+        "Some-Weird-Key": "value",
+        user_data: "stays"
+      }
+    });
+  });
+
+  it("does not mangle keys inside custom_headers → customHeaders (opaque field)", () => {
+    const input = {
+      target: {
+        kind: "pstn",
+        number: "+18005550300",
+        custom_headers: {
+          "X-Trace-Id": "abc123",
+          "X-Call-Reason": "sales"
+        }
+      }
+    };
+
+    const output = toCamelCase(input);
+    expect(output).toEqual({
+      target: {
+        kind: "pstn",
+        number: "+18005550300",
+        customHeaders: {
+          "X-Trace-Id": "abc123",
+          "X-Call-Reason": "sales"
+        }
+      }
     });
   });
 });

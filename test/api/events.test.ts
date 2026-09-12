@@ -64,4 +64,43 @@ describe('Events API (integration)', () => {
     const result = await client.events.redeliver('evt_123');
     expect(result.eventId).toBe('evt_123');
   });
+
+  it('preserves arbitrary keys inside payload without case conversion', async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/events/:id`, () =>
+        HttpResponse.json(
+          {
+            id: 'evt_123',
+            accountId: 'acc_123',
+            callId: 'call_123',
+            sipTrunkId: 'st_123',
+            legId: 'leg_123',
+            type: 'call.created',
+            apiVersion: '2024-01-01',
+            occurredAt: '2024-01-01T00:00:00Z',
+            payload: {
+              call_sid: 'abc123',
+              'Some-Weird-Key': 'value',
+              user_data: 'stays',
+            },
+            deliveryStatus: 'delivered',
+            attemptCount: 1,
+            lastAttemptAt: '2024-01-01T00:00:00Z',
+            lastStatusCode: 200,
+            lastError: '',
+            deliveredAt: '2024-01-01T00:00:00Z',
+            createdAt: '2024-01-01T00:00:00Z',
+          },
+          { status: 200 }
+        )
+      )
+    );
+    const client = createTestClient();
+    const event = await client.events.retrieve('evt_123');
+    expect(event.payload).toEqual({
+      call_sid: 'abc123',
+      'Some-Weird-Key': 'value',
+      user_data: 'stays',
+    });
+  });
 });

@@ -54,6 +54,48 @@ describe('Voice Operations API (integration)', () => {
     expect(captured.headers?.get('Idempotency-Key')).toBe('transfer_custom_key');
   });
 
+  it('round-trips customHeaders through request body without mangling SIP header names', async () => {
+    const captured: { body: unknown } = { body: null };
+    server.use(
+      http.post(`${TEST_CONFIG.baseUrl}/voice/calls/:id/transfer`, async ({ request }) => {
+        captured.body = await request.json();
+        return HttpResponse.json(
+          {
+            id: 'tr_123',
+            callId: 'cs_123',
+            status: 'completed',
+            targetLegId: 'cl_123',
+            mode: 'cold',
+            requestId: 'req_123',
+          },
+          { status: 202 }
+        );
+      })
+    );
+    const client = createTestClient();
+    await client.voice.operations.transfer(
+      'cs_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+      {
+        target: {
+          kind: 'pstn',
+          number: '+18005550300',
+          customHeaders: { 'X-Trace-Id': 'abc123', 'X-Call-Reason': 'sales' }
+        },
+        mode: 'cold',
+      }
+    );
+    expect(captured.body).toMatchObject({
+      target: {
+        kind: 'pstn',
+        number: '+18005550300',
+        custom_headers: {
+          'X-Trace-Id': 'abc123',
+          'X-Call-Reason': 'sales'
+        }
+      }
+    });
+  });
+
   // --- Error Contract Tests ---
 
   it('propagates 400 Bad Parameters on invalid transfer target or mode', async () => {
