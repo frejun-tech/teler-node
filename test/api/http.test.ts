@@ -309,4 +309,61 @@ describe('HttpResourceManager (integration)', () => {
 
     isAxiosErrorSpy.mockRestore();
   });
+
+  it('GET retries on 503 by default', async () => {
+    let attempts = 0;
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () => {
+        attempts++;
+        if (attempts < 2) {
+          return HttpResponse.json({ message: 'unavailable' }, { status: 503 });
+        }
+        return HttpResponse.json({ ok: true });
+      })
+    );
+    const httpClient = createHttp();
+
+    const result = await httpClient.get('/test-endpoint');
+
+    expect(attempts).toBe(2);
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('GET can disable retry with retry option', async () => {
+    let attempts = 0;
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () => {
+        attempts++;
+        return HttpResponse.json({ message: 'unavailable' }, { status: 503 });
+      })
+    );
+    const httpClient = createHttp();
+
+    await expect(
+      httpClient.get('/test-endpoint', undefined, { retry: false })
+    ).rejects.toThrow(InternalServerErrorException);
+    expect(attempts).toBe(1);
+  });
+
+  it('GET can override baseRetryDelayMs', async () => {
+    let attempts = 0;
+    const startTime = Date.now();
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () => {
+        attempts++;
+        if (attempts < 2) {
+          return HttpResponse.json({ message: 'unavailable' }, { status: 503 });
+        }
+        return HttpResponse.json({ ok: true });
+      })
+    );
+    const httpClient = createHttp();
+
+    const result = await httpClient.get('/test-endpoint', undefined, { baseRetryDelayMs: 10 });
+    const duration = Date.now() - startTime;
+
+    expect(attempts).toBe(2);
+    expect(result).toEqual({ ok: true });
+    expect(duration).toBeLessThan(100);
+  });
 });

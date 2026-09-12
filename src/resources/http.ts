@@ -81,21 +81,23 @@ export class HttpResourceManager {
    *
    * @param path - API endpoint path.
    * @param params - Optional. Query parameters to include in the request.
-   * @param config - Optional. Additional axios request config (e.g. responseType, timeout, maxRedirects).
+   * @param options - Optional. Headers, retry, backoff, and axios config.
    * @returns The response data of type T.
    */
   public async get<T, P = unknown>(
     path: string,
     params?: P,
-    config?: AxiosRequestConfig
+    options?: RequestOptions
   ): Promise<T> {
     return this.request<T>(
       "GET",
       path,
       undefined,
       params as Record<string, unknown> | undefined,
-      undefined,
-      config
+      options?.headers,
+      options?.config,
+      options?.retry ?? true,
+      options?.baseRetryDelayMs ?? 100
     );
   }
 
