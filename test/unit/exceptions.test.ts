@@ -17,7 +17,7 @@ import {
 describe('TelerException hierarchy', () => {
   describe('TelerException (base)', () => {
     it('sets name, message, status, and details', () => {
-      const err = new TelerException('base error', { field: 'x' }, 500);
+      const err = new TelerException({ message: 'base error', details: { field: 'x' }, status: 500 });
       expect(err.name).toBe('TelerException');
       expect(err.message).toBe('base error');
       expect(err.status).toBe(500);
@@ -36,20 +36,20 @@ describe('TelerException hierarchy', () => {
     });
 
     it('independently sets status and errorCode', () => {
-      const err = new TelerException('API error', { field: 'x' }, 403, 'AUTH_EXPIRED');
+      const err = new TelerException({ message: 'API error', details: { field: 'x' }, status: 403, errorCode: 'AUTH_EXPIRED' });
       expect(err.status).toBe(403);
       expect(err.errorCode).toBe('AUTH_EXPIRED');
     });
 
     it('independently sets status, errorCode, and type', () => {
-      const err = new TelerException('API error', { field: 'x' }, 409, 'transfer_in_progress', undefined, 'invalid_state');
+      const err = new TelerException({ message: 'API error', details: { field: 'x' }, status: 409, errorCode: 'transfer_in_progress', type: 'invalid_state' });
       expect(err.status).toBe(409);
       expect(err.errorCode).toBe('transfer_in_progress');
       expect(err.type).toBe('invalid_state');
     });
 
     it('param and type default to undefined', () => {
-      const err = new TelerException('error');
+      const err = new TelerException({ message: 'error' });
       expect(err.param).toBeUndefined();
       expect(err.type).toBeUndefined();
     });
@@ -57,7 +57,7 @@ describe('TelerException hierarchy', () => {
 
   describe('BadParametersException (400)', () => {
     it('has name BadParametersException and status 400', () => {
-      const err = new BadParametersException('Invalid value', undefined, 400, 'INVALID_EMAIL', 'email');
+      const err = new BadParametersException({ message: 'Invalid value', errorCode: 'INVALID_EMAIL', param: 'email' });
       expect(err.name).toBe('BadParametersException');
       expect(err.status).toBe(400);
       expect(err.param).toBe('email');
@@ -79,15 +79,15 @@ describe('TelerException hierarchy', () => {
     });
 
     it('carries the invalid cursor message from API', () => {
-      const err = new BadParametersException(
-        'The pagination cursor is invalid or has expired.'
-      );
+      const err = new BadParametersException({
+        message: 'The pagination cursor is invalid or has expired.'
+      });
       expect(err.message).toBe('The pagination cursor is invalid or has expired.');
       expect(err.status).toBe(400);
     });
 
     it('independently sets status, errorCode, and type', () => {
-      const err = new BadParametersException('Invalid', undefined, 400, 'INVALID_EMAIL_FORMAT', undefined, 'validation_error');
+      const err = new BadParametersException({ message: 'Invalid', errorCode: 'INVALID_EMAIL_FORMAT', type: 'validation_error' });
       expect(err.status).toBe(400);
       expect(err.errorCode).toBe('INVALID_EMAIL_FORMAT');
       expect(err.param).toBeUndefined();
@@ -104,7 +104,7 @@ describe('TelerException hierarchy', () => {
           { loc: ['body', 'name'], msg: 'field required', type: 'value_error' },
         ],
       };
-      const err = new UnprocessableRequestException('Validation Error', details, 422, undefined, 'body.name');
+      const err = new UnprocessableRequestException({ message: 'Validation Error', details, param: 'body.name' });
       expect(err.name).toBe('UnprocessableRequestException');
       expect(err.status).toBe(422);
       expect(err.message).toBe('Validation Error');
@@ -137,7 +137,7 @@ describe('TelerException hierarchy', () => {
           },
         ],
       };
-      const err = new UnprocessableRequestException('Validation Error', fullResponse, 422, undefined, 'body.from_number');
+      const err = new UnprocessableRequestException({ message: 'Validation Error', details: fullResponse, param: 'body.from_number' });
       expect(err.details).toEqual(fullResponse);
       const details = err.details as typeof fullResponse;
       expect(details.errors[0].input).toBe('918065200756');
@@ -147,7 +147,7 @@ describe('TelerException hierarchy', () => {
 
   describe('UnauthorizedException (401)', () => {
     it('has name UnauthorizedException and status 401', () => {
-      const err = new UnauthorizedException('Token expired.');
+      const err = new UnauthorizedException({ message: 'Token expired.' });
       expect(err.name).toBe('UnauthorizedException');
       expect(err.status).toBe(401);
       expect(err.message).toBe('Token expired.');
@@ -158,7 +158,7 @@ describe('TelerException hierarchy', () => {
     });
 
     it('carries errorCode and type', () => {
-      const err = new UnauthorizedException('Unauthorized', undefined, 401, 'TOKEN_EXPIRED', undefined, 'auth_error');
+      const err = new UnauthorizedException({ message: 'Unauthorized', errorCode: 'TOKEN_EXPIRED', type: 'auth_error' });
       expect(err.errorCode).toBe('TOKEN_EXPIRED');
       expect(err.type).toBe('auth_error');
     });
@@ -166,7 +166,7 @@ describe('TelerException hierarchy', () => {
 
   describe('ForbiddenException (403)', () => {
     it('has name ForbiddenException and status 403', () => {
-      const err = new ForbiddenException('Invalid API Key.');
+      const err = new ForbiddenException({ message: 'Invalid API Key.' });
       expect(err.name).toBe('ForbiddenException');
       expect(err.status).toBe(403);
       expect(err.message).toBe('Invalid API Key.');
@@ -181,14 +181,14 @@ describe('TelerException hierarchy', () => {
     });
 
     it('carries errorCode from API response', () => {
-      const err = new ForbiddenException('Access denied', undefined, 403, 'AUTH_INSUFFICIENT_PERMISSIONS');
+      const err = new ForbiddenException({ message: 'Access denied', errorCode: 'AUTH_INSUFFICIENT_PERMISSIONS' });
       expect(err.errorCode).toBe('AUTH_INSUFFICIENT_PERMISSIONS');
     });
   });
 
   describe('NotFoundException (404)', () => {
     it('has name NotFoundException and status 404', () => {
-      const err = new NotFoundException('The requested secret was not found.');
+      const err = new NotFoundException({ message: 'The requested secret was not found.' });
       expect(err.name).toBe('NotFoundException');
       expect(err.status).toBe(404);
       expect(err.message).toBe('The requested secret was not found.');
@@ -203,7 +203,7 @@ describe('TelerException hierarchy', () => {
     });
 
     it('carries errorCode when provided', () => {
-      const err = new NotFoundException('Resource not found', { id: 'sk_123' }, 404, 'RESOURCE_NOT_FOUND');
+      const err = new NotFoundException({ message: 'Resource not found', details: { id: 'sk_123' }, errorCode: 'RESOURCE_NOT_FOUND' });
       expect(err.errorCode).toBe('RESOURCE_NOT_FOUND');
       expect(err.details).toEqual({ id: 'sk_123' });
     });
@@ -211,9 +211,9 @@ describe('TelerException hierarchy', () => {
 
   describe('ConflictException (409)', () => {
     it('has name ConflictException and status 409', () => {
-      const err = new ConflictException(
-        'This event cannot be redelivered in its current state.'
-      );
+      const err = new ConflictException({
+        message: 'This event cannot be redelivered in its current state.'
+      });
       expect(err.name).toBe('ConflictException');
       expect(err.status).toBe(409);
     });
@@ -227,7 +227,7 @@ describe('TelerException hierarchy', () => {
     });
 
     it('carries errorCode and type for conflict scenarios', () => {
-      const err = new ConflictException('Transfer in progress', undefined, 409, 'transfer_in_progress', undefined, 'invalid_state');
+      const err = new ConflictException({ message: 'Transfer in progress', errorCode: 'transfer_in_progress', type: 'invalid_state' });
       expect(err.errorCode).toBe('transfer_in_progress');
       expect(err.type).toBe('invalid_state');
     });
@@ -235,7 +235,7 @@ describe('TelerException hierarchy', () => {
 
   describe('GoneException (410)', () => {
     it('has name GoneException and status 410', () => {
-      const err = new GoneException('Resource is no longer available.');
+      const err = new GoneException({ message: 'Resource is no longer available.' });
       expect(err.name).toBe('GoneException');
       expect(err.status).toBe(410);
       expect(err.message).toBe('Resource is no longer available.');
@@ -250,7 +250,7 @@ describe('TelerException hierarchy', () => {
     });
 
     it('carries errorCode when provided', () => {
-      const err = new GoneException('Resource deleted', undefined, 410, 'RESOURCE_DELETED', undefined, 'deleted');
+      const err = new GoneException({ message: 'Resource deleted', errorCode: 'RESOURCE_DELETED', type: 'deleted' });
       expect(err.errorCode).toBe('RESOURCE_DELETED');
       expect(err.type).toBe('deleted');
     });
@@ -258,7 +258,7 @@ describe('TelerException hierarchy', () => {
 
   describe('RateLimitException (429)', () => {
     it('has name RateLimitException and status 429', () => {
-      const err = new RateLimitException('Rate limit exceeded. Retry after 60s.');
+      const err = new RateLimitException({ message: 'Rate limit exceeded. Retry after 60s.' });
       expect(err.name).toBe('RateLimitException');
       expect(err.status).toBe(429);
     });
@@ -268,7 +268,7 @@ describe('TelerException hierarchy', () => {
     });
 
     it('carries errorCode and type', () => {
-      const err = new RateLimitException('Too many requests', undefined, 429, 'RATE_LIMIT_EXCEEDED', undefined, 'rate_limit');
+      const err = new RateLimitException({ message: 'Too many requests', errorCode: 'RATE_LIMIT_EXCEEDED', type: 'rate_limit' });
       expect(err.errorCode).toBe('RATE_LIMIT_EXCEEDED');
       expect(err.type).toBe('rate_limit');
     });
@@ -276,27 +276,26 @@ describe('TelerException hierarchy', () => {
 
   describe('InternalServerErrorException (500+)', () => {
     it('has name InternalServerErrorException and status 500', () => {
-      const err = new InternalServerErrorException('An unexpected error occurred.');
+      const err = new InternalServerErrorException({ message: 'An unexpected error occurred.' });
       expect(err.name).toBe('InternalServerErrorException');
       expect(err.status).toBe(500);
     });
 
     it('accepts custom 5xx statuses (e.g. 502, 503)', () => {
-      const err502 = new InternalServerErrorException('Bad Gateway', undefined, 502);
-      const err503 = new InternalServerErrorException('Service Unavailable', undefined, 503);
+      const err502 = new InternalServerErrorException({ message: 'Bad Gateway', status: 502 });
+      const err503 = new InternalServerErrorException({ message: 'Service Unavailable', status: 503 });
       expect(err502.status).toBe(502);
       expect(err503.status).toBe(503);
     });
 
     it('carries errorCode and type from server response', () => {
-      const err = new InternalServerErrorException(
-        'Internal server error',
-        { error: 'details' },
-        500,
-        'DATABASE_ERROR',
-        undefined,
-        'server_error'
-      );
+      const err = new InternalServerErrorException({
+        message: 'Internal server error',
+        details: { error: 'details' },
+        status: 500,
+        errorCode: 'DATABASE_ERROR',
+        type: 'server_error'
+      });
       expect(err.status).toBe(500);
       expect(err.errorCode).toBe('DATABASE_ERROR');
       expect(err.type).toBe('server_error');
@@ -309,7 +308,7 @@ describe('TelerException hierarchy', () => {
 
   describe('NotImplementedException (501)', () => {
     it('has name NotImplementedException and status 501', () => {
-      const err = new NotImplementedException('Feature not available.', undefined, 501);
+      const err = new NotImplementedException({ message: 'Feature not available.', status: 501 });
       expect(err.name).toBe('NotImplementedException');
       expect(err.status).toBe(501);
     });
@@ -319,14 +318,14 @@ describe('TelerException hierarchy', () => {
     });
 
     it('carries errorCode from server response', () => {
-      const err = new NotImplementedException('Feature not implemented', undefined, 501, 'FEATURE_NOT_AVAILABLE');
+      const err = new NotImplementedException({ message: 'Feature not implemented', status: 501, errorCode: 'FEATURE_NOT_AVAILABLE' });
       expect(err.errorCode).toBe('FEATURE_NOT_AVAILABLE');
     });
   });
 
   describe('NetworkException', () => {
     it('assigns message, details, and errorCode correctly', () => {
-      const err = new NetworkException('Connection refused', { host: 'api.frejun.ai' }, 'ECONNREFUSED');
+      const err = new NetworkException({ message: 'Connection refused', details: { host: 'api.frejun.ai' }, errorCode: 'ECONNREFUSED' });
       expect(err.name).toBe('NetworkException');
       expect(err.message).toBe('Connection refused');
       expect(err.details).toEqual({ host: 'api.frejun.ai' });
@@ -335,7 +334,7 @@ describe('TelerException hierarchy', () => {
     });
 
     it('is an instance of TelerException and Error', () => {
-      const err = new NetworkException('err');
+      const err = new NetworkException({ message: 'err' });
       expect(err).toBeInstanceOf(TelerException);
       expect(err).toBeInstanceOf(Error);
     });
@@ -372,18 +371,18 @@ describe('TelerException hierarchy', () => {
 
   describe('details field', () => {
     it('accepts object details', () => {
-      const err = new NotFoundException('not found', { id: 'sk_123' });
+      const err = new NotFoundException({ message: 'not found', details: { id: 'sk_123' } });
       expect(err.details).toEqual({ id: 'sk_123' });
     });
 
     it('accepts array details (validation errors)', () => {
       const details = [{ loc: ['name'], msg: 'field required', type: 'value_error' }];
-      const err = new UnprocessableRequestException('Validation failed', details);
+      const err = new UnprocessableRequestException({ message: 'Validation failed', details });
       expect(err.details).toEqual(details);
     });
 
     it('accepts string details', () => {
-      const err = new ConflictException('conflict', 'Resource is in use');
+      const err = new ConflictException({ message: 'conflict', details: 'Resource is in use' });
       expect(err.details).toBe('Resource is in use');
     });
 

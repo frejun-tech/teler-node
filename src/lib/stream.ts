@@ -35,29 +35,26 @@ export class StreamConnector {
     this.remoteHeaders = headers;
 
     if (this.streamType === StreamType.UNIDIRECTIONAL) {
-      throw new NotImplementedException(
-        "Unidirectional streams are not supported yet."
-      );
+      throw new NotImplementedException({
+        message: "Unidirectional streams are not supported yet."
+      });
     }
 
     if (!this.remoteUrl?.trim()) {
-      throw new BadParametersException(
-        "remoteUrl is a required parameter.",
-        "Please provide the remote websocket url to connect.",
-        400,
-        "",
-        "remoteUrl"
-      );
+      throw new BadParametersException({
+        message: "remoteUrl is a required parameter.",
+        details: "Please provide the remote websocket url to connect.",
+        param: "remoteUrl"
+      });
     }
     try {
       new URL(this.remoteUrl);
     } catch {
-      throw new BadParametersException(
-        "remoteUrl must be a valid URL.",
-        "Please provide a valid remote websocket url.",
-        400,
-        "remoteUrl"
-      );
+      throw new BadParametersException({
+        message: "remoteUrl must be a valid URL.",
+        details: "Please provide a valid remote websocket url.",
+        param: "remoteUrl"
+      });
     }
   }
 

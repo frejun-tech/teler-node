@@ -89,7 +89,7 @@ describe('RecordingResourceManager (unit)', () => {
     it('propagates NetworkException on http client error', async () => {
       http.httpClient.get.mockRejectedValue(new Error('Connection failed'));
       http.handleAxiosError.mockImplementation(() => {
-        throw new NetworkException('Connection failed', undefined, undefined);
+        throw new NetworkException({ message: 'Connection failed' });
       });
 
       await expect(recordings.retrieve(recordingParamsFixture())).rejects.toThrow(NetworkException);
@@ -105,7 +105,12 @@ describe('RecordingResourceManager (unit)', () => {
         headers: {}
       });
       http.handleAxiosError.mockImplementation(() => {
-        throw new NotFoundException('Not found', errorBody, 404, 'RECORDING_NOT_FOUND');
+        throw new NotFoundException({
+          message: 'Not found',
+          details: errorBody,
+          status: 404,
+          errorCode: 'RECORDING_NOT_FOUND'
+        });
       });
 
       await expect(recordings.retrieve(recordingParamsFixture())).rejects.toThrow(NotFoundException);
@@ -140,7 +145,12 @@ describe('RecordingResourceManager (unit)', () => {
       vi.mocked(axios.isAxiosError).mockReturnValue(true);
 
       http.handleAxiosError.mockImplementation(() => {
-        throw new ForbiddenException('Invalid signature', errorBody, 403, 'INVALID_SIGNATURE');
+        throw new ForbiddenException({
+          message: 'Invalid signature',
+          details: errorBody,
+          status: 403,
+          errorCode: 'INVALID_SIGNATURE'
+        });
       });
 
       await expect(recordings.retrieve(params)).rejects.toThrow(ForbiddenException);
@@ -172,7 +182,10 @@ describe('RecordingResourceManager (unit)', () => {
       vi.mocked(axios.isAxiosError).mockReturnValue(true);
 
       http.handleAxiosError.mockImplementation((err) => {
-        throw new NetworkException('Request timeout', undefined, 'ECONNABORTED');
+        throw new NetworkException({
+          message: 'Request timeout',
+          errorCode: 'ECONNABORTED'
+        });
       });
 
       await expect(recordings.retrieve(params)).rejects.toThrow(NetworkException);

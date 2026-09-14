@@ -1,5 +1,4 @@
 import { BadParametersException } from "./exceptions";
-import { CallResourceManager } from "./resources/calls";
 import { VoiceResourceManager } from "./resources/voice/voice";
 import { SipResourceManager } from "./resources/sip/sip";
 import { HttpResourceManager } from "./resources/http";
@@ -30,7 +29,6 @@ export class Client {
     config.RECORDING_DOWNLOAD_TIMEOUT_MS;
 
   private readonly http: HttpResourceManager;
-  public readonly calls: CallResourceManager;
   public readonly voice: VoiceResourceManager;
   public readonly sip: SipResourceManager;
   public readonly virtualNumbers: VirtualNumberResourceManager;
@@ -46,13 +44,11 @@ export class Client {
    */
   constructor(apiKey: string, options?: ClientOptions) {
     if (!apiKey)
-      throw new BadParametersException(
-        "Missing Teler API Key.",
-        "Please provide the API Key when initializing the client.",
-        400,
-        undefined,
-        "apiKey"
-      );
+      throw new BadParametersException({
+        message: "Missing Teler API Key.",
+        details: "Please provide the API Key when initializing the client.",
+        param: "apiKey"
+      });
     this.apiKey = apiKey;
     this.logger = options?.logger ?? noopLogger;
 
@@ -68,7 +64,6 @@ export class Client {
       this.baseURL,
       options?.baseTimeout
     );
-    this.calls = new CallResourceManager(this.http);
     this.voice = new VoiceResourceManager(this.http);
     this.sip = new SipResourceManager(this.http);
     this.virtualNumbers = new VirtualNumberResourceManager(this.http);

@@ -267,6 +267,8 @@ export class HttpResourceManager {
     const type = err.response?.data?.type;
     const body = err.response?.data;
 
+    const baseOpts = { message, details: body, status, errorCode, type };
+
     if (status === 422) {
       const errors = Array.isArray(body?.errors) ? body.errors : undefined;
       let param: string | undefined;
@@ -278,109 +280,34 @@ export class HttpResourceManager {
       ) {
         param = errors[0].loc.join(".");
       }
-      throw new UnprocessableRequestException(
-        message,
-        body,
-        status,
-        errorCode,
-        param
-      );
+      throw new UnprocessableRequestException({ ...baseOpts, param });
     }
-
-    const details = body;
 
     switch (status) {
       case 400:
-        throw new BadParametersException(
-          message,
-          details,
-          status,
-          errorCode,
-          undefined,
-          type
-        );
+        throw new BadParametersException(baseOpts);
       case 401:
-        throw new UnauthorizedException(
-          message,
-          details,
-          status,
-          errorCode,
-          undefined,
-          type
-        );
+        throw new UnauthorizedException(baseOpts);
       case 403:
-        throw new ForbiddenException(
-          message,
-          details,
-          status,
-          errorCode,
-          undefined,
-          type
-        );
+        throw new ForbiddenException(baseOpts);
       case 404:
-        throw new NotFoundException(
-          message,
-          details,
-          status,
-          errorCode,
-          undefined,
-          type
-        );
+        throw new NotFoundException(baseOpts);
       case 409:
-        throw new ConflictException(
-          message,
-          details,
-          status,
-          errorCode,
-          undefined,
-          type
-        );
+        throw new ConflictException(baseOpts);
       case 410:
-        throw new GoneException(
-          message,
-          details,
-          status,
-          errorCode,
-          undefined,
-          type
-        );
+        throw new GoneException(baseOpts);
       case 429:
-        throw new RateLimitException(
-          message,
-          details,
-          status,
-          errorCode,
-          undefined,
-          type
-        );
+        throw new RateLimitException(baseOpts);
       default:
         if (status === 501) {
-          throw new NotImplementedException(
-            message,
-            details,
-            status,
-            errorCode,
-            undefined,
-            type
-          );
+          throw new NotImplementedException(baseOpts);
         } else if (status >= 500) {
-          throw new InternalServerErrorException(
-            message,
-            details,
-            status,
-            errorCode,
-            undefined,
-            type
-          );
+          throw new InternalServerErrorException(baseOpts);
         }
-        throw new TelerException(
-          `API Error: ${message}`,
-          details,
-          status,
-          errorCode,
-          undefined,
-          type
-        );
+        throw new TelerException({
+          ...baseOpts,
+          message: `API Error: ${message}`
+        });
     }
   }
 
@@ -391,13 +318,16 @@ export class HttpResourceManager {
   public handleAxiosError(err: unknown): never {
     if (axios.isAxiosError<TelerErrorResponseBody>(err)) {
       if (!err.response) {
-        throw new NetworkException(err.message, undefined, err.code);
+        throw new NetworkException({
+          message: err.message,
+          errorCode: err.code
+        });
       }
       this.throwForStatus(err);
     }
-    throw new TelerException(
-      "An unknown error occurred while calling the API."
-    );
+    throw new TelerException({
+      message: "An unknown error occurred while calling the API."
+    });
   }
 
   /**

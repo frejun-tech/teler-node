@@ -1,6 +1,15 @@
 /**
  * Teler Base Exception model.
  */
+export interface TelerExceptionOptions {
+  message?: string;
+  details?: unknown;
+  status?: number;
+  errorCode?: string;
+  param?: string;
+  type?: string;
+}
+
 export class TelerException extends Error {
   public status?: number;
   public errorCode?: string;
@@ -8,106 +17,64 @@ export class TelerException extends Error {
   public param?: string;
   public details?: unknown;
 
-  constructor(
-    message = "",
-    details?: unknown,
-    status?: number,
-    errorCode?: string,
-    param?: string,
-    type?: string
-  ) {
-    super(message);
-    this.name = this.constructor.name;
-    this.status = status;
-    this.errorCode = errorCode;
-    this.type = type;
-    this.param = param;
-    this.details = details;
+  constructor(opts: TelerExceptionOptions = {}) {
+    super(opts.message ?? "");
+    this.name = "TelerException";
+    this.status = opts.status;
+    this.errorCode = opts.errorCode;
+    this.type = opts.type;
+    this.param = opts.param;
+    this.details = opts.details;
   }
 }
 
 /**
- *
  * If the parameters are invalid.
  */
 export class BadParametersException extends TelerException {
-  constructor(
-    message = "Bad Parameter(s).",
-    details?: unknown,
-    status = 400,
-    errorCode?: string,
-    param?: string,
-    type?: string
-  ) {
-    super(message, details, status, errorCode, param, type);
+  constructor(opts: TelerExceptionOptions = {}) {
+    super({ message: "Bad Parameter(s).", status: 400, ...opts });
+    this.name = "BadParametersException";
   }
 }
 
 /**
- *
  * If user is unauthorized to make request.
  */
 export class UnauthorizedException extends TelerException {
-  constructor(
-    message = "Unauthorized.",
-    details?: unknown,
-    status = 401,
-    errorCode?: string,
-    param?: string,
-    type?: string
-  ) {
-    super(message, details, status, errorCode, param, type);
+  constructor(opts: TelerExceptionOptions = {}) {
+    super({ message: "Unauthorized.", status: 401, ...opts });
+    this.name = "UnauthorizedException";
   }
 }
 
 /**
- *
  * If user makes forbidden request.
  */
 export class ForbiddenException extends TelerException {
-  constructor(
-    message = "Forbidden.",
-    details?: unknown,
-    status = 403,
-    errorCode?: string,
-    param?: string,
-    type?: string
-  ) {
-    super(message, details, status, errorCode, param, type);
+  constructor(opts: TelerExceptionOptions = {}) {
+    super({ message: "Forbidden.", status: 403, ...opts });
+    this.name = "ForbiddenException";
   }
 }
 
 /**
- *
  * If the requested resource does not exist.
  */
 export class NotFoundException extends TelerException {
-  constructor(
-    message = "Not Found.",
-    details?: unknown,
-    status = 404,
-    errorCode?: string,
-    param?: string,
-    type?: string
-  ) {
-    super(message, details, status, errorCode, param, type);
+  constructor(opts: TelerExceptionOptions = {}) {
+    super({ message: "Not Found.", status: 404, ...opts });
+    this.name = "NotFoundException";
   }
 }
 
 /**
- *
  * If the requested resource conflicts with the current state.
  */
 export class ConflictException extends TelerException {
-  constructor(
-    message = "Resource conflict.",
-    details?: unknown,
-    status = 409,
-    errorCode?: string,
-    param?: string,
-    type?: string
-  ) {
-    super(message, details, status, errorCode, param, type);
+  constructor(opts: TelerExceptionOptions = {}) {
+    super({ message: "Resource conflict.", status: 409, ...opts });
+    this.name = "ConflictException";
   }
 }
 
@@ -115,82 +82,53 @@ export class ConflictException extends TelerException {
  * If the resource is no longer available.
  */
 export class GoneException extends TelerException {
-  constructor(
-    message = "Resource is no longer available.",
-    details?: unknown,
-    status = 410,
-    errorCode?: string,
-    param?: string,
-    type?: string
-  ) {
-    super(message, details, status, errorCode, param, type);
+  constructor(opts: TelerExceptionOptions = {}) {
+    super({
+      message: "Resource is no longer available.",
+      status: 410,
+      ...opts
+    });
+    this.name = "GoneException";
   }
 }
 
 /**
- *
  * If the request body is invalid.
  */
 export class UnprocessableRequestException extends TelerException {
-  constructor(
-    message = "Unprocessable Request.",
-    details?: unknown,
-    status = 422,
-    errorCode?: string,
-    param?: string
-  ) {
-    super(message, details, status, errorCode, param);
+  constructor(opts: TelerExceptionOptions = {}) {
+    super({ message: "Unprocessable Request.", status: 422, ...opts });
+    this.name = "UnprocessableRequestException";
   }
 }
 
 /**
- *
  * If the rate limit is exceeded.
  */
 export class RateLimitException extends TelerException {
-  constructor(
-    message = "Rate Limit.",
-    details?: unknown,
-    status = 429,
-    errorCode?: string,
-    param?: string,
-    type?: string
-  ) {
-    super(message, details, status, errorCode, param, type);
+  constructor(opts: TelerExceptionOptions = {}) {
+    super({ message: "Rate Limit.", status: 429, ...opts });
+    this.name = "RateLimitException";
   }
 }
 
 /**
- *
  * If an internal server error occurs.
  */
 export class InternalServerErrorException extends TelerException {
-  constructor(
-    message = "Internal Server Error.",
-    details?: unknown,
-    status = 500,
-    errorCode?: string,
-    param?: string,
-    type?: string
-  ) {
-    super(message, details, status, errorCode, param, type);
+  constructor(opts: TelerExceptionOptions = {}) {
+    super({ message: "Internal Server Error.", status: 500, ...opts });
+    this.name = "InternalServerErrorException";
   }
 }
 
 /**
- *
  * If the requested feature is not implemented.
  */
 export class NotImplementedException extends TelerException {
-  constructor(
-    message = "Not implemented.",
-    details?: unknown,
-    status = 501,
-    errorCode?: string,
-    param?: string,
-    type?: string
-  ) {
-    super(message, details, status, errorCode, param, type);
+  constructor(opts: TelerExceptionOptions = {}) {
+    super({ message: "Not implemented.", status: 501, ...opts });
+    this.name = "NotImplementedException";
   }
 }
 
@@ -201,7 +139,8 @@ export class NotImplementedException extends TelerException {
  * responses (4xx/5xx), since no response was ever received.
  */
 export class NetworkException extends TelerException {
-  constructor(message: string, details?: unknown, errorCode?: string) {
-    super(message, details, undefined, errorCode);
+  constructor(opts: TelerExceptionOptions = {}) {
+    super(opts);
+    this.name = "NetworkException";
   }
 }

@@ -93,9 +93,9 @@ export class RecordingResourceManager {
       const location = this.extractLocationHeader(response.headers);
       response.data.destroy();
       if (!location) {
-        throw new NotFoundException(
-          "Redirect response missing Location header"
-        );
+        throw new NotFoundException({
+          message: "Redirect response missing Location header"
+        });
       }
 
       try {
