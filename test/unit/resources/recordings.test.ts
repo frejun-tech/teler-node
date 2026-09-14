@@ -3,8 +3,8 @@ import { Readable } from 'node:stream';
 import { RecordingResourceManager } from '@/resources/recordings';
 import { createMockHttp, asHttp, type MockHttp } from '@test/support/mock-http';
 import { recordingParamsFixture } from '@test/support/fixtures/recordings';
-import { NetworkException, NotFoundException } from '@/exceptions';
-import axios from 'axios';
+import { NetworkException, NotFoundException, ForbiddenException } from '@/exceptions';
+import axios, { AxiosError } from 'axios';
 
 vi.mock('axios');
 
@@ -111,6 +111,76 @@ describe('RecordingResourceManager (unit)', () => {
       await expect(recordings.retrieve(recordingParamsFixture())).rejects.toThrow(NotFoundException);
       // Verify handleAxiosError was called — the actual parsing happens in recordings.ts
       expect(http.handleAxiosError).toHaveBeenCalled();
+    });
+
+    it('maps storage host 403 (expired signed URL) to ForbiddenException', async () => {
+      const params = recordingParamsFixture();
+      const signedUrl = 'https://s3.example.com/signed-url';
+      const redirectStream = { destroy: vi.fn() } as any;
+      const errorBody = { success: false, message: 'Invalid signature', code: 'INVALID_SIGNATURE' };
+      const errorStream = Readable.from([JSON.stringify(errorBody)]);
+
+      http.httpClient.get.mockResolvedValue({
+        status: 307,
+        data: redirectStream,
+        headers: { location: signedUrl }
+      });
+
+      const axiosError = new AxiosError('Forbidden') as any;
+      axiosError.response = {
+        status: 403,
+        data: errorStream,
+        headers: {},
+      };
+
+      const mockAxiosClient = {
+        get: vi.fn().mockRejectedValue(axiosError)
+      };
+      vi.mocked(axios.create).mockReturnValue(mockAxiosClient as any);
+      vi.mocked(axios.isAxiosError).mockReturnValue(true);
+
+      http.handleAxiosError.mockImplementation(() => {
+        throw new ForbiddenException('Invalid signature', errorBody, 403, 'INVALID_SIGNATURE');
+      });
+
+      await expect(recordings.retrieve(params)).rejects.toThrow(ForbiddenException);
+      expect(http.handleAxiosError).toHaveBeenCalled();
+      // The error passed to handleAxiosError should have the parsed JSON as data
+      const callArg = vi.mocked(http.handleAxiosError).mock.calls[0][0] as any;
+      expect(callArg.response?.data).toEqual(errorBody);
+    });
+
+    it('preserves real error on storage host network failure (no response)', async () => {
+      const params = recordingParamsFixture();
+      const signedUrl = 'https://s3.example.com/signed-url';
+      const redirectStream = { destroy: vi.fn() } as any;
+
+      http.httpClient.get.mockResolvedValue({
+        status: 307,
+        data: redirectStream,
+        headers: { location: signedUrl }
+      });
+
+      const axiosError = new AxiosError('Request timeout');
+      (axiosError as any).code = 'ECONNABORTED';
+      // No response — simulates a true network failure
+
+      const mockAxiosClient = {
+        get: vi.fn().mockRejectedValue(axiosError)
+      };
+      vi.mocked(axios.create).mockReturnValue(mockAxiosClient as any);
+      vi.mocked(axios.isAxiosError).mockReturnValue(true);
+
+      http.handleAxiosError.mockImplementation((err) => {
+        throw new NetworkException('Request timeout', undefined, 'ECONNABORTED');
+      });
+
+      await expect(recordings.retrieve(params)).rejects.toThrow(NetworkException);
+      expect(http.handleAxiosError).toHaveBeenCalled();
+      // The error passed should not have been wrapped into a hardcoded message
+      // (it should still be the original axios error, not a NetworkException with generic text)
+      const callArg = vi.mocked(http.handleAxiosError).mock.calls[0][0] as any;
+      expect(axios.isAxiosError(callArg)).toBe(true);
     });
   });
 });

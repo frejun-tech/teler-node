@@ -177,20 +177,46 @@ export class HttpResourceManager {
   }
 
   /**
+   * Parses the Retry-After header value into milliseconds.
+   * Supports both delay-seconds and HTTP-date formats per RFC 7231.
+   * Returns undefined if parsing fails.
+   */
+  private parseRetryAfter(
+    retryAfterHeader: string | undefined
+  ): number | undefined {
+    if (!retryAfterHeader) return undefined;
+
+    const delaySeconds = parseInt(retryAfterHeader, 10);
+    if (!isNaN(delaySeconds)) {
+      return delaySeconds * 1000;
+    }
+
+    const retryDate = new Date(retryAfterHeader);
+    if (!isNaN(retryDate.getTime())) {
+      const delayMs = retryDate.getTime() - Date.now();
+      return Math.max(0, delayMs);
+    }
+
+    return undefined;
+  }
+
+  /**
    * Checks whether an error is safe to retry: network-level failures
-   * (no response received) or a 503 Service Unavailable from the server.
+   * (no response received), 429 Rate Limit Exceeded, or 503 Service Unavailable.
    */
   private isRetryableAxiosError(err: unknown): boolean {
     if (!axios.isAxiosError(err)) return false;
     if (!err.response) return true;
-    return err.response.status === 503;
+    return err.response.status === 429 || err.response.status === 503;
   }
 
   /**
    * Retries the given request with exponential backoff + full jitter on retryable
-   * errors, reusing the same request (and headers, e.g. Idempotency-Key) on every
-   * attempt. Delay for attempt N: random(0, min(maxRetryDelayMs, baseRetryDelayMs * 2^N)).
-   * Jitter desynchronizes retries across clients (prevents thundering herd on 503s);
+   * errors (429, 503, network failures), reusing the same request (and headers,
+   * e.g. Idempotency-Key) on every attempt. For 429, respects the Retry-After
+   * header if present; otherwise uses exponential backoff.
+   * Delay for attempt N: random(0, min(maxRetryDelayMs, baseRetryDelayMs * 2^N)).
+   * Jitter desynchronizes retries across clients (prevents thundering herd);
    * cap prevents excessive delays (e.g. 20s wait on 3rd retry).
    */
   private async executeWithRetry<T>(
@@ -208,12 +234,23 @@ export class HttpResourceManager {
         if (!this.isRetryableAxiosError(err) || attempt === maxRetries) {
           throw err;
         }
+
+        let retryAfterMs: number | undefined;
+        if (axios.isAxiosError(err) && err.response?.status === 429) {
+          retryAfterMs = this.parseRetryAfter(
+            err.response.headers["retry-after"] as string | undefined
+          );
+        }
+
         const exponentialDelay = Math.min(
           maxRetryDelayMs,
           baseRetryDelayMs * 2 ** attempt
         );
-        const jitteredDelay = Math.random() * exponentialDelay;
-        await new Promise((r) => setTimeout(r, jitteredDelay));
+        const delayMs = retryAfterMs
+          ? Math.min(maxRetryDelayMs, retryAfterMs)
+          : Math.random() * exponentialDelay;
+
+        await new Promise((r) => setTimeout(r, delayMs));
       }
     }
     throw lastError;

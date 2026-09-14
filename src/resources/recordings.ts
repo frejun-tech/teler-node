@@ -4,7 +4,7 @@ import axios, { AxiosResponse, AxiosError } from "axios";
 import { toSnakeCase } from "../lib/utils";
 import type { RecordingParams } from "../types/core";
 import type { HttpResourceManager, TelerErrorResponseBody } from "./http";
-import { NetworkException, NotFoundException } from "../exceptions";
+import { NotFoundException } from "../exceptions";
 import { logger } from "../logger";
 
 export class RecordingResourceManager {
@@ -68,9 +68,9 @@ export class RecordingResourceManager {
    *
    * @param params - The recording parameters including recordingId and optional expiresIn duration.
    * @returns A Readable stream of the recording's audio data.
-   * @throws {NetworkException} on connectivity failure (either hop).
+   * @throws {NetworkException} on connectivity failure (no HTTP response received).
    * @throws {NotFoundException} if the redirect is missing a Location header.
-   * @throws typed API exceptions for non-2xx responses from the recordings endpoint.
+   * @throws typed API exceptions for non-2xx responses from either endpoint (recordings or storage host).
    */
 
   public async retrieve(params: RecordingParams): Promise<Readable> {
@@ -107,14 +107,12 @@ export class RecordingResourceManager {
         });
         return finalResponse.data;
       } catch (err: unknown) {
-        if (axios.isAxiosError(err) && err.response?.data) {
-          (err.response.data as Readable).destroy();
+        if (axios.isAxiosError(err) && err.response) {
+          err.response.data = await this.readStreamAsJson(
+            err.response.data as Readable
+          );
         }
-        throw new NetworkException(
-          "Failed to download recording from storage host",
-          undefined,
-          undefined
-        );
+        this.http.handleAxiosError(err);
       }
     }
 

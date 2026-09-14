@@ -1,0 +1,31 @@
+image: node:20
+
+definitions:
+  caches:
+    node-modules: node_modules
+
+pipelines:
+  default:
+    - step:
+        name: Install, Lint, Typecheck, Build & Test
+        caches:
+          - node-modules
+        script:
+          - npm ci
+          - npm run lint
+          - npm run typecheck
+          - npm run build
+          - npm test
+
+  pull-requests:
+    '**':
+      - step:
+          name: Install, Lint, Typecheck, Build & Test
+          caches:
+            - node-modules
+          script:
+            - npm ci
+            - npm run lint
+            - npm run typecheck
+            - npm run build
+            - npm test

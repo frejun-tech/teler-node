@@ -516,4 +516,117 @@ describe('HttpResourceManager (integration)', () => {
     ).rejects.toThrow(InternalServerErrorException);
     expect(deleteAttempts).toBe(1);
   });
+
+  it('retries on 429 (rate limit)', async () => {
+    let attempts = 0;
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () => {
+        attempts++;
+        if (attempts < 2) {
+          return HttpResponse.json({ message: 'rate limited' }, { status: 429 });
+        }
+        return HttpResponse.json({ ok: true });
+      })
+    );
+    const httpClient = createHttp();
+
+    const result = await httpClient.get('/test-endpoint', undefined, { baseRetryDelayMs: 10 });
+
+    expect(attempts).toBe(2);
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('respects Retry-After header (delay in seconds) on 429', async () => {
+    let attempts = 0;
+    const startTime = Date.now();
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () => {
+        attempts++;
+        if (attempts < 2) {
+          return HttpResponse.json({ message: 'rate limited' }, {
+            status: 429,
+            headers: { 'Retry-After': '1' }
+          });
+        }
+        return HttpResponse.json({ ok: true });
+      })
+    );
+    const httpClient = createHttp();
+
+    const result = await httpClient.get('/test-endpoint', undefined, { baseRetryDelayMs: 10 });
+    const elapsed = Date.now() - startTime;
+
+    expect(attempts).toBe(2);
+    expect(result).toEqual({ ok: true });
+    expect(elapsed).toBeGreaterThanOrEqual(900);
+  });
+
+  it('respects Retry-After header (delay in seconds) when header is parsed', async () => {
+    let attempts = 0;
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () => {
+        attempts++;
+        if (attempts < 2) {
+          return HttpResponse.json({ message: 'rate limited' }, {
+            status: 429,
+            headers: { 'retry-after': '0' }
+          });
+        }
+        return HttpResponse.json({ ok: true });
+      })
+    );
+    const httpClient = createHttp();
+
+    const result = await httpClient.get('/test-endpoint', undefined, { baseRetryDelayMs: 10 });
+
+    expect(attempts).toBe(2);
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('falls back to exponential backoff when Retry-After is unparseable', async () => {
+    let attempts = 0;
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () => {
+        attempts++;
+        if (attempts < 2) {
+          return HttpResponse.json({ message: 'rate limited' }, {
+            status: 429,
+            headers: { 'Retry-After': 'invalid-value' }
+          });
+        }
+        return HttpResponse.json({ ok: true });
+      })
+    );
+    const httpClient = createHttp();
+
+    const result = await httpClient.get('/test-endpoint', undefined, { baseRetryDelayMs: 10 });
+
+    expect(attempts).toBe(2);
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('caps Retry-After delay at maxRetryDelayMs', async () => {
+    let attempts = 0;
+    const startTime = Date.now();
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () => {
+        attempts++;
+        if (attempts < 2) {
+          return HttpResponse.json({ message: 'rate limited' }, {
+            status: 429,
+            headers: { 'Retry-After': '100' }
+          });
+        }
+        return HttpResponse.json({ ok: true });
+      })
+    );
+    const httpClient = createHttp();
+
+    const result = await httpClient.get('/test-endpoint', undefined, { maxRetryDelayMs: 50 });
+    const elapsed = Date.now() - startTime;
+
+    expect(attempts).toBe(2);
+    expect(result).toEqual({ ok: true });
+    expect(elapsed).toBeLessThan(200);
+  });
 });
