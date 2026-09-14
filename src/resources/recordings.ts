@@ -1,9 +1,11 @@
+import type { Readable } from "node:stream";
+import { json } from "node:stream/consumers";
 import axios, { AxiosResponse, AxiosError } from "axios";
+import { toSnakeCase } from "../lib/utils";
 import type { RecordingParams } from "../types/core";
 import type { HttpResourceManager, TelerErrorResponseBody } from "./http";
-import type { Readable } from "node:stream";
-import { toSnakeCase } from "../lib/utils";
 import { NetworkException, NotFoundException } from "../exceptions";
+import { logger } from "../logger";
 
 export class RecordingResourceManager {
   private readonly basePath = "/recordings";
@@ -23,6 +25,36 @@ export class RecordingResourceManager {
   ): string | undefined {
     const value = (headers as Record<string, unknown>)["location"];
     return typeof value === "string" ? value : undefined;
+  }
+
+  /**
+   * Consumes a Readable stream and parses its contents as JSON, for
+   * extracting the error body from a `responseType: "stream"` request
+   * (whose `data` is a stream regardless of HTTP status).
+   *
+   * Logs a warning and returns `undefined` on any read or parse failure,
+   * so callers can fall back to a generic error message.
+   *
+   * @param stream - The Readable stream to read.
+   * @returns Parsed JSON object, or undefined if read/parse failed.
+   */
+  private async readStreamAsJson(
+    stream: Readable
+  ): Promise<TelerErrorResponseBody | undefined> {
+    try {
+      const data = (await json(stream)) as TelerErrorResponseBody;
+      return data;
+    } catch (error) {
+      logger.warn(
+        {
+          component: "RecordingResourceManager",
+          event: "stream_parse_failed",
+          reason: error
+        },
+        "Failed to parse recording error stream as JSON"
+      );
+    }
+    return undefined;
   }
 
   /**
@@ -80,12 +112,16 @@ export class RecordingResourceManager {
     }
 
     if (response.status >= 400) {
+      const errorBody = await this.readStreamAsJson(response.data);
       const err = new AxiosError<TelerErrorResponseBody>(
         "Recording API Error",
         undefined,
         undefined,
         undefined,
-        response as AxiosResponse<TelerErrorResponseBody>
+        {
+          ...response,
+          data: errorBody
+        } as AxiosResponse<TelerErrorResponseBody>
       );
       this.http.handleAxiosError(err);
     }

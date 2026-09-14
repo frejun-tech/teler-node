@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { Readable } from 'node:stream';
 import { RecordingResourceManager } from '@/resources/recordings';
 import { createMockHttp, asHttp, type MockHttp } from '@test/support/mock-http';
 import { recordingParamsFixture } from '@test/support/fixtures/recordings';
@@ -90,12 +91,13 @@ describe('RecordingResourceManager (unit)', () => {
       await expect(recordings.retrieve(recordingParamsFixture())).rejects.toThrow(NetworkException);
     });
 
-    it('propagates API errors via handleAxiosError', async () => {
+    it('parses stream body before passing to handleAxiosError on 4xx/5xx', async () => {
       const errorBody = { success: false, message: 'Not found', code: 'RECORDING_NOT_FOUND' };
+      const errorStream = Readable.from([JSON.stringify(errorBody)]);
 
       http.httpClient.get.mockResolvedValue({
         status: 404,
-        data: errorBody,
+        data: errorStream,
         headers: {}
       });
       http.handleAxiosError.mockImplementation(() => {
@@ -103,6 +105,8 @@ describe('RecordingResourceManager (unit)', () => {
       });
 
       await expect(recordings.retrieve(recordingParamsFixture())).rejects.toThrow(NotFoundException);
+      // Verify handleAxiosError was called — the actual parsing happens in recordings.ts
+      expect(http.handleAxiosError).toHaveBeenCalled();
     });
   });
 });

@@ -87,6 +87,8 @@ describe('Recordings API (integration)', () => {
     ).rejects.toMatchObject({
       name: 'ForbiddenException',
       status: 403,
+      message: 'Recording does not belong to account',
+      errorCode: 'ACCESS_FORBIDDEN',
     });
   });
 
@@ -109,6 +111,8 @@ describe('Recordings API (integration)', () => {
     ).rejects.toMatchObject({
       name: 'InternalServerErrorException',
       status: 500,
+      message: 'Internal server error',
+      errorCode: 'INTERNAL_ERROR',
     });
   });
 });

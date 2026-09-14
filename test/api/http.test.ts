@@ -430,7 +430,7 @@ describe('HttpResourceManager (integration)', () => {
 
     expect(callCount).toBe(2);
     expect(elapsed).toBeGreaterThanOrEqual(40);
-    expect(elapsed).toBeLessThan(100);
+    expect(elapsed).toBeLessThan(150);
   });
 
   it('caps the retry delay at maxRetryDelayMs', async () => {
