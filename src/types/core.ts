@@ -21,12 +21,15 @@ export interface VirtualNumberFilters extends CursorFilters {
 
 export interface VirtualNumberResponse {
   id: string;
-  accountId: string;
   name: string;
   number: string;
   location: LocationResponse;
   voiceApp?: VoiceAppListResponse;
   sipTrunk?: SipTrunkListResponse;
+}
+
+export interface VirtualNumberListResponse extends VirtualNumberResponse {
+  accountId: string;
 }
 
 export interface UpdateVirtualNumberPayload {

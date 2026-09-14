@@ -53,6 +53,9 @@ export class RecordingResourceManager {
         },
         "Failed to parse recording error stream as JSON"
       );
+      if (!stream.destroyed) {
+        stream.destroy();
+      }
     }
     return undefined;
   }
@@ -88,6 +91,7 @@ export class RecordingResourceManager {
 
     if ([301, 302, 303, 307, 308].includes(response.status)) {
       const location = this.extractLocationHeader(response.headers);
+      response.data.destroy();
       if (!location) {
         throw new NotFoundException(
           "Redirect response missing Location header"
@@ -102,7 +106,10 @@ export class RecordingResourceManager {
           responseType: "stream"
         });
         return finalResponse.data;
-      } catch {
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.data) {
+          (err.response.data as Readable).destroy();
+        }
         throw new NetworkException(
           "Failed to download recording from storage host",
           undefined,

@@ -52,15 +52,20 @@ export class IpAclResourceManager {
    * Changes apply to every trunk using this ACL.
    * @param ipAclId - The IP access control list identifier to update.
    * @param payload - UpdateIpAclPayload.
+   * @param retry - Optional. Whether to retry on network errors/503s. (Default: false)
+   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff with jitter. (Default: 500, capped at 2000ms)
    * @returns Details of the IP access control lists.
    */
   public async update(
     ipAclId: string,
-    payload: UpdateIpAclPayload
+    payload: UpdateIpAclPayload,
+    retry?: boolean,
+    baseRetryDelayMs?: number
   ): Promise<IpAclResponse> {
     return this.http.patch<IpAclResponse, UpdateIpAclPayload>(
       `${this.basePath}/${ipAclId}`,
-      payload
+      payload,
+      { retry, baseRetryDelayMs }
     );
   }
 
@@ -68,9 +73,18 @@ export class IpAclResourceManager {
    * Delete an IP access control list. Refused with 409 while any SIP trunk still authorises against it,
    * so a trunk can never be left without an auth source.
    * @param ipAclId - The IP access control list identifier to delete.
+   * @param retry - Optional. Whether to retry on network errors/503s. (Default: true)
+   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff with jitter. (Default: 100, capped at 2000ms)
    * @returns success/ failure.
    */
-  public async delete(ipAclId: string): Promise<DefaultResponse> {
-    return this.http.delete<DefaultResponse>(`${this.basePath}/${ipAclId}`);
+  public async delete(
+    ipAclId: string,
+    retry?: boolean,
+    baseRetryDelayMs?: number
+  ): Promise<DefaultResponse> {
+    return this.http.delete<DefaultResponse>(`${this.basePath}/${ipAclId}`, {
+      retry,
+      baseRetryDelayMs
+    });
   }
 }

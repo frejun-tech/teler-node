@@ -3,7 +3,8 @@ import type {
   VirtualNumberFilters,
   UnassignVirtualNumberPayload,
   UpdateVirtualNumberPayload,
-  VirtualNumberResponse
+  VirtualNumberResponse,
+  VirtualNumberListResponse
 } from "../types/core";
 import type { HttpResourceManager } from "./http";
 import type { CursorResponse, DefaultResponse } from "../types/common";
@@ -19,9 +20,9 @@ export class VirtualNumberResourceManager {
    */
   public async list(
     filters?: VirtualNumberFilters
-  ): Promise<CursorResponse<VirtualNumberResponse>> {
+  ): Promise<CursorResponse<VirtualNumberListResponse>> {
     return this.http.get<
-      CursorResponse<VirtualNumberResponse>,
+      CursorResponse<VirtualNumberListResponse>,
       VirtualNumberFilters
     >(this.basePath, filters);
   }
@@ -30,15 +31,20 @@ export class VirtualNumberResourceManager {
    * Update a virtual number.
    * @param vnId - virtual number ID to update.
    * @param payload - UpdateVirtualNumberPayload  with fields to update.
+   * @param retry - Optional. Whether to retry on network errors/503s. (Default: false)
+   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff with jitter. (Default: 500, capped at 2000ms)
    * @returns Details of the updated virtual number.
    */
   public async update(
     vnId: string,
-    payload: UpdateVirtualNumberPayload
+    payload: UpdateVirtualNumberPayload,
+    retry?: boolean,
+    baseRetryDelayMs?: number
   ): Promise<VirtualNumberResponse> {
     return this.http.patch<VirtualNumberResponse, UpdateVirtualNumberPayload>(
       `${this.basePath}/${vnId}`,
-      payload
+      payload,
+      { retry, baseRetryDelayMs }
     );
   }
 

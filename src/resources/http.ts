@@ -134,20 +134,46 @@ export class HttpResourceManager {
    *
    * @param path - API endpoint path.
    * @param data - Optional. The request payload body.
+   * @param options - Optional. Headers, retry, and backoff configuration.
    * @returns The response data of type T.
    */
-  public async patch<T, P = unknown>(path: string, data?: P): Promise<T> {
-    return this.request<T, P>("PATCH", path, data);
+  public async patch<T, P = unknown>(
+    path: string,
+    data?: P,
+    options?: RequestOptions
+  ): Promise<T> {
+    return this.request<T, P>(
+      "PATCH",
+      path,
+      data,
+      undefined,
+      options?.headers,
+      options?.config,
+      options?.retry ?? false,
+      options?.baseRetryDelayMs ?? 500,
+      options?.maxRetryDelayMs ?? CONFIG.MAX_RETRY_DELAY_MS
+    );
   }
 
   /**
    * Sends a DELETE request to the given path.
    *
    * @param path - API endpoint path.
+   * @param options - Optional. Headers, retry, and backoff configuration.
    * @returns The response data of type T.
    */
-  public async delete<T>(path: string): Promise<T> {
-    return this.request<T>("DELETE", path);
+  public async delete<T>(path: string, options?: RequestOptions): Promise<T> {
+    return this.request<T>(
+      "DELETE",
+      path,
+      undefined,
+      undefined,
+      options?.headers,
+      options?.config,
+      options?.retry ?? true,
+      options?.baseRetryDelayMs ?? 100,
+      options?.maxRetryDelayMs ?? CONFIG.MAX_RETRY_DELAY_MS
+    );
   }
 
   /**

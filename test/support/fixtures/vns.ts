@@ -1,5 +1,6 @@
 import type {
   VirtualNumberResponse,
+  VirtualNumberListResponse,
   VirtualNumberFilters,
   UpdateVirtualNumberPayload,
   AssignVirtualNumberPayload,
@@ -11,7 +12,6 @@ export const virtualNumberFixture = (
   overrides: Partial<VirtualNumberResponse> = {}
 ): VirtualNumberResponse => ({
   id: 'vn_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-  accountId: 'acc_01J5ABCDEFGHJKMNPQRSTVWXYZ',
   name: 'Support Line',
   number: '+18005550199',
   location: {
@@ -35,12 +35,20 @@ export const virtualNumberUnassignedFixture = (
     ...overrides,
   });
 
+export const virtualNumberListItemFixture = (
+  overrides: Partial<VirtualNumberListResponse> = {}
+): VirtualNumberListResponse => ({
+  ...virtualNumberFixture(),
+  accountId: 'acc_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+  ...overrides,
+});
+
 export const virtualNumberListFixture = (
-  overrides: Partial<CursorResponse<VirtualNumberResponse>> = {}
-): CursorResponse<VirtualNumberResponse> => ({
+  overrides: Partial<CursorResponse<VirtualNumberListResponse>> = {}
+): CursorResponse<VirtualNumberListResponse> => ({
   data: [
-    virtualNumberFixture({ id: 'vn_01J5AAAAAAAAAAAAAAAAAAAAAA', number: '+18005550101' }),
-    virtualNumberFixture({ id: 'vn_01J5BBBBBBBBBBBBBBBBBBBBBB', number: '+18005550102' }),
+    virtualNumberListItemFixture({ id: 'vn_01J5AAAAAAAAAAAAAAAAAAAAAA', number: '+18005550101' }),
+    virtualNumberListItemFixture({ id: 'vn_01J5BBBBBBBBBBBBBBBBBBBBBB', number: '+18005550102' }),
   ],
   nextCursor: 'eyJpZCI6InZuXzAxSjVBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ',
   previousCursor: null,

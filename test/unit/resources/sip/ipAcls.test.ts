@@ -164,7 +164,8 @@ describe('IpAclResourceManager (unit)', () => {
 
       expect(http.patch).toHaveBeenCalledWith(
         '/sip/ip-acls/acl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-        payload
+        payload,
+        { retry: undefined, baseRetryDelayMs: undefined }
       );
       expect(result).toEqual(fixture);
     });
@@ -177,7 +178,8 @@ describe('IpAclResourceManager (unit)', () => {
 
       expect(http.patch).toHaveBeenCalledWith(
         '/sip/ip-acls/acl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-        payload
+        payload,
+        { retry: undefined, baseRetryDelayMs: undefined }
       );
     });
 
@@ -209,7 +211,10 @@ describe('IpAclResourceManager (unit)', () => {
 
       const result = await ipAcls.delete('acl_01J5ABCDEFGHJKMNPQRSTVWXYZ');
 
-      expect(http.delete).toHaveBeenCalledWith('/sip/ip-acls/acl_01J5ABCDEFGHJKMNPQRSTVWXYZ');
+      expect(http.delete).toHaveBeenCalledWith(
+        '/sip/ip-acls/acl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+        { retry: undefined, baseRetryDelayMs: undefined }
+      );
       expect(result).toEqual(response);
     });
 

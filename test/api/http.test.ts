@@ -453,4 +453,67 @@ describe('HttpResourceManager (integration)', () => {
     expect(attempts).toBe(2);
     expect(duration).toBeLessThan(200);
   });
+
+  it('DELETE retries on 503 by default', async () => {
+    let attempts = 0;
+    server.use(
+      http.delete(`${TEST_CONFIG.baseUrl}/test-endpoint`, () => {
+        attempts++;
+        if (attempts < 2) {
+          return HttpResponse.json({ message: 'unavailable' }, { status: 503 });
+        }
+        return HttpResponse.json({ ok: true });
+      })
+    );
+    const httpClient = createHttp();
+
+    const result = await httpClient.delete('/test-endpoint');
+
+    expect(attempts).toBe(2);
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('PATCH does not retry by default', async () => {
+    let attempts = 0;
+    server.use(
+      http.patch(`${TEST_CONFIG.baseUrl}/test-endpoint`, () => {
+        attempts++;
+        return HttpResponse.json({ message: 'unavailable' }, { status: 503 });
+      })
+    );
+    const httpClient = createHttp();
+
+    await expect(
+      httpClient.patch('/test-endpoint', { data: 'value' })
+    ).rejects.toThrow(InternalServerErrorException);
+    expect(attempts).toBe(1);
+  });
+
+  it('PATCH/DELETE retry can be overridden via caller-supplied options', async () => {
+    let patchAttempts = 0;
+    let deleteAttempts = 0;
+    server.use(
+      http.patch(`${TEST_CONFIG.baseUrl}/test-patch`, () => {
+        patchAttempts++;
+        if (patchAttempts < 2) {
+          return HttpResponse.json({ message: 'unavailable' }, { status: 503 });
+        }
+        return HttpResponse.json({ ok: true });
+      }),
+      http.delete(`${TEST_CONFIG.baseUrl}/test-delete`, () => {
+        deleteAttempts++;
+        return HttpResponse.json({ message: 'unavailable' }, { status: 503 });
+      })
+    );
+    const httpClient = createHttp();
+
+    const patchResult = await httpClient.patch('/test-patch', { data: 'value' }, { retry: true });
+    expect(patchAttempts).toBe(2);
+    expect(patchResult).toEqual({ ok: true });
+
+    await expect(
+      httpClient.delete('/test-delete', { retry: false })
+    ).rejects.toThrow(InternalServerErrorException);
+    expect(deleteAttempts).toBe(1);
+  });
 });

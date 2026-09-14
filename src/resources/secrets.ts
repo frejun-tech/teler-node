@@ -51,24 +51,38 @@ export class SecretResourceManager {
    * Update a secret.
    * @param secretId - secret ID to update
    * @param payload - UpdateSecretPayload with fields to update.
+   * @param retry - Optional. Whether to retry on network errors/503s. (Default: false)
+   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff with jitter. (Default: 500, capped at 2000ms)
    * @returns Details of the updated secret.
    */
   public async update(
     secretId: string,
-    payload: UpdateSecretPayload
+    payload: UpdateSecretPayload,
+    retry?: boolean,
+    baseRetryDelayMs?: number
   ): Promise<SecretResponse> {
     return this.http.patch<SecretResponse, UpdateSecretPayload>(
       `${this.basePath}/${secretId}`,
-      payload
+      payload,
+      { retry, baseRetryDelayMs }
     );
   }
 
   /**
    * Delete a secret.
    * @param secretId - secret ID to delete.
+   * @param retry - Optional. Whether to retry on network errors/503s. (Default: true)
+   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff with jitter. (Default: 100, capped at 2000ms)
    * @returns success/ failure.
    */
-  public async delete(secretId: string): Promise<DefaultResponse> {
-    return this.http.delete<DefaultResponse>(`${this.basePath}/${secretId}`);
+  public async delete(
+    secretId: string,
+    retry?: boolean,
+    baseRetryDelayMs?: number
+  ): Promise<DefaultResponse> {
+    return this.http.delete<DefaultResponse>(`${this.basePath}/${secretId}`, {
+      retry,
+      baseRetryDelayMs
+    });
   }
 }

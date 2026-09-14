@@ -15,7 +15,7 @@
       "@/*": ["src/*"],
       "@test/*": ["test/*"]
     },
-    "strictNullChecks": true
+    "strict": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "test", "lib", "**/*spec.ts"]

@@ -249,7 +249,8 @@ describe('TrunkResourceManager (unit)', () => {
 
       expect(http.patch).toHaveBeenCalledWith(
         '/sip/trunks/st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-        payload
+        payload,
+        { retry: undefined, baseRetryDelayMs: undefined }
       );
       expect(result).toEqual(fixture);
     });
@@ -262,7 +263,8 @@ describe('TrunkResourceManager (unit)', () => {
 
       expect(http.patch).toHaveBeenCalledWith(
         '/sip/trunks/st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-        payload
+        payload,
+        { retry: undefined, baseRetryDelayMs: undefined }
       );
     });
 
@@ -275,7 +277,8 @@ describe('TrunkResourceManager (unit)', () => {
 
       expect(http.patch).toHaveBeenCalledWith(
         '/sip/trunks/st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-        payload
+        payload,
+        { retry: undefined, baseRetryDelayMs: undefined }
       );
       expect(result.transport).toBe(Transport.TCP);
       expect(result.secure).toBe(false);
@@ -309,7 +312,10 @@ describe('TrunkResourceManager (unit)', () => {
 
       const result = await trunks.delete('st_01J5ABCDEFGHJKMNPQRSTVWXYZ');
 
-      expect(http.delete).toHaveBeenCalledWith('/sip/trunks/st_01J5ABCDEFGHJKMNPQRSTVWXYZ');
+      expect(http.delete).toHaveBeenCalledWith(
+        '/sip/trunks/st_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+        { retry: undefined, baseRetryDelayMs: undefined }
+      );
       expect(result).toEqual(response);
     });
 

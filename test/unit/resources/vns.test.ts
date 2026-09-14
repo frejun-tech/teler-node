@@ -101,7 +101,8 @@ describe('VirtualNumberResourceManager (unit)', () => {
 
       expect(http.patch).toHaveBeenCalledWith(
         '/virtual-numbers/vn_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-        payload
+        payload,
+        { retry: undefined, baseRetryDelayMs: undefined }
       );
       expect(result).toEqual(fixture);
     });

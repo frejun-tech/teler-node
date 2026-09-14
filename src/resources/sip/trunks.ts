@@ -60,25 +60,39 @@ export class TrunkResourceManager {
    * Update a sip trunk.
    * @param sipTrunkId - Sip trunk ID to update.
    * @param payload - UpdateSipTrunkPayload.
+   * @param retry - Optional. Whether to retry on network errors/503s. (Default: false)
+   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff with jitter. (Default: 500, capped at 2000ms)
    * @returns Details of the updated trunk.
    */
   public async update(
     sipTrunkId: string,
-    payload: UpdateSipTrunkPayload
+    payload: UpdateSipTrunkPayload,
+    retry?: boolean,
+    baseRetryDelayMs?: number
   ): Promise<SipTrunkResponse> {
     return this.http.patch<SipTrunkResponse, UpdateSipTrunkPayload>(
       `${this.basePath}/${sipTrunkId}`,
-      payload
+      payload,
+      { retry, baseRetryDelayMs }
     );
   }
 
   /**
    * Delete a sip trunk.
    * @param sipTrunkId - sip trunk ID to delete.
+   * @param retry - Optional. Whether to retry on network errors/503s. (Default: true)
+   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff with jitter. (Default: 100, capped at 2000ms)
    * @returns success/ failure.
    */
-  public async delete(sipTrunkId: string): Promise<DefaultResponse> {
-    return this.http.delete<DefaultResponse>(`${this.basePath}/${sipTrunkId}`);
+  public async delete(
+    sipTrunkId: string,
+    retry?: boolean,
+    baseRetryDelayMs?: number
+  ): Promise<DefaultResponse> {
+    return this.http.delete<DefaultResponse>(`${this.basePath}/${sipTrunkId}`, {
+      retry,
+      baseRetryDelayMs
+    });
   }
 
   /**

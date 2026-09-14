@@ -60,25 +60,39 @@ export class AppResourceManager {
    * Update a voice app.
    * @param voiceAppId - voice app ID to update
    * @param payload - UpdateVoiceAppPayload with fields to update.
+   * @param retry - Optional. Whether to retry on network errors/503s. (Default: false)
+   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff with jitter. (Default: 500, capped at 2000ms)
    * @returns Details of the updated voice app.
    */
   public async update(
     voiceAppId: string,
-    payload: UpdateVoiceAppPayload
+    payload: UpdateVoiceAppPayload,
+    retry?: boolean,
+    baseRetryDelayMs?: number
   ): Promise<VoiceAppResponse> {
     return this.http.patch<VoiceAppResponse, UpdateVoiceAppPayload>(
       `${this.basePath}/${voiceAppId}`,
-      payload
+      payload,
+      { retry, baseRetryDelayMs }
     );
   }
 
   /**
    * Delete a voice app.
    * @param voiceAppId - voice app ID to delete.
+   * @param retry - Optional. Whether to retry on network errors/503s. (Default: true)
+   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff with jitter. (Default: 100, capped at 2000ms)
    * @returns success/ failure.
    */
-  public async delete(voiceAppId: string): Promise<DefaultResponse> {
-    return this.http.delete<DefaultResponse>(`${this.basePath}/${voiceAppId}`);
+  public async delete(
+    voiceAppId: string,
+    retry?: boolean,
+    baseRetryDelayMs?: number
+  ): Promise<DefaultResponse> {
+    return this.http.delete<DefaultResponse>(`${this.basePath}/${voiceAppId}`, {
+      retry,
+      baseRetryDelayMs
+    });
   }
 
   /**

@@ -52,10 +52,11 @@ describe('RecordingResourceManager (unit)', () => {
       const params = recordingParamsFixture();
       const signedUrl = 'https://s3.example.com/signed-url';
       const fakeStream = { pipe: () => {} } as any;
+      const redirectStream = { destroy: vi.fn() } as any;
 
       http.httpClient.get.mockResolvedValue({
         status: 307,
-        data: null,
+        data: redirectStream,
         headers: { location: signedUrl }
       });
 
@@ -67,19 +68,22 @@ describe('RecordingResourceManager (unit)', () => {
       const result = await recordings.retrieve(params);
 
       expect(result).toBe(fakeStream);
+      expect(redirectStream.destroy).toHaveBeenCalled();
       expect(mockAxiosClient.get).toHaveBeenCalledWith(signedUrl, {
         responseType: 'stream'
       });
     });
 
     it('throws NotFoundException when redirect missing Location header', async () => {
+      const redirectStream = { destroy: vi.fn() } as any;
       http.httpClient.get.mockResolvedValue({
         status: 307,
-        data: null,
+        data: redirectStream,
         headers: {}
       });
 
       await expect(recordings.retrieve(recordingParamsFixture())).rejects.toThrow(NotFoundException);
+      expect(redirectStream.destroy).toHaveBeenCalled();
     });
 
     it('propagates NetworkException on http client error', async () => {

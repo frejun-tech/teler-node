@@ -166,7 +166,11 @@ describe('AppResourceManager (unit)', () => {
 
       const result = await apps.update('va_01J5ABCDEFGHJKMNPQRSTVWXYZ', payload);
 
-      expect(http.patch).toHaveBeenCalledWith('/voice/apps/va_01J5ABCDEFGHJKMNPQRSTVWXYZ', payload);
+      expect(http.patch).toHaveBeenCalledWith(
+        '/voice/apps/va_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+        payload,
+        { retry: undefined, baseRetryDelayMs: undefined }
+      );
       expect(result).toEqual(fixture);
     });
 
@@ -198,7 +202,10 @@ describe('AppResourceManager (unit)', () => {
 
       const result = await apps.delete('va_01J5ABCDEFGHJKMNPQRSTVWXYZ');
 
-      expect(http.delete).toHaveBeenCalledWith('/voice/apps/va_01J5ABCDEFGHJKMNPQRSTVWXYZ');
+      expect(http.delete).toHaveBeenCalledWith(
+        '/voice/apps/va_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+        { retry: undefined, baseRetryDelayMs: undefined }
+      );
       expect(result).toEqual(response);
     });
 

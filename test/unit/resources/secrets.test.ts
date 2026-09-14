@@ -150,7 +150,8 @@ describe('SecretResourceManager (unit)', () => {
 
       expect(http.patch).toHaveBeenCalledWith(
         '/secrets/sk_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-        payload
+        payload,
+        { retry: undefined, baseRetryDelayMs: undefined }
       );
       expect(result).toEqual(fixture);
     });
@@ -164,7 +165,8 @@ describe('SecretResourceManager (unit)', () => {
 
       expect(http.patch).toHaveBeenCalledWith(
         '/secrets/sk_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-        payload
+        payload,
+        { retry: undefined, baseRetryDelayMs: undefined }
       );
       expect(result.needsRotation).toBe(true);
     });
@@ -194,7 +196,10 @@ describe('SecretResourceManager (unit)', () => {
 
       const result = await secrets.delete('sk_01J5ABCDEFGHJKMNPQRSTVWXYZ');
 
-      expect(http.delete).toHaveBeenCalledWith('/secrets/sk_01J5ABCDEFGHJKMNPQRSTVWXYZ');
+      expect(http.delete).toHaveBeenCalledWith(
+        '/secrets/sk_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+        { retry: undefined, baseRetryDelayMs: undefined }
+      );
       expect(result).toEqual(response);
     });
 
