@@ -55,6 +55,30 @@ describe('AppResourceManager (unit)', () => {
 
       await expect(apps.create(createVoiceAppPayloadFixture())).rejects.toThrow('Network error');
     });
+
+    it('defaults webhookApiVersion to 2026-06-01 if not provided', async () => {
+      const payload = createVoiceAppPayloadFixture({ webhookApiVersion: undefined });
+      http.post.mockResolvedValue(voiceAppFixture());
+
+      await apps.create(payload);
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/voice/apps',
+        expect.objectContaining({ webhookApiVersion: '2026-06-01' })
+      );
+    });
+
+    it('honors webhookApiVersion when explicitly specified', async () => {
+      const payload = createVoiceAppPayloadFixture({ webhookApiVersion: '2025-08-01' });
+      http.post.mockResolvedValue(voiceAppFixture());
+
+      await apps.create(payload);
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/voice/apps',
+        expect.objectContaining({ webhookApiVersion: '2025-08-01' })
+      );
+    });
   });
 
   describe('list', () => {

@@ -45,7 +45,10 @@ describe('TrunkResourceManager (unit)', () => {
 
       await trunks.create(payload);
 
-      expect(http.post).toHaveBeenCalledWith('/sip/trunks', payload);
+      expect(http.post).toHaveBeenCalledWith('/sip/trunks', {
+        ...payload,
+        webhookApiVersion: '2026-06-01',
+      });
     });
 
     it('handles transport tls when secure is passed as true', async () => {
@@ -79,8 +82,37 @@ describe('TrunkResourceManager (unit)', () => {
 
       const result = await trunks.create(payload);
 
-      expect(http.post).toHaveBeenCalledWith('/sip/trunks', payload);
+      expect(http.post).toHaveBeenCalledWith('/sip/trunks', {
+        ...payload,
+        webhookApiVersion: '2026-06-01',
+      });
       expect(result.transport).toBe(Transport.UDP);
+    });
+
+    it('defaults webhookApiVersion to 2026-06-01 if not provided', async () => {
+      const payload = createSipTrunkCredentialPayloadFixture({ webhookApiVersion: undefined });
+      const fixture = sipTrunkFixture({ name: payload.name });
+      http.post.mockResolvedValue(fixture);
+
+      await trunks.create(payload);
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/sip/trunks',
+        expect.objectContaining({ webhookApiVersion: '2026-06-01' })
+      );
+    });
+
+    it('honors webhookApiVersion when explicitly specified', async () => {
+      const payload = createSipTrunkPayloadFixture({ webhookApiVersion: '2025-08-01' });
+      const fixture = sipTrunkFixture({ name: payload.name });
+      http.post.mockResolvedValue(fixture);
+
+      await trunks.create(payload);
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/sip/trunks',
+        expect.objectContaining({ webhookApiVersion: '2025-08-01' })
+      );
     });
 
     it('returns a trunk with the st_ id prefix', async () => {

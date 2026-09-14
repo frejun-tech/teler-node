@@ -23,9 +23,13 @@ export class AppResourceManager {
   public async create(
     payload: CreateVoiceAppPayload
   ): Promise<VoiceAppResponse> {
+    const normalizedPayload = {
+      ...payload,
+      webhookApiVersion: payload.webhookApiVersion ?? "2026-06-01"
+    };
     return this.http.post<VoiceAppResponse, CreateVoiceAppPayload>(
       this.basePath,
-      payload
+      normalizedPayload
     );
   }
 

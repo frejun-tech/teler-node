@@ -23,9 +23,13 @@ export class TrunkResourceManager {
   public async create(
     payload: CreateSipTrunkPayload
   ): Promise<SipTrunkResponse> {
+    const normalizedPayload = {
+      ...payload,
+      webhookApiVersion: payload.webhookApiVersion ?? "2026-06-01"
+    };
     return this.http.post<SipTrunkResponse, CreateSipTrunkPayload>(
       `${this.basePath}`,
-      payload
+      normalizedPayload
     );
   }
 
