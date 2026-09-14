@@ -260,7 +260,7 @@ export const transferResponseFixture = (
 ): TransferResponse => ({
   id: 'tr_01J5ABCDEFGHJKMNPQRSTVWXYZ',
   callId: 'cs_01J5ABCDEFGHJKMNPQRSTVWXYZ',
-  status: 'completed',
+  status: 'initiated',
   targetLegId: 'cl_01J5ABCDEFGHJKMNPQRSTVWXYZ',
   mode: 'cold',
   requestId: 'req_01J5ABCDEFGHJKMNPQRSTVWXYZ',

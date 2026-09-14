@@ -33,7 +33,7 @@ describe('Voice Operations API (integration)', () => {
           {
             id: 'tr_123',
             callId: 'cs_123',
-            status: 'completed',
+            status: 'initiated',
             targetLegId: 'cl_123',
             mode: 'cold',
             requestId: 'req_123',
@@ -63,7 +63,7 @@ describe('Voice Operations API (integration)', () => {
           {
             id: 'tr_123',
             callId: 'cs_123',
-            status: 'completed',
+            status: 'initiated',
             targetLegId: 'cl_123',
             mode: 'cold',
             requestId: 'req_123',
@@ -239,7 +239,7 @@ describe('Voice Operations API (integration)', () => {
           {
             id: 'tr_123',
             callId: 'cs_123',
-            status: 'completed',
+            status: 'initiated',
             targetLegId: 'cl_123',
             mode: 'cold',
             requestId: 'req_123',

@@ -276,6 +276,46 @@ describe('HttpResourceManager (integration)', () => {
     expect(result).toEqual({ deleted: true });
   });
 
+  it('converts an outgoing camelCase request body to snake_case', async () => {
+    let capturedBody: unknown = null;
+    server.use(
+      http.post(`${TEST_CONFIG.baseUrl}/test-endpoint`, async ({ request }) => {
+        capturedBody = await request.json();
+        return HttpResponse.json({ ok: true });
+      })
+    );
+    const httpClient = createHttp();
+
+    await httpClient.post('/test-endpoint', {
+      fromNumber: '+18005550100',
+      webhookApiVersion: '2026-06-01',
+    });
+
+    expect(capturedBody).toEqual({
+      from_number: '+18005550100',
+      webhook_api_version: '2026-06-01',
+    });
+  });
+
+  it('converts an incoming snake_case response body to camelCase', async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/test-endpoint`, () =>
+        HttpResponse.json({
+          from_number: '+18005550100',
+          webhook_api_version: '2026-06-01',
+        })
+      )
+    );
+    const httpClient = createHttp();
+
+    const result = await httpClient.get('/test-endpoint');
+
+    expect(result).toEqual({
+      fromNumber: '+18005550100',
+      webhookApiVersion: '2026-06-01',
+    });
+  });
+
   it('attaches the x-api-key header on every request', async () => {
     let capturedKey: string | null = null;
     server.use(

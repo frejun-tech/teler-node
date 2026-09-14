@@ -62,6 +62,7 @@ export interface CreateVoiceAppPayload {
   vnIds?: string[];
   secretId?: string | null;
   webhookApiVersion?: WebhookApiVersion;
+  channelLimit?: number | null;
 }
 
 export interface UpdateVoiceAppPayload {
@@ -82,7 +83,7 @@ export interface VoiceAppResponse {
   webhookUrl: string;
   fallbackUrl?: string | null;
   status: Status;
-  channelLimit: number | null;
+  channelLimit?: number | null;
   vnCount: number;
   secretId?: string | null;
   secretName?: string | null;
@@ -137,16 +138,16 @@ export interface VoiceCallFilters extends CursorFilters {
 export interface VoiceCallResponse {
   id: string;
   accountId: string;
-  voiceAppId: string;
+  voiceAppId?: string | null;
   state: CallSessionStates;
   direction: CallDirection;
-  fromNumber: string;
-  toNumber: string;
+  fromNumber?: string | null;
+  toNumber?: string | null;
   properties: Record<string, unknown>;
   createdAt: string;
   answeredAt?: string;
   endedAt?: string;
-  reason: string;
+  reason?: string | null;
   legs: VoiceCallLegResponse[];
 }
 
@@ -156,15 +157,15 @@ export interface VoiceCallLegResponse {
   direction: CallDirection;
   role: CallLegRole;
   state: CallLegState;
-  fromNumber: string;
-  toNumber: string;
-  parentLegId: string;
+  fromNumber?: string | null;
+  toNumber?: string | null;
+  parentLegId?: string | null;
   recordings: string[];
   createdAt: string;
   answeredAt?: string;
   endedAt?: string;
-  reason: string;
-  endedBy: string;
+  reason?: string | null;
+  endedBy?: string | null;
 }
 
 /**
@@ -181,7 +182,7 @@ export interface HangupPayload extends MutationBase {
 }
 
 export interface MutePayload {
-  legId?: string;
+  legId: string;
   on: boolean;
 }
 
@@ -210,7 +211,7 @@ type CallTransferMode = "cold" | "warm" | "monitor";
 
 export interface DialTarget {
   kind: "pstn" | "sip" | "leg";
-  number: string;
+  number?: string | null;
   uri?: string;
   legId?: string;
   customHeaders?: Record<string, string>;
@@ -228,7 +229,7 @@ export interface TransferAction {
 
 export interface TransferPayload {
   target: DialTarget;
-  mode: CallTransferMode;
+  mode?: CallTransferMode;
   timeout?: number;
   record?: boolean;
   ringback?: "suppress" | "passthrough";
@@ -240,8 +241,8 @@ export interface TransferPayload {
 export interface TransferResponse {
   id: string;
   callId: string;
-  status: CallSessionStates;
-  targetLegId: string;
+  status: "initiated";
+  targetLegId?: string | null;
   mode: CallTransferMode;
-  requestId: string;
+  requestId?: string | null;
 }

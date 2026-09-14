@@ -20,19 +20,19 @@ export interface EventFilters extends CursorFilters {
 export interface EventResponse {
   id: string;
   accountId: string;
-  callId: string;
-  sipTrunkId: string;
-  legId: string;
+  callId?: string | null;
+  sipTrunkId?: string | null;
+  legId?: string | null;
   type: string;
-  apiVersion: string;
+  apiVersion?: string | null;
   occurredAt: string;
   payload: Record<string, unknown>;
   deliveryStatus: string;
   attemptCount: number;
-  lastAttemptAt: string;
-  lastStatusCode: number;
-  lastError: string;
-  deliveredAt: string;
+  lastAttemptAt?: string | null;
+  lastStatusCode?: number | null;
+  lastError?: string | null;
+  deliveredAt?: string | null;
   createdAt: string;
 }
 

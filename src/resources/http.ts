@@ -124,7 +124,7 @@ export class HttpResourceManager {
       options?.headers,
       options?.config,
       options?.retry ?? false,
-      options?.baseRetryDelayMs ?? 5000,
+      options?.baseRetryDelayMs ?? 500,
       options?.maxRetryDelayMs ?? CONFIG.MAX_RETRY_DELAY_MS
     );
   }
@@ -170,7 +170,7 @@ export class HttpResourceManager {
   private async executeWithRetry<T>(
     request: () => Promise<T>,
     maxRetries = 3,
-    baseRetryDelayMs = 5000,
+    baseRetryDelayMs = 500,
     maxRetryDelayMs = CONFIG.MAX_RETRY_DELAY_MS
   ): Promise<T> {
     let lastError: unknown;
@@ -347,7 +347,7 @@ export class HttpResourceManager {
    * @param headers - Additional HTTP headers to include with the request.
    * @param config - Additional axios request config (e.g. responseType).
    * @param retry - Whether to retry on network errors/503s, reusing the same request each attempt.
-   * @param baseRetryDelayMs - Base delay (ms) for exponential backoff between retries. (Default: 5000)
+   * @param baseRetryDelayMs - Base delay (ms) for exponential backoff between retries. (Default: 500)
    * @param maxRetryDelayMs - Maximum cap (ms) on the calculated retry delay with jitter. (Default: 2000)
    * @returns The response data of type T.
    */
@@ -359,7 +359,7 @@ export class HttpResourceManager {
     headers?: Record<string, string>,
     config?: AxiosRequestConfig,
     retry = false,
-    baseRetryDelayMs = 5000,
+    baseRetryDelayMs = 500,
     maxRetryDelayMs = CONFIG.MAX_RETRY_DELAY_MS
   ): Promise<T> {
     try {
