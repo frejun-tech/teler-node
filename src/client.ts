@@ -7,6 +7,7 @@ import { VirtualNumberResourceManager } from "./resources/vns";
 import { EventResourceManager } from "./resources/events";
 import { RecordingResourceManager } from "./resources/recordings";
 import { SecretResourceManager } from "./resources/secrets";
+import { StreamConnectorResourceManager } from "./resources/stream";
 import { config } from "./config";
 
 export interface ClientOptions {
@@ -35,6 +36,7 @@ export class Client {
   public readonly events: EventResourceManager;
   public readonly recordings: RecordingResourceManager;
   public readonly secrets: SecretResourceManager;
+  public readonly streamConnector: StreamConnectorResourceManager;
 
   /**
    * Initializes the Teler Client.
@@ -73,5 +75,6 @@ export class Client {
       this.recordingTimeout
     );
     this.secrets = new SecretResourceManager(this.http);
+    this.streamConnector = new StreamConnectorResourceManager(this.logger);
   }
 }

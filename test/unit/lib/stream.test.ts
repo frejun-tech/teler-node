@@ -59,35 +59,35 @@ describe('StreamConnector', () => {
         () =>
           new StreamConnector(
             'wss://example.com',
-            StreamType.UNIDIRECTIONAL,
             vi.fn(),
-            vi.fn()
+            vi.fn(),
+            StreamType.UNIDIRECTIONAL
           )
       ).toThrow(NotImplementedException);
     });
 
     it('throws BadParametersException for an empty remoteUrl', () => {
       expect(
-        () => new StreamConnector('', StreamType.BIDIRECTIONAL, vi.fn(), vi.fn())
+        () => new StreamConnector('', vi.fn(), vi.fn(), StreamType.BIDIRECTIONAL)
       ).toThrow(BadParametersException);
     });
 
     it('throws BadParametersException for a whitespace-only remoteUrl', () => {
       expect(
-        () => new StreamConnector('   ', StreamType.BIDIRECTIONAL, vi.fn(), vi.fn())
+        () => new StreamConnector('   ', vi.fn(), vi.fn(), StreamType.BIDIRECTIONAL)
       ).toThrow(BadParametersException);
     });
 
     it('throws BadParametersException for an invalid URL', () => {
       expect(
-        () => new StreamConnector('not-a-url', StreamType.BIDIRECTIONAL, vi.fn(), vi.fn())
+        () => new StreamConnector('not-a-url', vi.fn(), vi.fn(), StreamType.BIDIRECTIONAL)
       ).toThrow(BadParametersException);
     });
 
     it('accepts a valid bidirectional config', () => {
       expect(
         () =>
-          new StreamConnector('wss://example.com', StreamType.BIDIRECTIONAL, vi.fn(), vi.fn())
+          new StreamConnector('wss://example.com', vi.fn(), vi.fn(), StreamType.BIDIRECTIONAL)
       ).not.toThrow();
     });
   });
@@ -98,9 +98,9 @@ describe('StreamConnector', () => {
       const remoteStreamHandler = vi.fn();
       const connector = new StreamConnector(
         'wss://example.com',
-        StreamType.BIDIRECTIONAL,
         callStreamHandler,
-        remoteStreamHandler
+        remoteStreamHandler,
+        StreamType.BIDIRECTIONAL
       );
 
       const callWs = new MockWebSocket('ws://call');
@@ -117,9 +117,9 @@ describe('StreamConnector', () => {
       const callStreamHandler = vi.fn().mockResolvedValue(['queued-msg', StreamOP.RELAY]);
       const connector = new StreamConnector(
         'wss://example.com',
-        StreamType.BIDIRECTIONAL,
         callStreamHandler,
-        vi.fn()
+        vi.fn(),
+        StreamType.BIDIRECTIONAL
       );
 
       const callWs = new MockWebSocket('ws://call');
@@ -141,9 +141,9 @@ describe('StreamConnector', () => {
       const callStreamHandler = vi.fn().mockResolvedValue(['', StreamOP.STOP]);
       const connector = new StreamConnector(
         'wss://example.com',
-        StreamType.BIDIRECTIONAL,
         callStreamHandler,
-        vi.fn()
+        vi.fn(),
+        StreamType.BIDIRECTIONAL
       );
 
       const callWs = new MockWebSocket('ws://call');
@@ -159,9 +159,9 @@ describe('StreamConnector', () => {
       const remoteStreamHandler = vi.fn().mockResolvedValue(['ai-response', StreamOP.RELAY]);
       const connector = new StreamConnector(
         'wss://example.com',
-        StreamType.BIDIRECTIONAL,
         vi.fn(),
-        remoteStreamHandler
+        remoteStreamHandler,
+        StreamType.BIDIRECTIONAL
       );
 
       const callWs = new MockWebSocket('ws://call');
@@ -176,9 +176,9 @@ describe('StreamConnector', () => {
     it('closes callWs when remoteWs closes', async () => {
       const connector = new StreamConnector(
         'wss://example.com',
-        StreamType.BIDIRECTIONAL,
         vi.fn(),
-        vi.fn()
+        vi.fn(),
+        StreamType.BIDIRECTIONAL
       );
       const callWs = new MockWebSocket('ws://call');
       const remoteWs = (await connector.bridgeStream(callWs as any)) as unknown as InstanceType<typeof MockWebSocket>;
@@ -191,9 +191,9 @@ describe('StreamConnector', () => {
     it('closes remoteWs when callWs closes', async () => {
       const connector = new StreamConnector(
         'wss://example.com',
-        StreamType.BIDIRECTIONAL,
         vi.fn(),
-        vi.fn()
+        vi.fn(),
+        StreamType.BIDIRECTIONAL
       );
       const callWs = new MockWebSocket('ws://call');
       const remoteWs = (await connector.bridgeStream(callWs as any)) as unknown as InstanceType<typeof MockWebSocket>;
@@ -207,9 +207,9 @@ describe('StreamConnector', () => {
       const callStreamHandler = vi.fn().mockResolvedValue(['overflow-msg', StreamOP.RELAY]);
       const connector = new StreamConnector(
         'wss://example.com',
-        StreamType.BIDIRECTIONAL,
         callStreamHandler,
-        vi.fn()
+        vi.fn(),
+        StreamType.BIDIRECTIONAL
       );
 
       const callWs = new MockWebSocket('ws://call');
@@ -228,9 +228,9 @@ describe('StreamConnector', () => {
       const remoteStreamHandler = vi.fn().mockResolvedValue(['reply', StreamOP.RELAY]);
       const connector = new StreamConnector(
         'wss://example.com',
-        StreamType.BIDIRECTIONAL,
         vi.fn(),
-        remoteStreamHandler
+        remoteStreamHandler,
+        StreamType.BIDIRECTIONAL
       );
 
       const callWs = new MockWebSocket('ws://call');
@@ -248,9 +248,9 @@ describe('StreamConnector', () => {
     it('closes callWs when remoteWs errors', async () => {
       const connector = new StreamConnector(
         'wss://example.com',
-        StreamType.BIDIRECTIONAL,
         vi.fn(),
-        vi.fn()
+        vi.fn(),
+        StreamType.BIDIRECTIONAL
       );
       const callWs = new MockWebSocket('ws://call');
       const remoteWs = (await connector.bridgeStream(callWs as any)) as unknown as InstanceType<typeof MockWebSocket>;
@@ -263,9 +263,9 @@ describe('StreamConnector', () => {
     it('closes remoteWs when callWs errors', async () => {
       const connector = new StreamConnector(
         'wss://example.com',
-        StreamType.BIDIRECTIONAL,
         vi.fn(),
-        vi.fn()
+        vi.fn(),
+        StreamType.BIDIRECTIONAL
       );
       const callWs = new MockWebSocket('ws://call');
       const remoteWs = (await connector.bridgeStream(callWs as any)) as unknown as InstanceType<typeof MockWebSocket>;
@@ -279,9 +279,9 @@ describe('StreamConnector', () => {
       const callStreamHandler = vi.fn().mockRejectedValue(new Error('handler exploded'));
       const connector = new StreamConnector(
         'wss://example.com',
-        StreamType.BIDIRECTIONAL,
         callStreamHandler,
-        vi.fn()
+        vi.fn(),
+        StreamType.BIDIRECTIONAL
       );
       const callWs = new MockWebSocket('ws://call');
       await connector.bridgeStream(callWs as any);
@@ -294,9 +294,9 @@ describe('StreamConnector', () => {
       const remoteStreamHandler = vi.fn().mockRejectedValue(new Error('handler exploded'));
       const connector = new StreamConnector(
         'wss://example.com',
-        StreamType.BIDIRECTIONAL,
         vi.fn(),
-        remoteStreamHandler
+        remoteStreamHandler,
+        StreamType.BIDIRECTIONAL
       );
       const callWs = new MockWebSocket('ws://call');
       await connector.bridgeStream(callWs as any);
@@ -310,9 +310,9 @@ describe('StreamConnector', () => {
       const remoteStreamHandler = vi.fn().mockResolvedValue(['', StreamOP.STOP]);
       const connector = new StreamConnector(
         'wss://example.com',
-        StreamType.BIDIRECTIONAL,
         vi.fn(),
-        remoteStreamHandler
+        remoteStreamHandler,
+        StreamType.BIDIRECTIONAL
       );
 
       const callWs = new MockWebSocket('ws://call');
@@ -328,9 +328,9 @@ describe('StreamConnector', () => {
     const callStreamHandler = vi.fn().mockResolvedValue(['reply', StreamOP.RELAY]);
     const connector = new StreamConnector(
       'wss://example.com',
-      StreamType.BIDIRECTIONAL,
       callStreamHandler,
-      vi.fn()
+      vi.fn(),
+      StreamType.BIDIRECTIONAL
     );
   
     const callWs = new MockWebSocket('ws://call');
@@ -348,9 +348,9 @@ describe('StreamConnector', () => {
     const callStreamHandler = vi.fn().mockResolvedValue([Buffer.from('binary'), StreamOP.RELAY]);
     const connector = new StreamConnector(
       'wss://example.com',
-      StreamType.BIDIRECTIONAL,
       callStreamHandler,
-      vi.fn()
+      vi.fn(),
+      StreamType.BIDIRECTIONAL
     );
   
     const callWs = new MockWebSocket('ws://call');
@@ -367,9 +367,9 @@ describe('StreamConnector', () => {
       () =>
         new (StreamConnector as any)(
           'wss://example.com',
+          vi.fn(),
+          vi.fn(),
           undefined,
-          vi.fn(),
-          vi.fn(),
           undefined
         )
     ).not.toThrow();

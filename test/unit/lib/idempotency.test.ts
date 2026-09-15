@@ -1,6 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { resolveIdempotencyKey } from '@/lib/idempotency';
-import { UnprocessableRequestException } from '@/exceptions';
+import {
+  BadParametersException,
+  UnprocessableRequestException
+} from '@/exceptions';
 
 describe('resolveIdempotencyKey', () => {
   it('auto-generates a UUID when no key is provided', () => {
@@ -17,12 +20,12 @@ describe('resolveIdempotencyKey', () => {
     expect(resolveIdempotencyKey('my-custom-key')).toBe('my-custom-key');
   });
 
-  it('throws when the key is an empty string', () => {
-    expect(() => resolveIdempotencyKey('')).toThrow(UnprocessableRequestException);
+  it('throws BadParametersException when the key is an empty string', () => {
+    expect(() => resolveIdempotencyKey('')).toThrow(BadParametersException);
     expect(() => resolveIdempotencyKey('')).toThrow(/must not be empty/);
   });
 
-  it('throws when the key exceeds 255 characters', () => {
+  it('throws UnprocessableRequestException when the key exceeds 255 characters', () => {
     const tooLong = 'a'.repeat(256);
     expect(() => resolveIdempotencyKey(tooLong)).toThrow(UnprocessableRequestException);
     expect(() => resolveIdempotencyKey(tooLong)).toThrow(/must not exceed 255 characters/);

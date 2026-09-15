@@ -5,7 +5,6 @@ import { toSnakeCase } from "../lib/utils";
 import type { RecordingParams } from "../types/core";
 import type { HttpResourceManager, TelerErrorResponseBody } from "./http";
 import { NotFoundException } from "../exceptions";
-import { logger } from "../logger";
 
 export class RecordingResourceManager {
   private readonly basePath = "/recordings";
@@ -44,15 +43,7 @@ export class RecordingResourceManager {
     try {
       const data = (await json(stream)) as TelerErrorResponseBody;
       return data;
-    } catch (error) {
-      logger.warn(
-        {
-          component: "RecordingResourceManager",
-          event: "stream_parse_failed",
-          reason: error
-        },
-        "Failed to parse recording error stream as JSON"
-      );
+    } catch {
       if (!stream.destroyed) {
         stream.destroy();
       }

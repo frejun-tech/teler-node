@@ -161,13 +161,25 @@ The library provides a powerful interface for integrating real-time call audio s
 
 The `StreamConnector` lets you bridge the Teler call audio stream to your desired remote WebSocket endpoint (e.g., an AI agent). It handles message relaying between the two streams via pluggable handlers, making it highly customizable. It also handles graceful shutdown of the media streams in case of any unexpected errors.
 
-`StreamConnector` accepts the following parameters in order:
+Create a `StreamConnector` via the `Client` using `client.streamConnector.create()`, which passes the client's configured logger automatically:
+
+```typescript
+const connector = client.streamConnector.create(
+  remoteUrl,
+  callStreamHandler,
+  remoteStreamHandler,
+  streamType, // optional, defaults to StreamType.BIDIRECTIONAL
+  headers     // optional
+);
+```
+
+The `create()` method accepts the following parameters:
 
 - `remoteUrl` — The remote WebSocket URL where the call audio stream needs to be bridged.
-- `streamType` — Stream mode (defaults to `StreamType.BIDIRECTIONAL`).
 - `callStreamHandler` — An asynchronous `StreamHandler` function that handles incoming messages from the Teler call audio stream.
 - `remoteStreamHandler` — An asynchronous `StreamHandler` function that handles incoming messages from the remote audio stream (e.g., your AI agent).
-- `headers` — Optional HTTP headers (e.g., authentication tokens, API Key) sent when establishing the WebSocket connection to the remote endpoint.
+- `streamType` — (Optional) Stream mode (defaults to `StreamType.BIDIRECTIONAL`).
+- `headers` — (Optional) HTTP headers (e.g., authentication tokens, API Key) sent when establishing the WebSocket connection to the remote endpoint.
 
 ### Stream Handlers
 
@@ -200,16 +212,18 @@ A `StreamHandler` asynchronous function receives incoming messages over a WebSoc
 ### Example
 
 ```typescript
-import { StreamConnector, StreamType, StreamOP } from "@frejun/teler";
+import { Client, StreamType, StreamOP } from "@frejun/teler";
 import { WebSocketServer, WebSocket } from "ws";
+
+// Initialize the client with your API key
+const client = new Client("YOUR_API_KEY");
 
 export const wss = new WebSocketServer({
   noServer: true,
 });
 
-const connector = new StreamConnector(
+const connector = client.streamConnector.create(
   "wss://your-ai-agent.example.com/stream",
-  StreamType.BIDIRECTIONAL,
   async (message) => {
     // Handle audio/data coming from Teler
     console.log("Received from call:", message);
@@ -220,6 +234,7 @@ const connector = new StreamConnector(
     console.log("Received from agent:", message);
     return [message, StreamOP.RELAY];
   },
+  StreamType.BIDIRECTIONAL,
   {
     Authorization: `Bearer ${process.env.AGENT_API_KEY}`,
   }
@@ -238,17 +253,16 @@ By default, `Client` is silent. To enable logging, pass a `Logger` instance:
 
 ```typescript
 import { Client, type Logger } from "@frejun/teler";
-import pino from "pino"; // Optional: bring your own logger
+import pino from "pino"; // Bring your own logger (pino, winston, etc.)
 
-// Using pino (or any pino-compatible logger)
-const pinoLogger = pino();
+const logger = pino();
 
 const client = new Client("YOUR_API_KEY", {
-  logger: pinoLogger  // Logs from the client go to your pino instance
+  logger  // Logs from the client and StreamConnector go to your logger
 });
 ```
 
-A logger must implement the `Logger` interface: `{ info(obj, msg?), warn(obj, msg?), error(obj, msg?) }`. Any pino instance satisfies this interface structurally. `StreamConnector` emits internal logs (connection events, errors) that are not configurable per-instance.
+A logger must implement the `Logger` interface: `{ info(obj, msg?), warn(obj, msg?), error(obj, msg?) }`. Any logger that matches this interface structurally works — for example, pino, winston, or a custom implementation. The client and `StreamConnector` use this logger for emitting internal logs (connection events, errors).
 
 
 ## Error Handling
