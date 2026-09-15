@@ -46,7 +46,7 @@ export function toSnakeCase<T>(obj: unknown, parentKey?: string): T {
     return obj.map((item) => toSnakeCase(item, parentKey)) as unknown as T;
   }
 
-  const result: Record<string, unknown> = {};
+  const result = Object.create(null) as Record<string, unknown>;
   for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
     const snakeKey = camelToSnake(key);
     if (OPAQUE_FIELDS.has(key) || OPAQUE_FIELDS.has(parentKey ?? "")) {
@@ -84,7 +84,7 @@ export function toCamelCase<T>(obj: unknown, parentKey?: string): T {
     return obj.map((item) => toCamelCase(item, parentKey)) as unknown as T;
   }
 
-  const result: Record<string, unknown> = {};
+  const result = Object.create(null) as Record<string, unknown>;
   for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
     const camelKey = snakeToCamel(key);
     if (OPAQUE_FIELDS.has(camelKey) || OPAQUE_FIELDS.has(parentKey ?? "")) {

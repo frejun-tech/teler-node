@@ -88,6 +88,15 @@ describe("toSnakeCase", () => {
       }
     });
   });
+
+  it("prevents prototype pollution via __proto__ key", () => {
+    const pollutedInput = JSON.parse(
+      '{"__proto__":{"polluted":true},"userId":"123"}'
+    );
+    delete (Object.prototype as any).polluted;
+    toSnakeCase(pollutedInput);
+    expect((Object.prototype as any).polluted).toBeUndefined();
+  });
 });
 
 describe("toCamelCase", () => {
@@ -218,5 +227,22 @@ describe("toCamelCase", () => {
         }
       }
     });
+  });
+
+  it("uses null-prototype objects to prevent prototype pollution", () => {
+    const input = {
+      user_id: "123",
+      user_name: "Alice",
+      nested_data: {
+        field_one: "value1",
+        field_two: "value2"
+      }
+    };
+
+    const output = toCamelCase(input) as Record<string, unknown>;
+    expect(Object.getPrototypeOf(output)).toBeNull();
+
+    const nested = output.nestedData as Record<string, unknown>;
+    expect(Object.getPrototypeOf(nested)).toBeNull();
   });
 });
