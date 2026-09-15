@@ -1,3 +1,4 @@
+import { RawData } from "ws";
 import type { CallDirection, CursorFilters, WebhookApiVersion } from "./common";
 import { Status } from "./common";
 
@@ -41,7 +42,7 @@ export enum StreamOP {
   STOP = 2
 }
 
-export type StreamData = string | Buffer | Uint8Array | ArrayBuffer | Blob;
+export type StreamData = string | RawData;
 
 export type StreamHandlerResult = [StreamData, StreamOP];
 

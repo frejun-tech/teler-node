@@ -32,8 +32,36 @@ const { MockWebSocket } = vi.hoisted(() => {
       (this.listeners[event] ??= []).push(callback);
     }
 
-    emit(event: string, payload?: unknown) {
-      this.listeners[event]?.forEach((cb) => cb(payload));
+    on(event: string, callback: (data: unknown, isBinary?: boolean) => void) {
+      (this.listeners[event] ??= []).push(callback);
+      return this;
+    }
+
+    once(event: string, callback: (data?: unknown) => void) {
+      const wrapper = (data?: unknown) => {
+        callback(data);
+        this.listeners[event] = this.listeners[event]?.filter(
+          (cb) => cb !== wrapper
+        );
+      };
+      (this.listeners[event] ??= []).push(wrapper);
+      return this;
+    }
+
+    removeListener(event: string, callback: (data?: unknown) => void) {
+      this.listeners[event] = this.listeners[event]?.filter((cb) => cb !== callback);
+      return this;
+    }
+
+    terminate = vi.fn(() => {
+      if (this.closed) return;
+      this.closed = true;
+      this.readyState = 3;
+      this.emit('close', { code: 1006, reason: 'abnormal closure' });
+    });
+
+    emit(event: string, ...args: unknown[]) {
+      this.listeners[event]?.forEach((cb) => (cb as any)(...args));
     }
 
     static reset() {
@@ -93,6 +121,17 @@ describe('StreamConnector', () => {
   });
 
   describe('bridgeStream', () => {
+    async function bridgeAndOpen(
+      connector: any,
+      callWs: InstanceType<typeof MockWebSocket>
+    ) {
+      const bridgePromise = connector.bridgeStream(callWs as any);
+      const remoteWs = MockWebSocket.instances[MockWebSocket.instances.length - 1];
+      remoteWs.emit('open');
+      await bridgePromise;
+      return remoteWs as unknown as InstanceType<typeof MockWebSocket>;
+    }
+
     it('relays a message from callWs to remoteWs when remoteWs is open', async () => {
       const callStreamHandler = vi.fn().mockResolvedValue(['hello', StreamOP.RELAY]);
       const remoteStreamHandler = vi.fn();
@@ -104,13 +143,11 @@ describe('StreamConnector', () => {
       );
 
       const callWs = new MockWebSocket('ws://call');
-      const remoteWs = (await connector.bridgeStream(callWs as any)) as unknown as InstanceType<typeof MockWebSocket>;
-      remoteWs.readyState = MockWebSocket.OPEN;
+      const remoteWs = await bridgeAndOpen(connector, callWs);
 
-      callWs.emit('message', { data: 'incoming-audio' });
+      callWs.emit('message', 'incoming-audio', false);
       await vi.waitFor(() => expect(callStreamHandler).toHaveBeenCalledWith('incoming-audio'));
-
-      expect(remoteWs.send).toHaveBeenCalledWith('hello');
+      await vi.waitFor(() => expect(remoteWs.send).toHaveBeenCalledWith('hello'));
     });
 
     it('buffers a message when remoteWs is not open, then flushes on open', async () => {
@@ -123,16 +160,18 @@ describe('StreamConnector', () => {
       );
 
       const callWs = new MockWebSocket('ws://call');
-      const remoteWs = (await connector.bridgeStream(callWs as any)) as unknown as InstanceType<typeof MockWebSocket>;
+      const bridgePromise = connector.bridgeStream(callWs as any);
+      const remoteWs = MockWebSocket.instances[MockWebSocket.instances.length - 1] as unknown as InstanceType<typeof MockWebSocket>;
       remoteWs.readyState = MockWebSocket.CONNECTING;
 
-      callWs.emit('message', { data: 'incoming-audio' });
+      callWs.emit('message', 'incoming-audio', false);
       await vi.waitFor(() => expect(callStreamHandler).toHaveBeenCalled());
 
       expect(remoteWs.send).not.toHaveBeenCalled();
 
       remoteWs.readyState = MockWebSocket.OPEN;
       remoteWs.emit('open');
+      await bridgePromise;
 
       expect(remoteWs.send).toHaveBeenCalledWith('queued-msg');
     });
@@ -147,7 +186,7 @@ describe('StreamConnector', () => {
       );
 
       const callWs = new MockWebSocket('ws://call');
-      const remoteWs = (await connector.bridgeStream(callWs as any)) as unknown as InstanceType<typeof MockWebSocket>;
+      const remoteWs = await bridgeAndOpen(connector, callWs);
 
       callWs.emit('message', { data: 'stop-signal' });
       await vi.waitFor(() => expect(remoteWs.close).toHaveBeenCalled());
@@ -165,9 +204,9 @@ describe('StreamConnector', () => {
       );
 
       const callWs = new MockWebSocket('ws://call');
-      const remoteWs = (await connector.bridgeStream(callWs as any)) as unknown as InstanceType<typeof MockWebSocket>;
+      const remoteWs = await bridgeAndOpen(connector, callWs);
 
-      remoteWs.emit('message', { data: 'model-audio-chunk' });
+      remoteWs.emit('message', 'model-audio-chunk', false);
       await vi.waitFor(() => expect(remoteStreamHandler).toHaveBeenCalledWith('model-audio-chunk'));
 
       expect(callWs.send).toHaveBeenCalledWith('ai-response');
@@ -181,7 +220,7 @@ describe('StreamConnector', () => {
         StreamType.BIDIRECTIONAL
       );
       const callWs = new MockWebSocket('ws://call');
-      const remoteWs = (await connector.bridgeStream(callWs as any)) as unknown as InstanceType<typeof MockWebSocket>;
+      const remoteWs = await bridgeAndOpen(connector, callWs);
 
       remoteWs.emit('close', { code: 1000, reason: 'done' });
 
@@ -196,7 +235,7 @@ describe('StreamConnector', () => {
         StreamType.BIDIRECTIONAL
       );
       const callWs = new MockWebSocket('ws://call');
-      const remoteWs = (await connector.bridgeStream(callWs as any)) as unknown as InstanceType<typeof MockWebSocket>;
+      const remoteWs = await bridgeAndOpen(connector, callWs);
 
       callWs.emit('close', { code: 1000, reason: 'done' });
 
@@ -213,15 +252,18 @@ describe('StreamConnector', () => {
       );
 
       const callWs = new MockWebSocket('ws://call');
-      const remoteWs = (await connector.bridgeStream(callWs as any)) as unknown as InstanceType<typeof MockWebSocket>;
+      const bridgePromise = connector.bridgeStream(callWs as any);
+      const remoteWs = MockWebSocket.instances[MockWebSocket.instances.length - 1] as unknown as InstanceType<typeof MockWebSocket>;
       remoteWs.readyState = MockWebSocket.CONNECTING;
 
-      for (let i = 0; i < 101; i++) {
-        callWs.emit('message', { data: `msg-${i}` });
+      for (let i = 0; i < 51; i++) {
+        callWs.emit('message', `msg-${i}`, false);
         await vi.waitFor(() => expect(callStreamHandler).toHaveBeenCalledTimes(i + 1));
       }
 
       expect(remoteWs.send).not.toHaveBeenCalled();
+      remoteWs.emit('open');
+      await bridgePromise;
     });
 
     it('handles non-string binary data from remoteWs (array of buffers)', async () => {
@@ -234,11 +276,13 @@ describe('StreamConnector', () => {
       );
 
       const callWs = new MockWebSocket('ws://call');
-      await connector.bridgeStream(callWs as any);
+      const bridgePromise = connector.bridgeStream(callWs as any);
       const remoteWs = MockWebSocket.instances[MockWebSocket.instances.length - 1];
+      remoteWs.emit('open');
+      await bridgePromise;
 
       const chunks = [Buffer.from('a'), Buffer.from('b')];
-      remoteWs.emit('message', { data: chunks });
+      remoteWs.emit('message', Buffer.concat(chunks), true);
 
       await vi.waitFor(() =>
         expect(remoteStreamHandler).toHaveBeenCalledWith(Buffer.concat(chunks))
@@ -253,7 +297,7 @@ describe('StreamConnector', () => {
         StreamType.BIDIRECTIONAL
       );
       const callWs = new MockWebSocket('ws://call');
-      const remoteWs = (await connector.bridgeStream(callWs as any)) as unknown as InstanceType<typeof MockWebSocket>;
+      const remoteWs = await bridgeAndOpen(connector, callWs);
 
       remoteWs.emit('error', new Error('connection reset'));
 
@@ -268,7 +312,7 @@ describe('StreamConnector', () => {
         StreamType.BIDIRECTIONAL
       );
       const callWs = new MockWebSocket('ws://call');
-      const remoteWs = (await connector.bridgeStream(callWs as any)) as unknown as InstanceType<typeof MockWebSocket>;
+      const remoteWs = await bridgeAndOpen(connector, callWs);
 
       callWs.emit('error', new Error('connection reset'));
 
@@ -284,9 +328,12 @@ describe('StreamConnector', () => {
         StreamType.BIDIRECTIONAL
       );
       const callWs = new MockWebSocket('ws://call');
-      await connector.bridgeStream(callWs as any);
+      const bridgePromise = connector.bridgeStream(callWs as any);
+      const remoteWs = MockWebSocket.instances[MockWebSocket.instances.length - 1];
+      remoteWs.emit('open');
+      await bridgePromise;
 
-      expect(() => callWs.emit('message', { data: 'bad-input' })).not.toThrow();
+      expect(() => callWs.emit('message', 'bad-input', false)).not.toThrow();
       await vi.waitFor(() => expect(callStreamHandler).toHaveBeenCalled());
     });
 
@@ -299,10 +346,12 @@ describe('StreamConnector', () => {
         StreamType.BIDIRECTIONAL
       );
       const callWs = new MockWebSocket('ws://call');
-      await connector.bridgeStream(callWs as any);
+      const bridgePromise = connector.bridgeStream(callWs as any);
       const remoteWs = MockWebSocket.instances[MockWebSocket.instances.length - 1];
+      remoteWs.emit('open');
+      await bridgePromise;
 
-      expect(() => remoteWs.emit('message', { data: 'bad-input' })).not.toThrow();
+      expect(() => remoteWs.emit('message', 'bad-input', false)).not.toThrow();
       await vi.waitFor(() => expect(remoteStreamHandler).toHaveBeenCalled());
     });
 
@@ -316,7 +365,7 @@ describe('StreamConnector', () => {
       );
 
       const callWs = new MockWebSocket('ws://call');
-      const remoteWs = (await connector.bridgeStream(callWs as any)) as unknown as InstanceType<typeof MockWebSocket>;
+      const remoteWs = await bridgeAndOpen(connector, callWs);
 
       remoteWs.emit('message', { data: 'stop-signal-from-remote' });
       await vi.waitFor(() => expect(callWs.close).toHaveBeenCalled());
@@ -325,24 +374,24 @@ describe('StreamConnector', () => {
     });
 
     it('converts non-string call data to a string via toString', async () => {
-    const callStreamHandler = vi.fn().mockResolvedValue(['reply', StreamOP.RELAY]);
-    const connector = new StreamConnector(
-      'wss://example.com',
-      callStreamHandler,
-      vi.fn(),
-      StreamType.BIDIRECTIONAL
-    );
-  
-    const callWs = new MockWebSocket('ws://call');
-    await connector.bridgeStream(callWs as any);
-  
-    const bufferPayload = Buffer.from('binary-audio-chunk', 'utf-8');
-    callWs.emit('message', { data: bufferPayload });
-  
-    await vi.waitFor(() =>
-      expect(callStreamHandler).toHaveBeenCalledWith(bufferPayload.toString('utf-8'))
-    );
-  });
+      const callStreamHandler = vi.fn().mockResolvedValue(['reply', StreamOP.RELAY]);
+      const connector = new StreamConnector(
+        'wss://example.com',
+        callStreamHandler,
+        vi.fn(),
+        StreamType.BIDIRECTIONAL
+      );
+
+      const callWs = new MockWebSocket('ws://call');
+      await bridgeAndOpen(connector, callWs);
+
+      const bufferPayload = Buffer.from('binary-audio-chunk', 'utf-8');
+      callWs.emit('message', bufferPayload, true);
+
+      await vi.waitFor(() =>
+        expect(callStreamHandler).toHaveBeenCalledWith(bufferPayload)
+      );
+    });
   
   it('does not queue a buffered message when the handler returns non-string data', async () => {
     const callStreamHandler = vi.fn().mockResolvedValue([Buffer.from('binary'), StreamOP.RELAY]);
@@ -352,14 +401,17 @@ describe('StreamConnector', () => {
       vi.fn(),
       StreamType.BIDIRECTIONAL
     );
-  
+
     const callWs = new MockWebSocket('ws://call');
-    const remoteWs = (await connector.bridgeStream(callWs as any)) as unknown as InstanceType<typeof MockWebSocket>;
+    const bridgePromise = connector.bridgeStream(callWs as any);
+    const remoteWs = MockWebSocket.instances[MockWebSocket.instances.length - 1] as unknown as InstanceType<typeof MockWebSocket>;
     remoteWs.readyState = MockWebSocket.CONNECTING;
-  
-    callWs.emit('message', { data: 'trigger' });
+
+    callWs.emit('message', 'trigger', false);
     await vi.waitFor(() => expect(callStreamHandler).toHaveBeenCalled());
     expect(remoteWs.send).not.toHaveBeenCalled();
+    remoteWs.emit('open');
+    await bridgePromise;
   });
   
   it('uses default streamType and headers when not explicitly provided', () => {

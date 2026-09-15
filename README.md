@@ -168,8 +168,9 @@ const connector = client.streamConnector.create(
   remoteUrl,
   callStreamHandler,
   remoteStreamHandler,
-  streamType, // optional, defaults to StreamType.BIDIRECTIONAL
-  headers     // optional
+  streamType,        // optional, defaults to StreamType.BIDIRECTIONAL
+  headers,           // optional
+  connectTimeoutMs   // optional, defaults to 10000ms
 );
 ```
 
@@ -180,6 +181,7 @@ The `create()` method accepts the following parameters:
 - `remoteStreamHandler` — An asynchronous `StreamHandler` function that handles incoming messages from the remote audio stream (e.g., your AI agent).
 - `streamType` — (Optional) Stream mode (defaults to `StreamType.BIDIRECTIONAL`).
 - `headers` — (Optional) HTTP headers (e.g., authentication tokens, API Key) sent when establishing the WebSocket connection to the remote endpoint.
+- `connectTimeoutMs` — (Optional) Connection timeout in milliseconds (defaults to 10,000ms). If the remote endpoint doesn't establish a WebSocket connection within this time, the `bridgeStream()` call rejects with an error and both sockets are cleaned up.
 
 ### Stream Handlers
 
