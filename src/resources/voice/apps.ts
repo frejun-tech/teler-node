@@ -10,6 +10,7 @@ import type {
 } from "../../types/voice";
 import type { CursorResponse, DefaultResponse } from "../../types/common";
 import type { HttpResourceManager } from "../http";
+import { config } from "../../config";
 
 export class AppResourceManager {
   private readonly basePath = "/voice/apps";
@@ -25,7 +26,8 @@ export class AppResourceManager {
   ): Promise<VoiceAppResponse> {
     const normalizedPayload = {
       ...payload,
-      webhookApiVersion: payload.webhookApiVersion ?? "2026-06-01"
+      webhookApiVersion:
+        payload.webhookApiVersion ?? config.DEFAULT_WEBHOOK_API_VERSION
     };
     return this.http.post<VoiceAppResponse, CreateVoiceAppPayload>(
       this.basePath,

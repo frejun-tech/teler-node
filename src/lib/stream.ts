@@ -227,22 +227,11 @@ export class StreamConnector {
         remoteWs.on("message", (data: StreamData, isBinary: boolean) => {
           (async () => {
             try {
-              this.logger.info(
-                {
-                  component: "StreamConnector",
-                  event: "remote_message_received"
-                },
-                "Message received from remote"
-              );
               const payload = isBinary ? data : toPayloadString(data);
               const response = await this.remoteStreamHandler(payload);
               const [outputData, streamOp] = response;
 
               if (streamOp === StreamOP.RELAY) {
-                this.logger.warn(
-                  { component: "StreamConnector", event: "sending_to_call" },
-                  "Sending to call"
-                );
                 callWs.send(outputData);
               } else if (streamOp === StreamOP.STOP) {
                 this.logger.warn(

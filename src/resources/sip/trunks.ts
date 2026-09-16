@@ -10,6 +10,7 @@ import type {
   VirtualNumberResponse,
   VirtualNumberFilters
 } from "../../types/core";
+import { config } from "../../config";
 
 export class TrunkResourceManager {
   private readonly basePath = "/sip/trunks";
@@ -25,7 +26,8 @@ export class TrunkResourceManager {
   ): Promise<SipTrunkResponse> {
     const normalizedPayload = {
       ...payload,
-      webhookApiVersion: payload.webhookApiVersion ?? "2026-06-01"
+      webhookApiVersion:
+        payload.webhookApiVersion ?? config.DEFAULT_WEBHOOK_API_VERSION
     };
     return this.http.post<SipTrunkResponse, CreateSipTrunkPayload>(
       `${this.basePath}`,
