@@ -279,6 +279,7 @@ TelerException (base)
 ├── ForbiddenException (403)
 ├── NotFoundException (404)
 ├── ConflictException (409)
+├── GoneException (410)
 ├── UnprocessableRequestException (422)
 ├── RateLimitException (429)
 ├── InternalServerErrorException (500)
@@ -298,6 +299,7 @@ TelerException (base)
 | `ForbiddenException` | `403` | Authenticated but not allowed to perform action |
 | `NotFoundException` | `404` | The requested resource does not exist |
 | `ConflictException` | `409` | The requested resource conflicts with the current state |
+| `GoneException` | `410` | The requested resource is no longer available |
 | `RateLimitException` | `429` | The rate limit has been exceeded |
 | `InternalServerErrorException` | `500` | An internal server error occurred |
 | `NotImplementedException` | `501` | The requested feature is not implemented |
