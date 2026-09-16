@@ -5,11 +5,13 @@ import { server } from "@test/msw/server";
 import { TEST_CONFIG } from "@test/support/env";
 import {
   sipTrunkListFixture,
+  sipTrunkFixture,
   createSipTrunkPayloadFixture,
   createSipTrunkCredentialPayloadFixture,
   updateSipTrunkPayloadFixture,
   sipTrunkFiltersFixture
 } from "@test/support/fixtures/sip";
+import { virtualNumberFixture } from "@test/support/fixtures/vns";
 import { AuthenticationType, Transport } from "@/types/sip";
 import {
   BadParametersException,
@@ -153,6 +155,77 @@ describe("SIP Trunks API (integration)", () => {
     );
     expect(result.data).toBeInstanceOf(Array);
     expect(result).toHaveProperty("hasMore");
+  });
+
+  it("listAutoPagination walks a real multi-page cursor loop for sip trunks", async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/sip/trunks`, ({ request }) => {
+        const cursorAfter = new URL(request.url).searchParams.get(
+          "cursor_after"
+        );
+        if (!cursorAfter) {
+          return HttpResponse.json(
+            sipTrunkListFixture({
+              data: [sipTrunkFixture({ id: "st_page1" })],
+              nextCursor: "page2_cursor",
+              hasMore: true
+            })
+          );
+        }
+        return HttpResponse.json(
+          sipTrunkListFixture({
+            data: [sipTrunkFixture({ id: "st_page2" })],
+            nextCursor: null,
+            hasMore: false
+          })
+        );
+      })
+    );
+
+    const client = createTestClient();
+    const ids: string[] = [];
+    for await (const trunk of client.sip.trunks.listAutoPagination()) {
+      ids.push(trunk.id);
+    }
+
+    expect(ids).toEqual(["st_page1", "st_page2"]);
+  });
+
+  it("listVirtualNumbersAutoPagination walks a real multi-page cursor loop", async () => {
+    server.use(
+      http.get(
+        `${TEST_CONFIG.baseUrl}/sip/trunks/st_01J5ABCDEFGHJKMNPQRSTVWXYZ/virtual-numbers`,
+        ({ request }) => {
+          const cursorAfter = new URL(request.url).searchParams.get(
+            "cursor_after"
+          );
+          if (!cursorAfter) {
+            return HttpResponse.json({
+              data: [virtualNumberFixture({ id: "vn_page1" })],
+              nextCursor: "page2_cursor",
+              previousCursor: null,
+              hasMore: true
+            });
+          }
+          return HttpResponse.json({
+            data: [virtualNumberFixture({ id: "vn_page2" })],
+            nextCursor: null,
+            previousCursor: "page2_cursor",
+            hasMore: false
+          });
+        }
+      )
+    );
+
+    const client = createTestClient();
+    const ids: string[] = [];
+    for await (const vn of client.sip.trunks.listVirtualNumbersAutoPagination(
+      "st_01J5ABCDEFGHJKMNPQRSTVWXYZ"
+    )) {
+      ids.push(vn.id);
+    }
+
+    expect(ids).toEqual(["vn_page1", "vn_page2"]);
   });
 
   // --- Error Contract Tests ---

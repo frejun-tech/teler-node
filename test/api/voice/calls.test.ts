@@ -12,6 +12,8 @@ import {
   InternalServerErrorException
 } from "@/exceptions";
 
+const LIST_ENDPOINT = `${TEST_CONFIG.baseUrl}/voice/calls`;
+
 describe("Voice Calls API (integration)", () => {
   it("initiates a call through the real http stack", async () => {
     const client = createTestClient();
@@ -57,6 +59,40 @@ describe("Voice Calls API (integration)", () => {
     expect(captured.url?.searchParams.get("from_number")).toBe("+18005550100");
     expect(captured.url?.searchParams.get("to_number")).toBe("+18005550200");
     expect(captured.url?.searchParams.get("limit")).toBe("10");
+  });
+
+  it("listAutoPagination walks a real multi-page cursor loop for voice calls", async () => {
+    server.use(
+      http.get(LIST_ENDPOINT, ({ request }) => {
+        const cursorAfter = new URL(request.url).searchParams.get(
+          "cursor_after"
+        );
+        if (!cursorAfter) {
+          return HttpResponse.json(
+            voiceCallListFixture({
+              data: [voiceCallFixture({ id: "cs_page1" })],
+              nextCursor: "page2_cursor",
+              hasMore: true
+            })
+          );
+        }
+        return HttpResponse.json(
+          voiceCallListFixture({
+            data: [voiceCallFixture({ id: "cs_page2" })],
+            nextCursor: null,
+            hasMore: false
+          })
+        );
+      })
+    );
+
+    const client = createTestClient();
+    const ids: string[] = [];
+    for await (const call of client.voice.calls.listAutoPagination()) {
+      ids.push(call.id);
+    }
+
+    expect(ids).toEqual(["cs_page1", "cs_page2"]);
   });
 
   it("retrieves a voice call through the real http stack", async () => {

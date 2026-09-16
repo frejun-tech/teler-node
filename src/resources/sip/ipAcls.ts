@@ -7,6 +7,7 @@ import type {
   UpdateIpAclPayload
 } from "../../types/sip";
 import type { HttpResourceManager } from "../http";
+import { autoPaginate } from "../../lib/pagination";
 
 export class IpAclResourceManager {
   private readonly basePath = "/sip/ip-acls";
@@ -26,6 +27,7 @@ export class IpAclResourceManager {
 
   /**
    * List the IP access control lists in your account, newest first.
+   * Server-side default page size is 50 when `limit` is omitted
    * @param filters - Optional filters and cursor, which includes search, limit, cursorAfter and cursorBefore.
    * @returns A list of IP access control lists.
    */
@@ -34,6 +36,21 @@ export class IpAclResourceManager {
   ): Promise<CursorResponse<IpAclListResponse>> {
     return this.http.get<CursorResponse<IpAclListResponse>, IpAclFilters>(
       this.basePath,
+      filters
+    );
+  }
+
+  /**
+   * Auto-paginate through all IP access control lists, fetching further pages on demand
+   * as you iterate.
+   * @param filters - Optional filters, same as `list()` (`cursorAfter`/`cursorBefore` are managed internally).
+   * @returns An async iterable of IP ACLs.
+   */
+  public listAutoPagination(
+    filters?: IpAclFilters
+  ): AsyncGenerator<IpAclListResponse, void, undefined> {
+    return autoPaginate<IpAclListResponse, IpAclFilters>(
+      (f: IpAclFilters | undefined) => this.list(f),
       filters
     );
   }

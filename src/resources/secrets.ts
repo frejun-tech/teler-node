@@ -7,6 +7,7 @@ import type {
 } from "../types/secrets";
 import type { CursorResponse, DefaultResponse } from "../types/common";
 import type { HttpResourceManager } from "./http";
+import { autoPaginate } from "../lib/pagination";
 
 export class SecretResourceManager {
   private readonly basePath = "/secrets";
@@ -26,6 +27,7 @@ export class SecretResourceManager {
 
   /**
    * List all secrets.
+   * Server-side default page size is 50 when `limit` is omitted
    * @param filters - Optional filters and cursor, which includes search, limit, cursorAfter and cursorBefore.
    * @returns A list of secrets.
    */
@@ -34,6 +36,21 @@ export class SecretResourceManager {
   ): Promise<CursorResponse<SecretListResponse>> {
     return this.http.get<CursorResponse<SecretListResponse>, SecretFilters>(
       this.basePath,
+      filters
+    );
+  }
+
+  /**
+   * Auto-paginate through all secrets, fetching further pages on demand
+   * as you iterate.
+   * @param filters - Optional filters, same as `list()` (`cursorAfter`/`cursorBefore` are managed internally).
+   * @returns An async iterable of secrets.
+   */
+  public listAutoPagination(
+    filters?: SecretFilters
+  ): AsyncGenerator<SecretListResponse, void, undefined> {
+    return autoPaginate<SecretListResponse, SecretFilters>(
+      (f: SecretFilters | undefined) => this.list(f),
       filters
     );
   }

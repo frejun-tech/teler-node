@@ -3,7 +3,7 @@ import { http, HttpResponse } from "msw";
 import { createTestClient } from "@test/support/client";
 import { server } from "@test/msw/server";
 import { TEST_CONFIG } from "@test/support/env";
-import { sipCallListFixture } from "@test/support/fixtures/sip";
+import { sipCallListFixture, sipCallFixture } from "@test/support/fixtures/sip";
 import {
   BadParametersException,
   InternalServerErrorException
@@ -52,6 +52,40 @@ describe("SIP Calls API (integration)", () => {
     expect(captured.url?.searchParams.get("from_number")).toBe("+18005550100");
     expect(captured.url?.searchParams.get("to_number")).toBe("+18005550200");
     expect(captured.url?.searchParams.get("limit")).toBe("10");
+  });
+
+  it("listAutoPagination walks a real multi-page cursor loop for SIP calls", async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/sip/calls`, ({ request }) => {
+        const cursorAfter = new URL(request.url).searchParams.get(
+          "cursor_after"
+        );
+        if (!cursorAfter) {
+          return HttpResponse.json(
+            sipCallListFixture({
+              data: [sipCallFixture({ id: "cs_page1" })],
+              nextCursor: "page2_cursor",
+              hasMore: true
+            })
+          );
+        }
+        return HttpResponse.json(
+          sipCallListFixture({
+            data: [sipCallFixture({ id: "cs_page2" })],
+            nextCursor: null,
+            hasMore: false
+          })
+        );
+      })
+    );
+
+    const client = createTestClient();
+    const ids: string[] = [];
+    for await (const call of client.sip.calls.listAutoPagination()) {
+      ids.push(call.id);
+    }
+
+    expect(ids).toEqual(["cs_page1", "cs_page2"]);
   });
 
   // --- Error Contract Tests ---

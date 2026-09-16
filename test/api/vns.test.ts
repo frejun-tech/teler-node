@@ -3,7 +3,10 @@ import { http, HttpResponse } from "msw";
 import { createTestClient } from "@test/support/client";
 import { server } from "@test/msw/server";
 import { TEST_CONFIG } from "@test/support/env";
-import { virtualNumberListFixture } from "@test/support/fixtures/vns";
+import {
+  virtualNumberListFixture,
+  virtualNumberListItemFixture
+} from "@test/support/fixtures/vns";
 import {
   BadParametersException,
   InternalServerErrorException
@@ -38,6 +41,40 @@ describe("Virtual Numbers API (integration)", () => {
     expect(captured.url?.searchParams.get("search")).toBe("800");
     expect(captured.url?.searchParams.get("location")).toBe("US");
     expect(captured.url?.searchParams.get("limit")).toBe("10");
+  });
+
+  it("listAutoPagination walks a real multi-page cursor loop for virtual numbers", async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/virtual-numbers`, ({ request }) => {
+        const cursorAfter = new URL(request.url).searchParams.get(
+          "cursor_after"
+        );
+        if (!cursorAfter) {
+          return HttpResponse.json(
+            virtualNumberListFixture({
+              data: [virtualNumberListItemFixture({ id: "vn_page1" })],
+              nextCursor: "page2_cursor",
+              hasMore: true
+            })
+          );
+        }
+        return HttpResponse.json(
+          virtualNumberListFixture({
+            data: [virtualNumberListItemFixture({ id: "vn_page2" })],
+            nextCursor: null,
+            hasMore: false
+          })
+        );
+      })
+    );
+
+    const client = createTestClient();
+    const ids: string[] = [];
+    for await (const vn of client.virtualNumbers.listAutoPagination()) {
+      ids.push(vn.id);
+    }
+
+    expect(ids).toEqual(["vn_page1", "vn_page2"]);
   });
 
   it("updates a virtual number through the real http stack", async () => {

@@ -11,6 +11,7 @@ import type {
 import type { CursorResponse, DefaultResponse } from "../../types/common";
 import type { HttpResourceManager } from "../http";
 import { config } from "../../config";
+import { autoPaginate } from "../../lib/pagination";
 
 export class AppResourceManager {
   private readonly basePath = "/voice/apps";
@@ -37,6 +38,7 @@ export class AppResourceManager {
 
   /**
    * List all voice apps.
+   * Server-side default page size is 50 when `limit` is omitted
    * @param filters - Optional filters and cursor, which includes search, status, limit, cursorAfter and cursorBefore.
    * @returns A list of voice apps.
    */
@@ -45,6 +47,21 @@ export class AppResourceManager {
   ): Promise<CursorResponse<VoiceAppResponse>> {
     return this.http.get<CursorResponse<VoiceAppResponse>, VoiceAppFilters>(
       this.basePath,
+      filters
+    );
+  }
+
+  /**
+   * Auto-paginate through all voice apps, fetching further pages on demand
+   * as you iterate.
+   * @param filters - Optional filters, same as `list()` (`cursorAfter`/`cursorBefore` are managed internally).
+   * @returns An async iterable of voice apps.
+   */
+  public listAutoPagination(
+    filters?: VoiceAppFilters
+  ): AsyncGenerator<VoiceAppResponse, void, undefined> {
+    return autoPaginate<VoiceAppResponse, VoiceAppFilters>(
+      (f: VoiceAppFilters | undefined) => this.list(f),
       filters
     );
   }
@@ -99,6 +116,7 @@ export class AppResourceManager {
 
   /**
    * Get virtual numbers assigned to a voice app.
+   * Server-side default page size is 50 when `limit` is omitted
    * @param voiceAppId - voice app ID to fetch vns.
    * @param params - Optional filters and cursor for pagination.
    * @returns Details of the vns assigned to the voice app.
@@ -111,5 +129,21 @@ export class AppResourceManager {
       CursorResponse<VirtualNumberResponse>,
       VirtualNumberFilters
     >(`${this.basePath}/${voiceAppId}/virtual-numbers`, params);
+  }
+
+  /**
+   * Auto-paginate through all virtual numbers assigned to a voice app.
+   * @param voiceAppId - voice app ID to fetch vns.
+   * @param params - Optional filters, same as `listVirtualNumbers()` (`cursorAfter`/`cursorBefore` are managed internally).
+   * @returns An async iterable of virtual numbers.
+   */
+  public listVirtualNumbersAutoPagination(
+    voiceAppId: string,
+    params?: VirtualNumberFilters
+  ): AsyncGenerator<VirtualNumberResponse, void, undefined> {
+    return autoPaginate<VirtualNumberResponse, VirtualNumberFilters>(
+      (f) => this.listVirtualNumbers(voiceAppId, f),
+      params
+    );
   }
 }

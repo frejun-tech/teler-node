@@ -8,6 +8,7 @@ import type {
 } from "../types/core";
 import type { HttpResourceManager } from "./http";
 import type { CursorResponse, DefaultResponse } from "../types/common";
+import { autoPaginate } from "../lib/pagination";
 
 export class VirtualNumberResourceManager {
   private readonly basePath = "/virtual-numbers";
@@ -15,6 +16,7 @@ export class VirtualNumberResourceManager {
 
   /**
    * List all virtual numbers.
+   * Server-side default page size is 50 when `limit` is omitted
    * @param filters - Optional filters and cursor, which includes search, location, limit, cursorAfter and cursorBefore.
    * @returns A list of virtual numbers.
    */
@@ -25,6 +27,21 @@ export class VirtualNumberResourceManager {
       CursorResponse<VirtualNumberListResponse>,
       VirtualNumberFilters
     >(this.basePath, filters);
+  }
+
+  /**
+   * Auto-paginate through all virtual numbers, fetching further pages on demand
+   * as you iterate.
+   * @param filters - Optional filters, same as `list()` (`cursorAfter`/`cursorBefore` are managed internally).
+   * @returns An async iterable of virtual numbers.
+   */
+  public listAutoPagination(
+    filters?: VirtualNumberFilters
+  ): AsyncGenerator<VirtualNumberListResponse, void, undefined> {
+    return autoPaginate<VirtualNumberListResponse, VirtualNumberFilters>(
+      (f: VirtualNumberFilters | undefined) => this.list(f),
+      filters
+    );
   }
 
   /**

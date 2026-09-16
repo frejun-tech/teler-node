@@ -3,7 +3,10 @@ import { http, HttpResponse } from "msw";
 import { createTestClient } from "@test/support/client";
 import { server } from "@test/msw/server";
 import { TEST_CONFIG } from "@test/support/env";
-import { secretListFixture } from "@test/support/fixtures/secrets";
+import {
+  secretListFixture,
+  secretFixture
+} from "@test/support/fixtures/secrets";
 import {
   BadParametersException,
   InternalServerErrorException
@@ -51,6 +54,40 @@ describe("Secrets API (integration)", () => {
     expect(captured.url?.searchParams.get("cursor_after")).toBe(
       "eyJpZCI6InNrXzEifQ"
     );
+  });
+
+  it("listAutoPagination walks a real multi-page cursor loop for secrets", async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/secrets`, ({ request }) => {
+        const cursorAfter = new URL(request.url).searchParams.get(
+          "cursor_after"
+        );
+        if (!cursorAfter) {
+          return HttpResponse.json(
+            secretListFixture({
+              data: [secretFixture({ id: "sk_page1" })],
+              nextCursor: "page2_cursor",
+              hasMore: true
+            })
+          );
+        }
+        return HttpResponse.json(
+          secretListFixture({
+            data: [secretFixture({ id: "sk_page2" })],
+            nextCursor: null,
+            hasMore: false
+          })
+        );
+      })
+    );
+
+    const client = createTestClient();
+    const ids: string[] = [];
+    for await (const secret of client.secrets.listAutoPagination()) {
+      ids.push(secret.id);
+    }
+
+    expect(ids).toEqual(["sk_page1", "sk_page2"]);
   });
 
   it("retrieves a secret through the real http stack", async () => {

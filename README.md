@@ -57,11 +57,30 @@ const call = await client.voice.calls.create({
 
 ## Field Naming
 
-The SDK uses **camelCase** for everything you write in TypeScript — REST API requests/responses (e.g. `client.voice.calls.create`) are automatically converted to/from the API's snake_case wire format.
+The SDK uses **camelCase** for everything you write in TypeScript REST API requests/responses (e.g. `client.voice.calls.create`) are automatically converted to/from the API's snake_case wire format.
 
-**Exception:** `CallFlow` action JSON (`stream`, `play`, `hangup`, `dial`) is returned as **snake_case**, matching the webhook response contract Teler reads directly from your `flowUrl` — it isn't parsed back by the SDK, so no conversion happens.
+In both cases, user- or server-defined key/value bags (e.g. `customHeaders` SIP header names) are passed through untouched, their keys are never case-converted.
 
-In both cases, user- or server-defined key/value bags (e.g. `customHeaders` SIP header names) are passed through untouched — their keys are never case-converted.
+
+## Pagination
+
+List endpoints (`client.voice.apps.list()`, `client.sip.trunks.list()`, `client.events.list()`, etc.) return a single page. To iterate over all results without hand-rolling a cursor loop, use the `listAutoPagination()` sibling method:
+
+```typescript
+// Fetch all items across pages lazily
+for await (const app of client.voice.apps.listAutoPagination()) {
+  console.log(app.id, app.name);
+}
+
+// Filters work the same as list(), paging is managed internally
+for await (const event of client.events.listAutoPagination({ type: "call.completed" })) {
+  console.log(event.id);
+}
+```
+
+**Server-side default:** when you omit `limit`, the server defaults to 50 results per page. A plain `.list()` call is not guaranteed to return everything.
+
+**Available on:** `client.voice.apps` (and `.listVirtualNumbersAutoPagination()`), `client.voice.calls`, `client.sip.trunks` (and `.listVirtualNumbersAutoPagination()`), `client.sip.calls`, `client.sip.ipAcls`, `client.virtualNumbers`, `client.secrets`, and `client.events`.
 
 
 ## Call Flows
@@ -150,6 +169,59 @@ Equivalent JSON:
 {
     "action": "hangup"
 }
+```
+
+
+## Call Controls & Mutations
+
+Once a call is live, you can control it in real time via `client.voice.mutations` and `client.voice.operations`:
+
+```typescript
+// Mute (or unmute) a specific leg
+await client.voice.mutations.mute(callId, { legId, on: true });
+
+// Send DTMF tones
+await client.voice.mutations.dtmf(callId, { legId, digits: "123#" });
+
+// Play audio into the call
+await client.voice.mutations.play(callId, { legId, mediaUrl: "https://example.com/audio.mp3" });
+
+// End the call, or a single leg of it
+await client.voice.mutations.hangup(callId, { legId });
+
+// Transfer the call to a new PSTN destination
+await client.voice.operations.transfer(callId, {
+  target: { kind: "pstn", number: "+919967xxxx" }
+});
+```
+
+Each method accepts three optional trailing parameters: `idempotencyKey`, `retry`, and `baseRetryDelayMs`:
+
+```typescript
+await client.voice.mutations.mute(
+  callId,
+  { legId, on: true },
+  "my-own-key", // idempotencyKey (optional)
+  true,         // retry on network errors/503s (optional, default: false)
+  300           // base retry delay in ms (optional, default: 300, capped at 2000ms)
+);
+```
+
+### Idempotency Keys
+
+If you omit `idempotencyKey`, the SDK generates a random UUID for you. That's enough to make the SDK's **own** internal retries (the `retry`/`baseRetryDelayMs` behavior above) safe, the same key is reused across every retry attempt of a single call.
+
+It does **not** make retries safe across separate calls. If your application retries a mutation itself after a client-side timeout, a crash and restart, or its own retry logic, the SDK has no way to know it's the same logical operation, and a fresh call generates a fresh key. The server will treat it as a new request and may process it twice.
+
+If you need that guarantee, generate your own key up front and pass it explicitly, reusing the exact same value every time you retry the same logical operation:
+
+```typescript
+import { randomUUID } from "crypto";
+
+const idempotencyKey = randomUUID(); // generate once, store it alongside your own retry state
+
+await client.voice.mutations.hangup(callId, { legId }, idempotencyKey);
+// ...if this call needs to be retried later by your own logic, pass the same idempotencyKey again
 ```
 
 
@@ -264,7 +336,7 @@ const client = new Client("YOUR_API_KEY", {
 });
 ```
 
-A logger must implement the `Logger` interface: `{ info(obj, msg?), warn(obj, msg?), error(obj, msg?) }`. Any logger that matches this interface structurally works — for example, pino, winston, or a custom implementation. The client and `StreamConnector` use this logger for emitting internal logs (connection events, errors).
+A logger must implement the `Logger` interface: `{ info(obj, msg?), warn(obj, msg?), error(obj, msg?) }`. Any logger that matches this interface structurally works for example, pino, winston, or a custom implementation. The client and `StreamConnector` use this logger for emitting internal logs (connection events, errors).
 
 
 ## Error Handling
@@ -318,7 +390,7 @@ All exceptions expose:
 `UnprocessableRequestException` additionally exposes:
 - `param` — the dot-joined path to the invalid field, taken verbatim from the API's validation error (e.g. `"body.auth_credential.username"`). Not populated for `BadParametersException` or any other exception today, even though the property exists on the base class.
 
-> **Note:** `details` and `param` reflect the raw API response exactly as received — unlike successful responses, they are **not** converted to camelCase. The API's own error messages may also reference fields by their snake_case wire name (e.g. `"cursor_after and cursor_before are mutually exclusive"`), even when you passed `cursorAfter`/`cursorBefore` in your SDK call.
+> **Note:** `details` and `param` reflect the raw API response exactly as received, unlike successful responses, they are **not** converted to camelCase. The API's own error messages may also reference fields by their snake_case wire name (e.g. `"cursor_after and cursor_before are mutually exclusive"`), even when you passed `cursorAfter`/`cursorBefore` in your SDK call.
 
 ### API Response Body Shape
 

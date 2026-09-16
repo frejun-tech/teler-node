@@ -46,6 +46,54 @@ describe("SIP IP ACLs API (integration)", () => {
     expect(captured.url?.searchParams.get("limit")).toBe("10");
   });
 
+  it("listAutoPagination walks a real multi-page cursor loop for IP ACLs", async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/sip/ip-acls`, ({ request }) => {
+        const cursorAfter = new URL(request.url).searchParams.get(
+          "cursor_after"
+        );
+        if (!cursorAfter) {
+          return HttpResponse.json({
+            data: [
+              {
+                id: "acl_page1",
+                name: "ACL Page 1",
+                addressCount: 1,
+                trunkCount: 0,
+                createdAt: "2026-08-14T00:00:00.000Z"
+              }
+            ],
+            nextCursor: "page2_cursor",
+            previousCursor: null,
+            hasMore: true
+          });
+        }
+        return HttpResponse.json({
+          data: [
+            {
+              id: "acl_page2",
+              name: "ACL Page 2",
+              addressCount: 1,
+              trunkCount: 0,
+              createdAt: "2026-08-14T00:00:00.000Z"
+            }
+          ],
+          nextCursor: null,
+          previousCursor: "page2_cursor",
+          hasMore: false
+        });
+      })
+    );
+
+    const client = createTestClient();
+    const ids: string[] = [];
+    for await (const acl of client.sip.ipAcls.listAutoPagination()) {
+      ids.push(acl.id);
+    }
+
+    expect(ids).toEqual(["acl_page1", "acl_page2"]);
+  });
+
   it("retrieves an IP ACL through the real http stack", async () => {
     const client = createTestClient();
     const acl = await client.sip.ipAcls.retrieve(

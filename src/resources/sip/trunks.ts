@@ -11,6 +11,7 @@ import type {
   VirtualNumberFilters
 } from "../../types/core";
 import { config } from "../../config";
+import { autoPaginate } from "../../lib/pagination";
 
 export class TrunkResourceManager {
   private readonly basePath = "/sip/trunks";
@@ -46,6 +47,7 @@ export class TrunkResourceManager {
 
   /**
    * List all sip trunks.
+   * Server-side default page size is 50 when `limit` is omitted
    * @param filters - Optional filters and cursor, which includes search, status, limit, cursorAfter and cursorBefore.
    * @returns A list of sip trunks.
    */
@@ -54,6 +56,21 @@ export class TrunkResourceManager {
   ): Promise<CursorResponse<SipTrunkResponse>> {
     return this.http.get<CursorResponse<SipTrunkResponse>, SipTrunkFilters>(
       this.basePath,
+      filters
+    );
+  }
+
+  /**
+   * Auto-paginate through all sip trunks, fetching further pages on demand
+   * as you iterate.
+   * @param filters - Optional filters, same as `list()` (`cursorAfter`/`cursorBefore` are managed internally).
+   * @returns An async iterable of sip trunks.
+   */
+  public listAutoPagination(
+    filters?: SipTrunkFilters
+  ): AsyncGenerator<SipTrunkResponse, void, undefined> {
+    return autoPaginate<SipTrunkResponse, SipTrunkFilters>(
+      (f: SipTrunkFilters | undefined) => this.list(f),
       filters
     );
   }
@@ -99,6 +116,7 @@ export class TrunkResourceManager {
 
   /**
    * Get virtual numbers assigned to a sip trunk.
+   * Server-side default page size is 50 when `limit` is omitted
    * @param sipTrunkId - sipTrunkID to fetch vns.
    * @param params - Optional filters and cursor for pagination.
    * @returns Details of the vns assigned to the sip trunk.
@@ -111,5 +129,21 @@ export class TrunkResourceManager {
       CursorResponse<VirtualNumberResponse>,
       VirtualNumberFilters
     >(`${this.basePath}/${sipTrunkId}/virtual-numbers`, params);
+  }
+
+  /**
+   * Auto-paginate through all virtual numbers assigned to a sip trunk.
+   * @param sipTrunkId - sip trunk ID to fetch vns.
+   * @param params - Optional filters, same as `listVirtualNumbers()` (`cursorAfter`/`cursorBefore` are managed internally).
+   * @returns An async iterable of virtual numbers.
+   */
+  public listVirtualNumbersAutoPagination(
+    sipTrunkId: string,
+    params?: VirtualNumberFilters
+  ): AsyncGenerator<VirtualNumberResponse, void, undefined> {
+    return autoPaginate<VirtualNumberResponse, VirtualNumberFilters>(
+      (f) => this.listVirtualNumbers(sipTrunkId, f),
+      params
+    );
   }
 }

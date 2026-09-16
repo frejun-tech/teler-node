@@ -3,7 +3,7 @@ import { http, HttpResponse } from "msw";
 import { createTestClient } from "@test/support/client";
 import { server } from "@test/msw/server";
 import { TEST_CONFIG } from "@test/support/env";
-import { eventListFixture } from "@test/support/fixtures/events";
+import { eventListFixture, eventFixture } from "@test/support/fixtures/events";
 
 describe("Events API (integration)", () => {
   it("retrieves an event through the real http stack", async () => {
@@ -107,6 +107,103 @@ describe("Events API (integration)", () => {
       call_sid: "abc123",
       "Some-Weird-Key": "value",
       user_data: "stays"
+    });
+  });
+
+  it("listAutoPagination walks a real multi-page cursor loop", async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/events`, ({ request }) => {
+        const cursorAfter = new URL(request.url).searchParams.get(
+          "cursor_after"
+        );
+        if (!cursorAfter) {
+          return HttpResponse.json(
+            eventListFixture({
+              data: [eventFixture({ id: "evt_page1" })],
+              nextCursor: "page2_cursor",
+              hasMore: true
+            })
+          );
+        }
+        return HttpResponse.json(
+          eventListFixture({
+            data: [eventFixture({ id: "evt_page2" })],
+            nextCursor: null,
+            hasMore: false
+          })
+        );
+      })
+    );
+
+    const client = createTestClient();
+    const ids: string[] = [];
+    for await (const event of client.events.listAutoPagination()) {
+      ids.push(event.id);
+    }
+
+    expect(ids).toEqual(["evt_page1", "evt_page2"]);
+  });
+
+  it("listAutoPagination propagates errors from page 1 fetch", async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/events`, () =>
+        HttpResponse.json(
+          { success: false, message: "Internal server error" },
+          { status: 500 }
+        )
+      )
+    );
+
+    const client = createTestClient();
+    await expect(
+      (async () => {
+        for await (const event of client.events.listAutoPagination()) {
+          expect(event).toBeDefined();
+          break; // Error occurs on first fetch
+        }
+      })()
+    ).rejects.toMatchObject({
+      name: "InternalServerErrorException",
+      status: 500
+    });
+  });
+
+  it("listAutoPagination propagates errors from page 2 fetch", async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/events`, ({ request }) => {
+        const cursorAfter = new URL(request.url).searchParams.get(
+          "cursor_after"
+        );
+        if (!cursorAfter) {
+          return HttpResponse.json(
+            eventListFixture({
+              data: [eventFixture({ id: "evt_page1" })],
+              nextCursor: "page2_cursor",
+              hasMore: true
+            })
+          );
+        }
+        // Page 2 fetch fails
+        return HttpResponse.json(
+          { success: false, message: "Service temporarily unavailable" },
+          { status: 503 }
+        );
+      })
+    );
+
+    const client = createTestClient();
+    await expect(
+      (async () => {
+        for await (const event of client.events.listAutoPagination()) {
+          // Gets page 1 items fine, but fails on page 2 fetch
+          if (event.id === "evt_page1") {
+            // After yielding page 1 item, next iteration should fail
+          }
+        }
+      })()
+    ).rejects.toMatchObject({
+      name: "InternalServerErrorException",
+      status: 503
     });
   });
 });

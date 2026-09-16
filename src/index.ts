@@ -9,4 +9,5 @@ export * from "./exceptions";
 export type { TelerErrorResponseBody } from "./resources/http";
 export type { Logger } from "./logger";
 export * from "./lib/flows";
+export * from "./lib/pagination";
 export * from "./lib/stream";

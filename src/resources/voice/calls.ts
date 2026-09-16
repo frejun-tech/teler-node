@@ -7,6 +7,7 @@ import type {
   VoiceCallLegResponse
 } from "../../types/voice";
 import type { HttpResourceManager } from "../http";
+import { autoPaginate } from "../../lib/pagination";
 
 export class CallResourceManager {
   private readonly basePath = "/voice/calls";
@@ -31,6 +32,7 @@ export class CallResourceManager {
 
   /**
    * List all voice calls.
+   * Server-side default page size is 50 when `limit` is omitted
    * @param filters - Optional filters and cursor, which includes state, fromNumber, toNumber, createdAfter, createdBefore, limit, cursorAfter and cursorBefore.
    * @returns A list of voice calls.
    */
@@ -39,6 +41,21 @@ export class CallResourceManager {
   ): Promise<CursorResponse<VoiceCallResponse>> {
     return this.http.get<CursorResponse<VoiceCallResponse>, VoiceCallFilters>(
       this.basePath,
+      filters
+    );
+  }
+
+  /**
+   * Auto-paginate through all voice calls, fetching further pages on demand
+   * as you iterate.
+   * @param filters - Optional filters, same as `list()` (`cursorAfter`/`cursorBefore` are managed internally).
+   * @returns An async iterable of voice calls.
+   */
+  public listAutoPagination(
+    filters?: VoiceCallFilters
+  ): AsyncGenerator<VoiceCallResponse, void, undefined> {
+    return autoPaginate<VoiceCallResponse, VoiceCallFilters>(
+      (f: VoiceCallFilters | undefined) => this.list(f),
       filters
     );
   }

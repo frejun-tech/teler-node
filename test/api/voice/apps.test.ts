@@ -3,7 +3,11 @@ import { http, HttpResponse } from "msw";
 import { createTestClient } from "@test/support/client";
 import { server } from "@test/msw/server";
 import { TEST_CONFIG } from "@test/support/env";
-import { voiceAppListFixture } from "@test/support/fixtures/voice";
+import {
+  voiceAppListFixture,
+  voiceAppFixture
+} from "@test/support/fixtures/voice";
+import { virtualNumberFixture } from "@test/support/fixtures/vns";
 import { Status } from "@/types/common";
 import {
   BadParametersException,
@@ -87,6 +91,77 @@ describe("Voice Apps API (integration)", () => {
     );
     expect(result.data).toBeInstanceOf(Array);
     expect(result).toHaveProperty("hasMore");
+  });
+
+  it("listAutoPagination walks a real multi-page cursor loop for voice apps", async () => {
+    server.use(
+      http.get(`${TEST_CONFIG.baseUrl}/voice/apps`, ({ request }) => {
+        const cursorAfter = new URL(request.url).searchParams.get(
+          "cursor_after"
+        );
+        if (!cursorAfter) {
+          return HttpResponse.json(
+            voiceAppListFixture({
+              data: [voiceAppFixture({ id: "va_page1" })],
+              nextCursor: "page2_cursor",
+              hasMore: true
+            })
+          );
+        }
+        return HttpResponse.json(
+          voiceAppListFixture({
+            data: [voiceAppFixture({ id: "va_page2" })],
+            nextCursor: null,
+            hasMore: false
+          })
+        );
+      })
+    );
+
+    const client = createTestClient();
+    const ids: string[] = [];
+    for await (const app of client.voice.apps.listAutoPagination()) {
+      ids.push(app.id);
+    }
+
+    expect(ids).toEqual(["va_page1", "va_page2"]);
+  });
+
+  it("listVirtualNumbersAutoPagination walks a real multi-page cursor loop", async () => {
+    server.use(
+      http.get(
+        `${TEST_CONFIG.baseUrl}/voice/apps/va_01J5ABCDEFGHJKMNPQRSTVWXYZ/virtual-numbers`,
+        ({ request }) => {
+          const cursorAfter = new URL(request.url).searchParams.get(
+            "cursor_after"
+          );
+          if (!cursorAfter) {
+            return HttpResponse.json({
+              data: [virtualNumberFixture({ id: "vn_page1" })],
+              nextCursor: "page2_cursor",
+              previousCursor: null,
+              hasMore: true
+            });
+          }
+          return HttpResponse.json({
+            data: [virtualNumberFixture({ id: "vn_page2" })],
+            nextCursor: null,
+            previousCursor: "page2_cursor",
+            hasMore: false
+          });
+        }
+      )
+    );
+
+    const client = createTestClient();
+    const ids: string[] = [];
+    for await (const vn of client.voice.apps.listVirtualNumbersAutoPagination(
+      "va_01J5ABCDEFGHJKMNPQRSTVWXYZ"
+    )) {
+      ids.push(vn.id);
+    }
+
+    expect(ids).toEqual(["vn_page1", "vn_page2"]);
   });
 
   // --- Error Contract Tests ---
