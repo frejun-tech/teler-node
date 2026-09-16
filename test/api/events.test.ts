@@ -1,28 +1,28 @@
-﻿import { describe, it, expect } from 'vitest';
-import { http, HttpResponse } from 'msw';
-import { createTestClient } from '@test/support/client';
-import { server } from '@test/msw/server';
-import { TEST_CONFIG } from '@test/support/env';
-import { eventListFixture } from '@test/support/fixtures/events';
+﻿import { describe, it, expect } from "vitest";
+import { http, HttpResponse } from "msw";
+import { createTestClient } from "@test/support/client";
+import { server } from "@test/msw/server";
+import { TEST_CONFIG } from "@test/support/env";
+import { eventListFixture } from "@test/support/fixtures/events";
 
-describe('Events API (integration)', () => {
-  it('retrieves an event through the real http stack', async () => {
+describe("Events API (integration)", () => {
+  it("retrieves an event through the real http stack", async () => {
     const client = createTestClient();
-    const event = await client.events.retrieve('evt_42');
-    expect(event.id).toBe('evt_42');
+    const event = await client.events.retrieve("evt_42");
+    expect(event.id).toBe("evt_42");
   });
 
-  it('lists events', async () => {
+  it("lists events", async () => {
     const client = createTestClient();
     const result = await client.events.list();
     expect(result.data).toBeInstanceOf(Array);
-    expect(result).toHaveProperty('hasMore');
-    expect(result).toHaveProperty('nextCursor');
-    expect(result).toHaveProperty('previousCursor');
+    expect(result).toHaveProperty("hasMore");
+    expect(result).toHaveProperty("nextCursor");
+    expect(result).toHaveProperty("previousCursor");
   });
 
-  it('sends query params correctly on list', async () => {
-    const captured: {url: URL | null} = {url: null};
+  it("sends query params correctly on list", async () => {
+    const captured: { url: URL | null } = { url: null };
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/events`, ({ request }) => {
         captured.url = new URL(request.url);
@@ -30,77 +30,83 @@ describe('Events API (integration)', () => {
       })
     );
     const client = createTestClient();
-    await client.events.list({ callId: 'call_1' });
-    expect(captured.url?.searchParams.get('call_id')).toBe('call_1');
+    await client.events.list({ callId: "call_1" });
+    expect(captured.url?.searchParams.get("call_id")).toBe("call_1");
   });
 
-  it('propagates 404 errors from the backend', async () => {
+  it("propagates 404 errors from the backend", async () => {
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/events/:id`, () =>
-        HttpResponse.json({ success: false, message: 'Event not found' }, { status: 404 })
+        HttpResponse.json(
+          { success: false, message: "Event not found" },
+          { status: 404 }
+        )
       )
     );
     const client = createTestClient();
-    await expect(client.events.retrieve('evt_missing')).rejects.toMatchObject({
-      name: 'NotFoundException',
-      status: 404,
+    await expect(client.events.retrieve("evt_missing")).rejects.toMatchObject({
+      name: "NotFoundException",
+      status: 404
     });
   });
 
-  it('propagates 500 errors from the backend', async () => {
+  it("propagates 500 errors from the backend", async () => {
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/events/:id`, () =>
-        HttpResponse.json({ success: false, message: 'Internal server error' }, { status: 500 })
+        HttpResponse.json(
+          { success: false, message: "Internal server error" },
+          { status: 500 }
+        )
       )
     );
     const client = createTestClient();
-    await expect(client.events.retrieve('evt_broken')).rejects.toMatchObject({
-      name: 'InternalServerErrorException',
+    await expect(client.events.retrieve("evt_broken")).rejects.toMatchObject({
+      name: "InternalServerErrorException"
     });
   });
 
-  it('redelivers an event through the real http stack', async () => {
+  it("redelivers an event through the real http stack", async () => {
     const client = createTestClient();
-    const result = await client.events.redeliver('evt_123');
-    expect(result.eventId).toBe('evt_123');
+    const result = await client.events.redeliver("evt_123");
+    expect(result.eventId).toBe("evt_123");
   });
 
-  it('preserves arbitrary keys inside payload without case conversion', async () => {
+  it("preserves arbitrary keys inside payload without case conversion", async () => {
     server.use(
       http.get(`${TEST_CONFIG.baseUrl}/events/:id`, () =>
         HttpResponse.json(
           {
-            id: 'evt_123',
-            accountId: 'acc_123',
-            callId: 'call_123',
-            sipTrunkId: 'st_123',
-            legId: 'leg_123',
-            type: 'call.created',
-            apiVersion: '2024-01-01',
-            occurredAt: '2024-01-01T00:00:00Z',
+            id: "evt_123",
+            accountId: "acc_123",
+            callId: "call_123",
+            sipTrunkId: "st_123",
+            legId: "leg_123",
+            type: "call.created",
+            apiVersion: "2024-01-01",
+            occurredAt: "2024-01-01T00:00:00Z",
             payload: {
-              call_sid: 'abc123',
-              'Some-Weird-Key': 'value',
-              user_data: 'stays',
+              call_sid: "abc123",
+              "Some-Weird-Key": "value",
+              user_data: "stays"
             },
-            deliveryStatus: 'delivered',
+            deliveryStatus: "delivered",
             attemptCount: 1,
-            lastAttemptAt: '2024-01-01T00:00:00Z',
+            lastAttemptAt: "2024-01-01T00:00:00Z",
             lastStatusCode: 200,
-            lastError: '',
-            deliveredAt: '2024-01-01T00:00:00Z',
-            createdAt: '2024-01-01T00:00:00Z',
+            lastError: "",
+            deliveredAt: "2024-01-01T00:00:00Z",
+            createdAt: "2024-01-01T00:00:00Z"
           },
           { status: 200 }
         )
       )
     );
     const client = createTestClient();
-    const event = await client.events.retrieve('evt_123');
+    const event = await client.events.retrieve("evt_123");
     expect(event.payload).toEqual({
-      call_sid: 'abc123',
-      'Some-Weird-Key': 'value',
-      user_data: 'stays',
+      call_sid: "abc123",
+      "Some-Weird-Key": "value",
+      user_data: "stays"
     });
   });
 });

@@ -1,8 +1,5 @@
 import { randomUUID } from "crypto";
-import {
-  BadParametersException,
-  UnprocessableRequestException
-} from "../exceptions";
+import { BadParametersException } from "../exceptions";
 import { config } from "../config";
 
 /**
@@ -21,7 +18,7 @@ export function resolveIdempotencyKey(key?: string): string {
     });
   }
   if (key.length > config.IDEMPOTENCY_KEY_MAX_LEN) {
-    throw new UnprocessableRequestException({
+    throw new BadParametersException({
       message: `Idempotency-Key must not exceed ${config.IDEMPOTENCY_KEY_MAX_LEN} characters (got ${key.length}).`,
       param: "Idempotency-Key"
     });

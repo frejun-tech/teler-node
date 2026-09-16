@@ -1,5 +1,4 @@
-import { vi } from 'vitest';
-
+import { vi } from "vitest";
 
 export class MockWebSocket {
   static OPEN = 1;
@@ -17,7 +16,7 @@ export class MockWebSocket {
     if (this.closed) return;
     this.closed = true;
     this.readyState = 3;
-    this.emit('close', { code: 1000, reason: 'test-close' });
+    this.emit("close", { code: 1000, reason: "test-close" });
   });
 
   constructor(url: string, options?: unknown) {

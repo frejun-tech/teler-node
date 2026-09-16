@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { VirtualNumberResourceManager } from '@/resources/vns';
-import { createMockHttp, asHttp, type MockHttp } from '@test/support/mock-http';
+import { describe, it, expect, beforeEach } from "vitest";
+import { VirtualNumberResourceManager } from "@/resources/vns";
+import { createMockHttp, asHttp, type MockHttp } from "@test/support/mock-http";
 import {
   virtualNumberFixture,
   virtualNumberListFixture,
@@ -10,10 +10,10 @@ import {
   assignAllPayloadFixture,
   unassignVirtualNumberPayloadFixture,
   unassignAllPayloadFixture,
-  virtualNumberFiltersFixture,
-} from '@test/support/fixtures/vns';
+  virtualNumberFiltersFixture
+} from "@test/support/fixtures/vns";
 
-describe('VirtualNumberResourceManager (unit)', () => {
+describe("VirtualNumberResourceManager (unit)", () => {
   let http: MockHttp;
   let virtualNumbers: VirtualNumberResourceManager;
 
@@ -22,41 +22,45 @@ describe('VirtualNumberResourceManager (unit)', () => {
     virtualNumbers = new VirtualNumberResourceManager(asHttp(http));
   });
 
-  describe('list', () => {
-    it('gets /virtual-numbers with undefined when called without filters', async () => {
+  describe("list", () => {
+    it("gets /virtual-numbers with undefined when called without filters", async () => {
       http.get.mockResolvedValue(virtualNumberListFixture());
 
       await virtualNumbers.list();
 
-      expect(http.get).toHaveBeenCalledWith('/virtual-numbers', undefined);
+      expect(http.get).toHaveBeenCalledWith("/virtual-numbers", undefined);
     });
 
-    it('forwards all filter fields to the http layer', async () => {
+    it("forwards all filter fields to the http layer", async () => {
       http.get.mockResolvedValue(virtualNumberListFixture());
       const filters = virtualNumberFiltersFixture();
 
       await virtualNumbers.list(filters);
 
-      expect(http.get).toHaveBeenCalledWith('/virtual-numbers', filters);
+      expect(http.get).toHaveBeenCalledWith("/virtual-numbers", filters);
     });
 
-    it('forwards search-only filter correctly', async () => {
+    it("forwards search-only filter correctly", async () => {
       http.get.mockResolvedValue(virtualNumberListFixture());
 
-      await virtualNumbers.list({ search: '800' });
+      await virtualNumbers.list({ search: "800" });
 
-      expect(http.get).toHaveBeenCalledWith('/virtual-numbers', { search: '800' });
+      expect(http.get).toHaveBeenCalledWith("/virtual-numbers", {
+        search: "800"
+      });
     });
 
-    it('forwards location array filter correctly', async () => {
+    it("forwards location array filter correctly", async () => {
       http.get.mockResolvedValue(virtualNumberListFixture());
 
-      await virtualNumbers.list({ location: ['US', 'IN'] });
+      await virtualNumbers.list({ location: ["US", "IN"] });
 
-      expect(http.get).toHaveBeenCalledWith('/virtual-numbers', { location: ['US', 'IN'] });
+      expect(http.get).toHaveBeenCalledWith("/virtual-numbers", {
+        location: ["US", "IN"]
+      });
     });
 
-    it('returns the response object reference unchanged', async () => {
+    it("returns the response object reference unchanged", async () => {
       const response = virtualNumberListFixture();
       http.get.mockResolvedValue(response);
 
@@ -65,18 +69,18 @@ describe('VirtualNumberResourceManager (unit)', () => {
       expect(result).toBe(response);
     });
 
-    it('returns a page with data, cursors, and hasMore', async () => {
+    it("returns a page with data, cursors, and hasMore", async () => {
       http.get.mockResolvedValue(virtualNumberListFixture());
 
       const result = await virtualNumbers.list();
 
       expect(result.data).toBeInstanceOf(Array);
-      expect(result).toHaveProperty('hasMore');
-      expect(result).toHaveProperty('nextCursor');
-      expect(result).toHaveProperty('previousCursor');
+      expect(result).toHaveProperty("hasMore");
+      expect(result).toHaveProperty("nextCursor");
+      expect(result).toHaveProperty("previousCursor");
     });
 
-    it('returns virtual numbers with vn_ id prefix', async () => {
+    it("returns virtual numbers with vn_ id prefix", async () => {
       http.get.mockResolvedValue(virtualNumberListFixture());
 
       const result = await virtualNumbers.list();
@@ -84,134 +88,165 @@ describe('VirtualNumberResourceManager (unit)', () => {
       result.data.forEach((vn) => expect(vn.id).toMatch(/^vn_/));
     });
 
-    it('propagates errors from the http layer', async () => {
-      http.get.mockRejectedValue(new Error('Network error'));
+    it("propagates errors from the http layer", async () => {
+      http.get.mockRejectedValue(new Error("Network error"));
 
-      await expect(virtualNumbers.list()).rejects.toThrow('Network error');
+      await expect(virtualNumbers.list()).rejects.toThrow("Network error");
     });
   });
 
-  describe('update', () => {
-    it('patches the correct path with the update payload', async () => {
+  describe("update", () => {
+    it("patches the correct path with the update payload", async () => {
       const payload = updateVirtualNumberPayloadFixture();
       const fixture = virtualNumberFixture({ name: payload.name });
       http.patch.mockResolvedValue(fixture);
 
-      const result = await virtualNumbers.update('vn_01J5ABCDEFGHJKMNPQRSTVWXYZ', payload);
+      const result = await virtualNumbers.update(
+        "vn_01J5ABCDEFGHJKMNPQRSTVWXYZ",
+        payload
+      );
 
       expect(http.patch).toHaveBeenCalledWith(
-        '/virtual-numbers/vn_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+        "/virtual-numbers/vn_01J5ABCDEFGHJKMNPQRSTVWXYZ",
         payload,
         { retry: undefined, baseRetryDelayMs: undefined }
       );
       expect(result).toEqual(fixture);
     });
 
-    it('returns the response object reference unchanged', async () => {
+    it("returns the response object reference unchanged", async () => {
       const fixture = virtualNumberFixture();
       http.patch.mockResolvedValue(fixture);
 
       const result = await virtualNumbers.update(
-        'vn_01J5ABCDEFGHJKMNPQRSTVWXYZ',
+        "vn_01J5ABCDEFGHJKMNPQRSTVWXYZ",
         updateVirtualNumberPayloadFixture()
       );
 
       expect(result).toBe(fixture);
     });
 
-    it('propagates errors from the http layer', async () => {
-      http.patch.mockRejectedValue(new Error('Network error'));
+    it("propagates errors from the http layer", async () => {
+      http.patch.mockRejectedValue(new Error("Network error"));
 
       await expect(
-        virtualNumbers.update('vn_01J5ABCDEFGHJKMNPQRSTVWXYZ', updateVirtualNumberPayloadFixture())
-      ).rejects.toThrow('Network error');
+        virtualNumbers.update(
+          "vn_01J5ABCDEFGHJKMNPQRSTVWXYZ",
+          updateVirtualNumberPayloadFixture()
+        )
+      ).rejects.toThrow("Network error");
     });
   });
 
-  describe('assign', () => {
-    it('posts to /virtual-numbers/assign with the payload', async () => {
+  describe("assign", () => {
+    it("posts to /virtual-numbers/assign with the payload", async () => {
       const payload = assignVirtualNumberPayloadFixture();
-      const response = { success: true, message: 'Virtual numbers assigned successfully.' };
+      const response = {
+        success: true,
+        message: "Virtual numbers assigned successfully."
+      };
       http.post.mockResolvedValue(response);
 
       const result = await virtualNumbers.assign(payload);
 
-      expect(http.post).toHaveBeenCalledWith('/virtual-numbers/assign', payload);
+      expect(http.post).toHaveBeenCalledWith(
+        "/virtual-numbers/assign",
+        payload
+      );
       expect(result).toEqual(response);
     });
 
-    it('assigns to a SIP trunk instead of a voice app', async () => {
+    it("assigns to a SIP trunk instead of a voice app", async () => {
       const payload = assignToTrunkPayloadFixture();
-      http.post.mockResolvedValue({ success: true, message: 'Assigned.' });
+      http.post.mockResolvedValue({ success: true, message: "Assigned." });
 
       await virtualNumbers.assign(payload);
 
-      expect(http.post).toHaveBeenCalledWith('/virtual-numbers/assign', payload);
+      expect(http.post).toHaveBeenCalledWith(
+        "/virtual-numbers/assign",
+        payload
+      );
     });
 
-    it('assigns all virtual numbers via apply_to_all flag', async () => {
+    it("assigns all virtual numbers via apply_to_all flag", async () => {
       const payload = assignAllPayloadFixture();
-      http.post.mockResolvedValue({ success: true, message: 'Assigned.' });
+      http.post.mockResolvedValue({ success: true, message: "Assigned." });
 
       await virtualNumbers.assign(payload);
 
-      expect(http.post).toHaveBeenCalledWith('/virtual-numbers/assign', payload);
+      expect(http.post).toHaveBeenCalledWith(
+        "/virtual-numbers/assign",
+        payload
+      );
     });
 
-    it('returns the response object reference unchanged', async () => {
-      const response = { success: true, message: 'Assigned.' };
+    it("returns the response object reference unchanged", async () => {
+      const response = { success: true, message: "Assigned." };
       http.post.mockResolvedValue(response);
 
-      const result = await virtualNumbers.assign(assignVirtualNumberPayloadFixture());
+      const result = await virtualNumbers.assign(
+        assignVirtualNumberPayloadFixture()
+      );
 
       expect(result).toBe(response);
     });
 
-    it('propagates errors from the http layer', async () => {
-      http.post.mockRejectedValue(new Error('Network error'));
+    it("propagates errors from the http layer", async () => {
+      http.post.mockRejectedValue(new Error("Network error"));
 
       await expect(
         virtualNumbers.assign(assignVirtualNumberPayloadFixture())
-      ).rejects.toThrow('Network error');
+      ).rejects.toThrow("Network error");
     });
   });
 
-  describe('unassign', () => {
-    it('posts to /virtual-numbers/unassign with the payload', async () => {
+  describe("unassign", () => {
+    it("posts to /virtual-numbers/unassign with the payload", async () => {
       const payload = unassignVirtualNumberPayloadFixture();
-      const response = { success: true, message: 'Virtual numbers unassigned successfully.' };
+      const response = {
+        success: true,
+        message: "Virtual numbers unassigned successfully."
+      };
       http.post.mockResolvedValue(response);
 
       const result = await virtualNumbers.unassign(payload);
 
-      expect(http.post).toHaveBeenCalledWith('/virtual-numbers/unassign', payload);
+      expect(http.post).toHaveBeenCalledWith(
+        "/virtual-numbers/unassign",
+        payload
+      );
       expect(result).toEqual(response);
     });
 
-    it('unassigns all virtual numbers via apply_to_all flag', async () => {
+    it("unassigns all virtual numbers via apply_to_all flag", async () => {
       const payload = unassignAllPayloadFixture();
-      http.post.mockResolvedValue({ success: true, message: 'Unassigned.' });
+      http.post.mockResolvedValue({ success: true, message: "Unassigned." });
 
       await virtualNumbers.unassign(payload);
 
-      expect(http.post).toHaveBeenCalledWith('/virtual-numbers/unassign', payload);
+      expect(http.post).toHaveBeenCalledWith(
+        "/virtual-numbers/unassign",
+        payload
+      );
     });
 
-    it('returns the response object reference unchanged', async () => {
-      const response = { success: true, message: 'Unassigned.' };
+    it("returns the response object reference unchanged", async () => {
+      const response = { success: true, message: "Unassigned." };
       http.post.mockResolvedValue(response);
 
-      const result = await virtualNumbers.unassign(unassignVirtualNumberPayloadFixture());
+      const result = await virtualNumbers.unassign(
+        unassignVirtualNumberPayloadFixture()
+      );
 
       expect(result).toBe(response);
     });
 
-    it('propagates errors from the http layer', async () => {
-      http.post.mockRejectedValue(new Error('Network error'));
+    it("propagates errors from the http layer", async () => {
+      http.post.mockRejectedValue(new Error("Network error"));
 
       await expect(
         virtualNumbers.unassign(unassignVirtualNumberPayloadFixture())
-      ).rejects.toThrow('Network error');
+      ).rejects.toThrow("Network error");
     });
   });
 });

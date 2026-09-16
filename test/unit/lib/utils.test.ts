@@ -239,7 +239,7 @@ describe("toCamelCase", () => {
       }
     };
 
-    const output = toCamelCase(input) as Record<string, unknown>;
+    const output = toCamelCase<Record<string, unknown>>(input);
     expect(Object.getPrototypeOf(output)).toBeNull();
 
     const nested = output.nestedData as Record<string, unknown>;

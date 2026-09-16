@@ -1,5 +1,5 @@
-import { vi } from 'vitest';
-import type { HttpResourceManager } from '@/resources/http';
+import { vi } from "vitest";
+import type { HttpResourceManager } from "@/resources/http";
 
 export function createMockHttp() {
   return {
@@ -8,10 +8,10 @@ export function createMockHttp() {
     patch: vi.fn(),
     delete: vi.fn(),
     httpClient: {
-      get: vi.fn(),
+      get: vi.fn()
     },
     handleAxiosError: vi.fn(),
-    throwForStatus: vi.fn(),
+    throwForStatus: vi.fn()
   };
 }
 

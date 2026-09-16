@@ -37,6 +37,28 @@ export default tseslint.config(
     },
     rules: typeCheckedRules,
   },
+  {
+    files: ['test/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: './tsconfig.test.json',
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    plugins: {
+      prettier: eslintPluginPrettier,
+    },
+    rules: {
+      ...typeCheckedRules,
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+    },
+  },
   eslintConfigPrettier,
   {
     ignores: ['dist/**', 'node_modules/**', 'coverage/**'],
