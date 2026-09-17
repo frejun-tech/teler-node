@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { StreamOP, StreamType } from "@/types/voice";
+import {
+  StreamData,
+  StreamHandler,
+  StreamHandlerResult,
+  StreamOP,
+  StreamType
+} from "@/types/voice";
 import { NotImplementedException, BadParametersException } from "@/exceptions";
 
 const { MockWebSocket } = vi.hoisted(() => {
@@ -14,7 +20,7 @@ const { MockWebSocket } = vi.hoisted(() => {
     listeners: Record<string, Array<(event: unknown) => void>> = {};
     private closed = false;
 
-    send = vi.fn((data: any, callback?: (err?: Error) => void) => {
+    send = vi.fn((_data: any, callback?: (err?: Error) => void) => {
       if (callback) callback();
     });
     close = vi.fn(() => {
@@ -499,6 +505,185 @@ describe("StreamConnector", () => {
             undefined
           )
       ).not.toThrow();
+    });
+
+    it("maintains message order from call to remote via promise chain", async () => {
+      const processingOrder: StreamData[] = [];
+      const callStreamHandler: StreamHandler = vi.fn(
+        async (data: StreamData) => {
+          processingOrder.push(data);
+          await new Promise((resolve) => setTimeout(resolve, 5));
+          return [data, StreamOP.RELAY] as StreamHandlerResult;
+        }
+      );
+
+      const connector = new StreamConnector(
+        "wss://example.com",
+        callStreamHandler,
+        vi.fn(),
+        StreamType.BIDIRECTIONAL
+      );
+
+      const callWs = new MockWebSocket("ws://call");
+      await bridgeAndOpen(connector, callWs);
+
+      callWs.emit("message", "1", false);
+      callWs.emit("message", "2", false);
+      callWs.emit("message", "3", false);
+
+      await vi.waitFor(() =>
+        expect(callStreamHandler).toHaveBeenCalledTimes(3)
+      );
+
+      expect(processingOrder).toEqual(["1", "2", "3"]);
+    });
+
+    it("maintains message order from remote to call via promise chain", async () => {
+      const processingOrder: StreamData[] = [];
+      const remoteStreamHandler = vi.fn(async (data: StreamData) => {
+        processingOrder.push(data);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        return [data, StreamOP.RELAY] as StreamHandlerResult;
+      });
+
+      const connector = new StreamConnector(
+        "wss://example.com",
+        vi.fn(),
+        remoteStreamHandler,
+        StreamType.BIDIRECTIONAL
+      );
+
+      const callWs = new MockWebSocket("ws://call");
+      const remoteWs = await bridgeAndOpen(connector, callWs);
+
+      remoteWs.emit("message", "1", false);
+      remoteWs.emit("message", "2", false);
+      remoteWs.emit("message", "3", false);
+
+      await vi.waitFor(() =>
+        expect(remoteStreamHandler).toHaveBeenCalledTimes(3)
+      );
+
+      expect(processingOrder).toEqual(["1", "2", "3"]);
+    });
+
+    it("preserves message order despite varying handler delays", async () => {
+      const processingOrder: StreamData[] = [];
+      const callStreamHandler = vi.fn(async (data: StreamData) => {
+        processingOrder.push(data);
+        const delays = [50, 10, 30];
+        const delay = delays[processingOrder.length - 1];
+        if (delay) {
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+        return [data, StreamOP.RELAY] as StreamHandlerResult;
+      });
+
+      const connector = new StreamConnector(
+        "wss://example.com",
+        callStreamHandler,
+        vi.fn(),
+        StreamType.BIDIRECTIONAL
+      );
+
+      const callWs = new MockWebSocket("ws://call");
+      await bridgeAndOpen(connector, callWs);
+
+      callWs.emit("message", "1", false);
+      callWs.emit("message", "2", false);
+      callWs.emit("message", "3", false);
+
+      await vi.waitFor(() =>
+        expect(callStreamHandler).toHaveBeenCalledTimes(3)
+      );
+
+      expect(processingOrder).toEqual(["1", "2", "3"]);
+    });
+
+    it("does not interleave call message processing from rapid messages", async () => {
+      const timeline: Array<{ msgId: number; phase: string }> = [];
+      let msgCounter = 0;
+
+      const callStreamHandler: StreamHandler = vi.fn(
+        async (data: StreamData) => {
+          const msgId = msgCounter++;
+          timeline.push({ msgId, phase: "start" });
+          await new Promise((resolve) => setTimeout(resolve, 5));
+          timeline.push({ msgId, phase: "end" });
+          return [data, StreamOP.RELAY] as StreamHandlerResult;
+        }
+      );
+
+      const connector = new StreamConnector(
+        "wss://example.com",
+        callStreamHandler,
+        vi.fn(),
+        StreamType.BIDIRECTIONAL
+      );
+
+      const callWs = new MockWebSocket("ws://call");
+      await bridgeAndOpen(connector, callWs);
+
+      for (let i = 1; i <= 5; i++) {
+        callWs.emit("message", String(i), false);
+      }
+
+      await vi.waitFor(() =>
+        expect(callStreamHandler).toHaveBeenCalledTimes(5)
+      );
+
+      for (let i = 0; i < 4; i++) {
+        const endIdx = timeline.findIndex(
+          (entry) => entry.msgId === i && entry.phase === "end"
+        );
+        const nextStartIdx = timeline.findIndex(
+          (entry) => entry.msgId === i + 1 && entry.phase === "start"
+        );
+        expect(endIdx).toBeLessThan(nextStartIdx);
+      }
+    });
+
+    it("does not interleave remote message processing", async () => {
+      const timeline: Array<{ msgId: number; phase: string }> = [];
+      let msgCounter = 0;
+
+      const remoteStreamHandler: StreamHandler = vi.fn(
+        async (data: StreamData) => {
+          const msgId = msgCounter++;
+          timeline.push({ msgId, phase: "start" });
+          await new Promise((resolve) => setTimeout(resolve, 5));
+          timeline.push({ msgId, phase: "end" });
+          return [data, StreamOP.RELAY] as StreamHandlerResult;
+        }
+      );
+
+      const connector = new StreamConnector(
+        "wss://example.com",
+        vi.fn(),
+        remoteStreamHandler,
+        StreamType.BIDIRECTIONAL
+      );
+
+      const callWs = new MockWebSocket("ws://call");
+      const remoteWs = await bridgeAndOpen(connector, callWs);
+
+      for (let i = 1; i <= 5; i++) {
+        remoteWs.emit("message", String(i), false);
+      }
+
+      await vi.waitFor(() =>
+        expect(remoteStreamHandler).toHaveBeenCalledTimes(5)
+      );
+
+      for (let i = 0; i < 4; i++) {
+        const endIdx = timeline.findIndex(
+          (entry) => entry.msgId === i && entry.phase === "end"
+        );
+        const nextStartIdx = timeline.findIndex(
+          (entry) => entry.msgId === i + 1 && entry.phase === "start"
+        );
+        expect(endIdx).toBeLessThan(nextStartIdx);
+      }
     });
   });
 });
