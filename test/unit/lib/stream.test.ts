@@ -14,12 +14,17 @@ const { MockWebSocket } = vi.hoisted(() => {
     listeners: Record<string, Array<(event: unknown) => void>> = {};
     private closed = false;
 
-    send = vi.fn();
+    send = vi.fn((data: any, callback?: (err?: Error) => void) => {
+      if (callback) callback();
+    });
     close = vi.fn(() => {
       if (this.closed) return;
       this.closed = true;
       this.readyState = 3;
       this.emit("close", { code: 1000, reason: "test-close" });
+    });
+    ping = vi.fn(() => {
+      setTimeout(() => this.emit("pong"), 0);
     });
 
     constructor(url: string, options?: unknown) {
@@ -45,6 +50,13 @@ const { MockWebSocket } = vi.hoisted(() => {
         );
       };
       (this.listeners[event] ??= []).push(wrapper);
+      return this;
+    }
+
+    off(event: string, callback: (data?: unknown) => void) {
+      this.listeners[event] = this.listeners[event]?.filter(
+        (cb) => cb !== callback
+      );
       return this;
     }
 
@@ -168,7 +180,10 @@ describe("StreamConnector", () => {
         expect(callStreamHandler).toHaveBeenCalledWith("incoming-audio")
       );
       await vi.waitFor(() =>
-        expect(remoteWs.send).toHaveBeenCalledWith("hello")
+        expect(remoteWs.send).toHaveBeenCalledWith(
+          "hello",
+          expect.any(Function)
+        )
       );
     });
 
@@ -199,7 +214,10 @@ describe("StreamConnector", () => {
       remoteWs.emit("open");
       await bridgePromise;
 
-      expect(remoteWs.send).toHaveBeenCalledWith("queued-msg");
+      expect(remoteWs.send).toHaveBeenCalledWith(
+        "queued-msg",
+        expect.any(Function)
+      );
     });
 
     it("closes both sockets when call handler returns STOP", async () => {
@@ -239,7 +257,10 @@ describe("StreamConnector", () => {
         expect(remoteStreamHandler).toHaveBeenCalledWith("model-audio-chunk")
       );
 
-      expect(callWs.send).toHaveBeenCalledWith("ai-response");
+      expect(callWs.send).toHaveBeenCalledWith(
+        "ai-response",
+        expect.any(Function)
+      );
     });
 
     it("closes callWs when remoteWs closes", async () => {

@@ -36,6 +36,7 @@ Complete rewrite from single-resource to modular platform SDK.
 - **`client.streamConnector`** — Bidirectional audio streaming (NEW).
   - `bridgeStream(callWs)` — Bridge call WebSocket to remote AI/transcription endpoint.
   - Configurable handler callbacks, custom headers, timeout (10s default), optional logger.
+  - Automatic heartbeat (ping/pong) on both call and remote connections to detect stale links.
 
 ### Exception System (Complete Rewrite)
 

@@ -231,7 +231,7 @@ The library provides a powerful interface for integrating real-time call audio s
 
 ### StreamConnector
 
-The `StreamConnector` lets you bridge the Teler call audio stream to your desired remote WebSocket endpoint (e.g., an AI agent). It handles message relaying between the two streams via pluggable handlers, making it highly customizable. It also handles graceful shutdown of the media streams in case of any unexpected errors.
+The `StreamConnector` lets you bridge the Teler call audio stream to your desired remote WebSocket endpoint (e.g., an AI agent). It handles message relaying between the two streams via pluggable handlers, making it highly customizable. It also handles graceful shutdown of the media streams in case of any unexpected errors, and automatically manages heartbeat (ping/pong) on both call and remote connections to detect stale links.
 
 Create a `StreamConnector` via the `Client` using `client.streamConnector.create()`, which passes the client's configured logger automatically:
 
@@ -277,11 +277,10 @@ A `StreamHandler` asynchronous function receives incoming messages over a WebSoc
 
 `StreamData` represents the data returned by a stream handler. It can be any of the following:
 
-- `string`
-- `Buffer`
-- `Uint8Array`
-- `ArrayBuffer`
-- `Blob`
+- `string` — UTF-8 encoded text
+- `Buffer` — Node.js buffer
+- `Uint8Array` — Typed array (binary data)
+- `Buffer[]` — Array of buffers
 
 ### Example
 
