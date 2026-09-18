@@ -1,86 +1,80 @@
-import { CallResourceManager } from "./resources/calls";
-import axios, { AxiosInstance } from "axios";
-import { CreateCallPayload } from "./types";
-import { TelerException, ForbiddenException, UnauthorizedException, BadParametersException } from "./exceptions";
-import { TELER_BASE_URL } from "./constants";
+import { BadParametersException } from "./exceptions";
+import { VoiceResourceManager } from "./resources/voice/voice";
+import { SipResourceManager } from "./resources/sip/sip";
+import { HttpResourceManager } from "./resources/http";
+import { noopLogger, type Logger } from "./logger";
+import { VirtualNumberResourceManager } from "./resources/vns";
+import { EventResourceManager } from "./resources/events";
+import { RecordingResourceManager } from "./resources/recordings";
+import { SecretResourceManager } from "./resources/secrets";
+import { StreamConnectorResourceManager } from "./resources/stream";
+import { config } from "./config";
 
+export interface ClientOptions {
+  baseURL?: string;
+  logger?: Logger;
+  baseTimeout?: number;
+  recordingTimeout?: number;
+}
+
+/**
+ * Teler API Client.
+ *
+ * Provides unified access to all Teler SDK resource managers including voice, sip, ip-acls, virtual numbers, events, recordings, and secrets.
+ */
 export class Client {
+  private readonly apiKey: string;
+  public readonly logger: Logger;
+  private readonly baseURL: string = config.BASE_URL;
+  private readonly recordingTimeout: number =
+    config.RECORDING_DOWNLOAD_TIMEOUT_MS;
 
-    /**
-     * HTTP Client for the Teler API.
-     * 
-     * Usage:
-        const client = new Client(API_KEY);
-        const response = await client.calls.create(
-            {
-                'flow_url': `https://${SERVER_DOMAIN}/api/v1/calls/flow`,
-                'status_callback_url': `https://${SERVER_DOMAIN}/api/v1/webhooks/receiver`,
-                'from_number': "+918065193777",
-                'to_number': "+919954174459",
-                'record': true,
-            }
-        )
+  private readonly http: HttpResourceManager;
+  public readonly voice: VoiceResourceManager;
+  public readonly sip: SipResourceManager;
+  public readonly virtualNumbers: VirtualNumberResourceManager;
+  public readonly events: EventResourceManager;
+  public readonly recordings: RecordingResourceManager;
+  public readonly secrets: SecretResourceManager;
+  public readonly streamConnector: StreamConnectorResourceManager;
+
+  /**
+   * Initializes the Teler Client.
+   *
+   * @param apiKey - Teler API Key.
+   * @param options - Optional configuration options.
+   */
+  constructor(apiKey: string, options?: ClientOptions) {
+    if (!apiKey)
+      throw new BadParametersException({
+        message: "Missing Teler API Key.",
+        details: "Please provide the API Key when initializing the client.",
+        param: "apiKey"
+      });
+    this.apiKey = apiKey;
+    this.logger = options?.logger ?? noopLogger;
+
+    if (options?.baseURL) {
+      this.baseURL = options.baseURL;
+    }
+    if (options?.recordingTimeout) {
+      this.recordingTimeout = options.recordingTimeout;
+    }
+
+    this.http = new HttpResourceManager(
+      this.apiKey,
+      this.baseURL,
+      options?.baseTimeout
     );
-     */
-
-    private apiKey: string;
-    private httpClient: AxiosInstance;
-    public calls: CallResourceManager;
-
-    constructor(apiKey: string) {
-        if (!apiKey) {
-            throw new BadParametersException("API Key", "API KEY is required");
-        }
-        this.apiKey = apiKey;
-        this.calls  = new CallResourceManager(this);
-        this.httpClient = axios.create({
-            baseURL: TELER_BASE_URL,
-            timeout: 10000
-        });
-    }
-
-    public async request<T>(method: string, path: string, data: CreateCallPayload): Promise<T> {
-        /**
-         * Initiates a Http request to Teler Server
-         * 
-         * @params
-         * 1. method: HTTP method to use
-         * 2. path: endpoint to call
-         * 3. data: Payload
-         * 
-         * @returns
-         * 1. message: Success/ failure
-         * 2. data: info about the call 
-        */
-
-        try {
-            const headers = {
-                'Content-Type': 'application/json',
-                "Accept": "application/json",
-                'x-api-key': `${this.apiKey}`,
-            };
-            const response = await this.httpClient.request({
-                method,
-                url: path,
-                data,
-                headers,
-            });
-            return response?.data;
-        } catch (err) {
-            if (axios.isAxiosError(err)) {
-                const status = err.response?.status;
-                const message = err.response?.data?.message || err.message;
-
-                switch(status) {
-                    case 401:
-                        throw new UnauthorizedException();
-                    case 403:
-                        throw new ForbiddenException();
-                    default:
-                        throw new TelerException(`API Error: ${message}`, status);
-                }
-            }
-            throw new TelerException("An unknown error occurred while calling the API.");
-        }
-    }
+    this.voice = new VoiceResourceManager(this.http);
+    this.sip = new SipResourceManager(this.http);
+    this.virtualNumbers = new VirtualNumberResourceManager(this.http);
+    this.events = new EventResourceManager(this.http);
+    this.recordings = new RecordingResourceManager(
+      this.http,
+      this.recordingTimeout
+    );
+    this.secrets = new SecretResourceManager(this.http);
+    this.streamConnector = new StreamConnectorResourceManager(this.logger);
+  }
 }

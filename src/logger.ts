@@ -1,4 +1,11 @@
-import type {Logger} from 'pino';
-import pino from 'pino';
+export interface Logger {
+  info(obj: Record<string, unknown>, msg?: string): void;
+  warn(obj: Record<string, unknown>, msg?: string): void;
+  error(obj: Record<string, unknown>, msg?: string): void;
+}
 
-export const logger: Logger = pino();
+export const noopLogger: Logger = {
+  info: () => {},
+  warn: () => {},
+  error: () => {}
+};
