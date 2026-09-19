@@ -1,6 +1,13 @@
 export { Client } from "./client";
-export * from "./types";
+export * from "./types/core";
+export * from "./types/voice";
+export * from "./types/common";
+export * from "./types/sip";
+export * from "./types/events";
+export * from "./types/secrets";
 export * from "./exceptions";
-export * from "./resources/calls";
+export type { TelerErrorResponseBody } from "./resources/http";
+export type { Logger } from "./logger";
 export * from "./lib/flows";
+export * from "./lib/pagination";
 export * from "./lib/stream";
