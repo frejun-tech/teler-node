@@ -8,6 +8,8 @@ import type {
 } from "../../types/voice";
 import type { HttpResourceManager } from "../http";
 import { autoPaginate } from "../../lib/pagination";
+import { resolveIdempotencyKey } from "../../lib/idempotency";
+import { config } from "../../config";
 
 export class CallResourceManager {
   private readonly basePath = "/voice/calls";
@@ -17,16 +19,33 @@ export class CallResourceManager {
    * Initiate Call API
    *
    * @param payload - The parameters to create a call
+   * @param idempotencyKey - Optional. Unique key (≤ 255 chars). Defaults to a SDK-generated UUID v4.
+   * @param retry - Optional. Whether to retry on network errors/503s. (Default: false)
+   * @param baseRetryDelayMs - Optional. Base delay (ms) for exponential backoff with jitter. (Default: 300, capped at 2000ms, per-request timeout: 5000ms)
    * @returns Response of the call
    */
-  public async create(payload: CreateCallPayload): Promise<CallResponse> {
+  public async create(
+    payload: CreateCallPayload,
+    idempotencyKey?: string,
+    retry?: boolean,
+    baseRetryDelayMs?: number
+  ): Promise<CallResponse> {
     const normalizedPayload = {
       ...payload,
       record: payload.record ?? true
     };
+    const key = resolveIdempotencyKey(idempotencyKey);
     return this.http.post<CallResponse, CreateCallPayload>(
       `${this.basePath}/initiate`,
-      normalizedPayload
+      normalizedPayload,
+      {
+        headers: { "Idempotency-Key": key },
+        retry: retry,
+        baseRetryDelayMs:
+          baseRetryDelayMs ?? config.CALL_CONTROL_RETRY_BASE_DELAY_MS,
+        maxRetryDelayMs: config.MAX_RETRY_DELAY_MS,
+        config: { timeout: config.CALL_CONTROL_TIMEOUT_MS }
+      }
     );
   }
 
