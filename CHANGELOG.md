@@ -2,7 +2,16 @@
 
 All notable changes to the Teler Node SDK are documented in this file.
 
-## [2.0.0] - 2026-09-16
+## [2.0.1]
+
+### Added
+
+- **Idempotency Support for Call Initiation** — `client.voice.calls.create()` now accepts optional `idempotencyKey`, `retry`, and `baseRetryDelayMs` parameters to make call creation idempotent.
+  - Generate your own idempotency key or let the SDK auto-generate a UUID.
+  - Enable retries on network errors and 503s for increased reliability.
+  - Customize exponential backoff delay for your use case.
+
+## [2.0.0]
 
 ### Architecture
 
