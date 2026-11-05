@@ -54,6 +54,42 @@ const call = await client.voice.calls.create({
 });
 ```
 
+### Call Initiation with Idempotency
+
+The `create()` method accepts optional parameters for idempotency, retries, and retry configuration:
+
+```typescript
+// Initiate a call with idempotency
+const call = await client.voice.calls.create(
+    {
+        fromNumber: "+918065xxxx",
+        toNumber: "+919967xxxx",
+        flowUrl: "https://your-domain.com/flow",
+        statusCallbackUrl: "https://your-domain.com/receiver",
+        record: true
+    },
+    "my-unique-idempotency-key",  // idempotencyKey (optional)
+    true,                          // retry on network errors/503s (optional, default: false)
+    300                            // base retry delay in ms (optional, default: 300, capped at 2000ms)
+);
+```
+
+**Parameters:**
+- `idempotencyKey` — (Optional, ≤ 255 chars) Unique key for this operation. If omitted, the SDK generates a random UUID v4. Use the same key when retrying the same logical operation.
+- `retry` — (Optional, default: `false`) Whether to retry on network errors and 503 responses.
+- `baseRetryDelayMs` — (Optional, default: `300`) Base delay in milliseconds for exponential backoff with jitter. Capped at 2000ms per-request timeout of 5000ms.
+
+If you omit `idempotencyKey`, the SDK auto-generates a UUID, making SDK-internal retries safe. However, for application-level retries (after a timeout or crash), generate and reuse your own key:
+
+```typescript
+import { randomUUID } from "crypto";
+
+const idempotencyKey = randomUUID(); // generate once
+const call = await client.voice.calls.create(payload, idempotencyKey, true, 500);
+
+// If this call needs to be retried, use the same idempotencyKey
+```
+
 
 ## Field Naming
 

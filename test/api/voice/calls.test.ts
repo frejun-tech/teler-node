@@ -29,6 +29,56 @@ describe("Voice Calls API (integration)", () => {
     expect(result.data.fromNumber).toBe("+18005550100");
   });
 
+  it("sends Idempotency-Key header with auto-generated UUID", async () => {
+    const capturedHeaders: { idempotencyKey?: string } = {};
+    server.use(
+      http.post(
+        `${TEST_CONFIG.baseUrl}/voice/calls/initiate`,
+        ({ request }) => {
+          capturedHeaders.idempotencyKey =
+            request.headers.get("Idempotency-Key") ?? undefined;
+          return HttpResponse.json(voiceCallFixture());
+        }
+      )
+    );
+    const client = createTestClient();
+    await client.voice.calls.create({
+      fromNumber: "+18005550100",
+      toNumber: "+18005550200",
+      flowUrl: "https://example.com/flow",
+      statusCallbackUrl: "https://example.com/status"
+    });
+    expect(capturedHeaders.idempotencyKey).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    );
+  });
+
+  it("sends custom Idempotency-Key when provided", async () => {
+    const capturedHeaders: { idempotencyKey?: string } = {};
+    server.use(
+      http.post(
+        `${TEST_CONFIG.baseUrl}/voice/calls/initiate`,
+        ({ request }) => {
+          capturedHeaders.idempotencyKey =
+            request.headers.get("Idempotency-Key") ?? undefined;
+          return HttpResponse.json(voiceCallFixture());
+        }
+      )
+    );
+    const client = createTestClient();
+    const customKey = "my-custom-key-123";
+    await client.voice.calls.create(
+      {
+        fromNumber: "+18005550100",
+        toNumber: "+18005550200",
+        flowUrl: "https://example.com/flow",
+        statusCallbackUrl: "https://example.com/status"
+      },
+      customKey
+    );
+    expect(capturedHeaders.idempotencyKey).toBe(customKey);
+  });
+
   it("lists voice calls", async () => {
     const client = createTestClient();
     const result = await client.voice.calls.list();
