@@ -2,7 +2,7 @@
 
 All notable changes to the Teler Node SDK are documented in this file.
 
-## [2.0.1]
+## [2.1.0]
 
 ### Added
 
