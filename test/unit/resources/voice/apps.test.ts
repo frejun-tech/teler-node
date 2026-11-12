@@ -12,7 +12,7 @@ import {
   virtualNumberListFixture,
   virtualNumberFiltersFixture
 } from "@test/support/fixtures/vns";
-import { Status } from "@/types/common";
+import { Status, type WebhookApiVersion } from "@/types/common";
 
 describe("AppResourceManager (unit)", () => {
   let http: MockHttp;
@@ -77,7 +77,7 @@ describe("AppResourceManager (unit)", () => {
 
     it("honors webhookApiVersion when explicitly specified", async () => {
       const payload = createVoiceAppPayloadFixture({
-        webhookApiVersion: "2025-08-01"
+        webhookApiVersion: "explicit-test-value" as unknown as WebhookApiVersion
       });
       http.post.mockResolvedValue(voiceAppFixture());
 
@@ -85,7 +85,7 @@ describe("AppResourceManager (unit)", () => {
 
       expect(http.post).toHaveBeenCalledWith(
         "/voice/apps",
-        expect.objectContaining({ webhookApiVersion: "2025-08-01" })
+        expect.objectContaining({ webhookApiVersion: "explicit-test-value" })
       );
     });
   });

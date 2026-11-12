@@ -14,7 +14,7 @@ import {
   virtualNumberListFixture,
   virtualNumberFiltersFixture
 } from "@test/support/fixtures/vns";
-import { Status } from "@/types/common";
+import { Status, type WebhookApiVersion } from "@/types/common";
 import { Transport } from "@/types/sip";
 
 describe("TrunkResourceManager (unit)", () => {
@@ -114,7 +114,7 @@ describe("TrunkResourceManager (unit)", () => {
 
     it("honors webhookApiVersion when explicitly specified", async () => {
       const payload = createSipTrunkPayloadFixture({
-        webhookApiVersion: "2025-08-01"
+        webhookApiVersion: "explicit-test-value" as unknown as WebhookApiVersion
       });
       const fixture = sipTrunkFixture({ name: payload.name });
       http.post.mockResolvedValue(fixture);
@@ -123,7 +123,7 @@ describe("TrunkResourceManager (unit)", () => {
 
       expect(http.post).toHaveBeenCalledWith(
         "/sip/trunks",
-        expect.objectContaining({ webhookApiVersion: "2025-08-01" })
+        expect.objectContaining({ webhookApiVersion: "explicit-test-value" })
       );
     });
 

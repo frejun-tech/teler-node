@@ -2,7 +2,26 @@
 
 All notable changes to the Teler Node SDK are documented in this file.
 
-## [2.0.0] - 2026-09-16
+## [2.1.0]
+
+### Breaking Changes
+
+- **Removed webhook API version `2025-08-01`** — `WebhookApiVersion` now only
+  accepts `"2026-06-01"`. The backend rejects any other value with a hard
+  error, so this value is no longer type-valid in `CreateVoiceAppPayload`,
+  `UpdateVoiceAppPayload`, `CreateSipTrunkPayload`, and
+  `UpdateSipTrunkPayload`. Remove any code that pins
+  `webhookApiVersion: "2025-08-01"` — omit the field (the SDK defaults to
+  `"2026-06-01"`) or pass `"2026-06-01"` explicitly.
+
+### Added
+
+- **Idempotency Support for Call Initiation** — `client.voice.calls.create()` now accepts optional `idempotencyKey`, `retry`, and `baseRetryDelayMs` parameters to make call creation idempotent.
+  - Generate your own idempotency key or let the SDK auto-generate a UUID.
+  - Enable retries on network errors and 503s for increased reliability.
+  - Customize exponential backoff delay for your use case.
+
+## [2.0.0]
 
 ### Architecture
 

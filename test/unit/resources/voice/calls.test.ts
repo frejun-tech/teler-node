@@ -28,13 +28,21 @@ describe("CallResourceManager (unit)", () => {
 
       const result = await calls.create(params);
 
-      expect(http.post).toHaveBeenCalledWith("/voice/calls/initiate", {
-        fromNumber: params.fromNumber,
-        toNumber: params.toNumber,
-        flowUrl: params.flowUrl,
-        statusCallbackUrl: params.statusCallbackUrl,
-        record: true
-      });
+      expect(http.post).toHaveBeenCalledWith(
+        "/voice/calls/initiate",
+        {
+          fromNumber: params.fromNumber,
+          toNumber: params.toNumber,
+          flowUrl: params.flowUrl,
+          statusCallbackUrl: params.statusCallbackUrl,
+          record: true
+        },
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            "Idempotency-Key": expect.any(String)
+          })
+        })
+      );
       expect(result.data.fromNumber).toBe(params.fromNumber);
       expect(result.data.toNumber).toBe(params.toNumber);
       expect(result.message).toBe(fixture.message);
@@ -48,7 +56,12 @@ describe("CallResourceManager (unit)", () => {
 
       expect(http.post).toHaveBeenCalledWith(
         "/voice/calls/initiate",
-        expect.objectContaining({ record: true })
+        expect.objectContaining({ record: true }),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            "Idempotency-Key": expect.any(String)
+          })
+        })
       );
     });
 
@@ -60,7 +73,12 @@ describe("CallResourceManager (unit)", () => {
 
       expect(http.post).toHaveBeenCalledWith(
         "/voice/calls/initiate",
-        expect.objectContaining({ record: false })
+        expect.objectContaining({ record: false }),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            "Idempotency-Key": expect.any(String)
+          })
+        })
       );
     });
 
@@ -83,6 +101,93 @@ describe("CallResourceManager (unit)", () => {
       expect(result.data).toHaveProperty("toNumber");
       expect(result.data).not.toHaveProperty("from_number");
       expect(result.data).not.toHaveProperty("to_number");
+    });
+
+    it("sends Idempotency-Key header with auto-generated UUID when no key provided", async () => {
+      http.post.mockResolvedValue(toCamelCase(callResponseFixture()));
+
+      await calls.create(CreateCallPayloadFixture());
+
+      expect(http.post).toHaveBeenCalledWith(
+        "/voice/calls/initiate",
+        expect.any(Object),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            "Idempotency-Key": expect.stringMatching(
+              /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+            )
+          })
+        })
+      );
+    });
+
+    it("uses caller-supplied idempotency key in header", async () => {
+      const customKey = "my-custom-idempotency-key";
+      http.post.mockResolvedValue(toCamelCase(callResponseFixture()));
+
+      await calls.create(CreateCallPayloadFixture(), customKey);
+
+      expect(http.post).toHaveBeenCalledWith(
+        "/voice/calls/initiate",
+        expect.any(Object),
+        expect.objectContaining({
+          headers: { "Idempotency-Key": customKey }
+        })
+      );
+    });
+
+    it("passes retry option to http layer", async () => {
+      http.post.mockResolvedValue(toCamelCase(callResponseFixture()));
+
+      await calls.create(CreateCallPayloadFixture(), undefined, true);
+
+      expect(http.post).toHaveBeenCalledWith(
+        "/voice/calls/initiate",
+        expect.any(Object),
+        expect.objectContaining({ retry: true })
+      );
+    });
+
+    it("passes baseRetryDelayMs option to http layer", async () => {
+      http.post.mockResolvedValue(toCamelCase(callResponseFixture()));
+
+      await calls.create(CreateCallPayloadFixture(), undefined, false, 600);
+
+      expect(http.post).toHaveBeenCalledWith(
+        "/voice/calls/initiate",
+        expect.any(Object),
+        expect.objectContaining({ baseRetryDelayMs: 600 })
+      );
+    });
+
+    it("uses CALL_CONTROL_RETRY_BASE_DELAY_MS as default baseRetryDelayMs", async () => {
+      http.post.mockResolvedValue(toCamelCase(callResponseFixture()));
+
+      await calls.create(CreateCallPayloadFixture(), undefined, true);
+
+      expect(http.post).toHaveBeenCalledWith(
+        "/voice/calls/initiate",
+        expect.any(Object),
+        expect.objectContaining({
+          baseRetryDelayMs: expect.any(Number)
+        })
+      );
+    });
+
+    it("includes CALL_CONTROL_TIMEOUT_MS in config when retry enabled", async () => {
+      http.post.mockResolvedValue(toCamelCase(callResponseFixture()));
+
+      await calls.create(CreateCallPayloadFixture(), undefined, true);
+
+      expect(http.post).toHaveBeenCalledWith(
+        "/voice/calls/initiate",
+        expect.any(Object),
+        expect.objectContaining({
+          config: expect.objectContaining({
+            timeout: expect.any(Number)
+          })
+        })
+      );
     });
 
     it("propagates errors from the http layer", async () => {
